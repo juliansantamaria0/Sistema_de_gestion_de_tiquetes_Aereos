@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="src\" />
+    <Folder Include="src\Modules\" />
+    <Folder Include="src\Shared\" />
+    <Folder Include="src\Shared\configuration\" />
+    <Folder Include="src\Shared\context\" />
+    <Folder Include="src\Shared\contracts\" />
+    <Folder Include="src\Shared\helpers\" />
+    <Folder Include="src\Shared\ui\" />
+  </ItemGroup>
+
+</Project>
