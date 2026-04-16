@@ -8,14 +8,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="src\" />
     <Folder Include="src\Modules\" />
-    <Folder Include="src\Shared\" />
     <Folder Include="src\Shared\configuration\" />
-    <Folder Include="src\Shared\context\" />
     <Folder Include="src\Shared\contracts\" />
     <Folder Include="src\Shared\helpers\" />
     <Folder Include="src\Shared\ui\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="src\Shared\context\AppDbContext.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.5" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
   </ItemGroup>
 
 </Project>
