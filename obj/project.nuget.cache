@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "aT4KSVTwz80=",
+  "dgSpecHash": "PQGPBVZapV8=",
   "success": false,
   "projectFilePath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
   "expectedPackageFiles": [
@@ -68,7 +68,7 @@
     {
       "code": "NU1608",
       "level": "Warning",
-      "message": "Se detectó una versión del paquete fuera de la restricción de dependencia: Pomelo.EntityFrameworkCore.MySql 9.0.0 requiere Microsoft.EntityFrameworkCore.Relational (>= 9.0.0 && <= 9.0.999), pero la versión Microsoft.EntityFrameworkCore.Relational 10.0.1 ya se resolvió.",
+      "message": "Detected package version outside of dependency constraint: Pomelo.EntityFrameworkCore.MySql 9.0.0 requires Microsoft.EntityFrameworkCore.Relational (>= 9.0.0 && <= 9.0.999) but version Microsoft.EntityFrameworkCore.Relational 10.0.1 was resolved.",
       "projectPath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "warningLevel": 1,
       "filePath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
@@ -80,7 +80,7 @@
     {
       "code": "NU1605",
       "level": "Error",
-      "message": "Advertencia como error: Degradación del paquete detectada: Microsoft.EntityFrameworkCore de 10.0.1 a 9.0.0. Haga referencia al paquete directamente desde el proyecto para seleccionar una versión diferente. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> EFCore.NamingConventions 10.0.1 -> Microsoft.EntityFrameworkCore (>= 10.0.1 && < 11.0.0) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.EntityFrameworkCore (>= 9.0.0)",
+      "message": "Warning As Error: Detected package downgrade: Microsoft.EntityFrameworkCore from 10.0.1 to 9.0.0. Reference the package directly from the project to select a different version. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> EFCore.NamingConventions 10.0.1 -> Microsoft.EntityFrameworkCore (>= 10.0.1 && < 11.0.0) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.EntityFrameworkCore (>= 9.0.0)",
       "projectPath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "filePath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "libraryId": "Microsoft.EntityFrameworkCore",
@@ -91,7 +91,7 @@
     {
       "code": "NU1605",
       "level": "Error",
-      "message": "Advertencia como error: Degradación del paquete detectada: Microsoft.Extensions.Configuration.EnvironmentVariables de 10.0.6 a 10.0.5. Haga referencia al paquete directamente desde el proyecto para seleccionar una versión diferente. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Hosting 10.0.6 -> Microsoft.Extensions.Configuration.EnvironmentVariables (>= 10.0.6) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Configuration.EnvironmentVariables (>= 10.0.5)",
+      "message": "Warning As Error: Detected package downgrade: Microsoft.Extensions.Configuration.EnvironmentVariables from 10.0.6 to 10.0.5. Reference the package directly from the project to select a different version. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Hosting 10.0.6 -> Microsoft.Extensions.Configuration.EnvironmentVariables (>= 10.0.6) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Configuration.EnvironmentVariables (>= 10.0.5)",
       "projectPath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "filePath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "libraryId": "Microsoft.Extensions.Configuration.EnvironmentVariables",
@@ -102,7 +102,7 @@
     {
       "code": "NU1605",
       "level": "Error",
-      "message": "Advertencia como error: Degradación del paquete detectada: Microsoft.Extensions.Configuration.Json de 10.0.6 a 10.0.5. Haga referencia al paquete directamente desde el proyecto para seleccionar una versión diferente. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Hosting 10.0.6 -> Microsoft.Extensions.Configuration.Json (>= 10.0.6) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Configuration.Json (>= 10.0.5)",
+      "message": "Warning As Error: Detected package downgrade: Microsoft.Extensions.Configuration.Json from 10.0.6 to 10.0.5. Reference the package directly from the project to select a different version. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Hosting 10.0.6 -> Microsoft.Extensions.Configuration.Json (>= 10.0.6) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Configuration.Json (>= 10.0.5)",
       "projectPath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "filePath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "libraryId": "Microsoft.Extensions.Configuration.Json",
@@ -113,7 +113,7 @@
     {
       "code": "NU1605",
       "level": "Error",
-      "message": "Advertencia como error: Degradación del paquete detectada: Microsoft.Extensions.Configuration de 10.0.6 a 10.0.5. Haga referencia al paquete directamente desde el proyecto para seleccionar una versión diferente. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Hosting 10.0.6 -> Microsoft.Extensions.Configuration (>= 10.0.6) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Configuration (>= 10.0.5)",
+      "message": "Warning As Error: Detected package downgrade: Microsoft.Extensions.Configuration from 10.0.6 to 10.0.5. Reference the package directly from the project to select a different version. \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Hosting 10.0.6 -> Microsoft.Extensions.Configuration (>= 10.0.6) \r\n Sistema_de_gestion_de_tiquetes_Aereos -> Microsoft.Extensions.Configuration (>= 10.0.5)",
       "projectPath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "filePath": "C:\\Users\\Julian\\Sistema_de_gestion_de_tiquetes_Aereos\\Sistema_de_gestion_de_tiquetes_Aereos.csproj",
       "libraryId": "Microsoft.Extensions.Configuration",

@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Sistema_de_gestion_de_tiquetes_Aereos.src.shared.context;
-using Sistema_de_gestion_de_tiquetes_Aereos.src.Shared.contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+
 
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 

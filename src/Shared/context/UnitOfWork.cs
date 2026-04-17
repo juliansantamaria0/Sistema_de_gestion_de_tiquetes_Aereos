@@ -1,18 +1,23 @@
-using Sistema_de_gestion_de_tiquetes_Aereos.src.Shared.contracts;
+namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 
-namespace Sistema_de_gestion_de_tiquetes_Aereos.src.shared.context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
+/// <summary>
+/// Implementación concreta de <see cref="IUnitOfWork"/>.
+/// Envuelve <see cref="AppDbContext.SaveChangesAsync"/> para desacoplar
+/// los módulos de la dependencia directa a EF Core.
+/// Se registra con ciclo de vida Scoped junto al DbContext.
+/// </summary>
 public sealed class UnitOfWork : IUnitOfWork
 {
-    private readonly AppDbContext _dbContext;
+    private readonly AppDbContext _context;
 
-    public UnitOfWork(AppDbContext dbContext)
+    public UnitOfWork(AppDbContext context)
     {
-        _dbContext = dbContext;
+        _context = context;
     }
 
-    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        return _dbContext.SaveChangesAsync(cancellationToken);
-    }
+    /// <inheritdoc/>
+    public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
+        => await _context.SaveChangesAsync(cancellationToken);
 }

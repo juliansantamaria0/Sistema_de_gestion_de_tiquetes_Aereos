@@ -1,35 +1,43 @@
-// using System;
-// using Microsoft.EntityFrameworkCore; 
-// using Microsoft.Extensions.Configuration;
-// using Sistema_de_gestion_de_tiquetes_Aereos.src.shared.context;
-// namespace sistema_de_gestion_de_tiquetes_Aereos.src.shared.ui.src.shared.helpers;
+namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.Helpers;
 
-// public class DbContextFactory
-// {
-//     public static object MySqlVersionResolver { get; private set; }
+using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
-//     public static AppDbContext Create()
-//         {
-//             var config = new ConfigurationBuilder()
-//                 .SetBasePath(Directory.GetCurrentDirectory())
-//                 .AddJsonFile("appsettings.json", optional: true)
-//                 .AddEnvironmentVariables()
-//                 .Build();
-//             string? connectionString = Environment.GetEnvironmentVariable("MYSQL_CONNECTION")
-//                                 ?? config.GetConnectionString("MySqlDB");
+/// <summary>
+/// Resuelve la versión exacta del servidor MySQL en tiempo de ejecución.
+/// Evita hardcodear la versión del servidor en el código fuente.
+/// </summary>
+public static class MySqlVersionResolver
+{
+    /// <summary>
+    /// Abre una conexión breve a la base de datos y consulta la versión
+    /// del servidor. En caso de fallo, devuelve una versión mínima segura (8.0.21).
+    /// </summary>
+    /// <param name="connectionString">Cadena de conexión MySQL válida.</param>
+    /// <returns>
+    /// <see cref="ServerVersion"/> detectada automáticamente o
+    /// <c>ServerVersion.Parse("8.0.21")</c> como fallback.
+    /// </returns>
+    public static ServerVersion Resolve(string connectionString)
+    {
+        try
+        {
+            return ServerVersion.AutoDetect(connectionString);
+        }
+        catch (Exception ex)
+        {
+            // En entornos CI/CD o diseño en frío la BD puede no estar disponible.
+            // Fallback: MySQL 8.0.21 — versión mínima compatible con Pomelo 8.x
+            Console.Error.WriteLine(
+                $"[MySqlVersionResolver] AutoDetect failed: {ex.Message}. " +
+                "Falling back to MySQL 8.0.21.");
 
-//             if (string.IsNullOrWhiteSpace(connectionString))
-//                 throw new InvalidOperationException("No se encontró una cadena de conexión válida.");
-//             // Detectar versión MySQL 
-//             var detectedVersion = MySqlVersionResolver.Resolve(connectionString);
-//             var minVersion = new Version(8, 0, 0);
-//             if (detectedVersion < minVersion)
-//                 throw new NotSupportedException($"Versión de MySQL no soportada: {detectedVersion}. Requiere {minVersion} o superior.");
+            return ServerVersion.Parse("8.0.21-mysql");
+        }
+    }
 
-//             var options = new DbContextOptionsBuilder<AppDbContext>()
-//                 .UseMySql(connectionString, new MySqlServerVersion(detectedVersion))
-//                 .Options;
-//             return new AppDbContext(options); 
-        
-//         }
-// }
+    /// <summary>
+    /// Versión de fallback explícita para usarse en tests o migraciones offline.
+    /// </summary>
+    public static ServerVersion Fallback => ServerVersion.Parse("8.0.21-mysql");
+}
