@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
 // ── MÓDULO 1: Geografía (5 tablas) ──────────────────────────────────────────
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity;
+// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity;
@@ -115,9 +115,9 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // =========================================================================
 
     /// <summary>country</summary>
-    public DbSet<CountryEntity> Countries { get; set; } = null!;
+    // public DbSet<CountryEntity> Countries { get; set; } = null!;
 
-    // /// <summary>city</summary>
+    /// <summary>city</summary>
     // public DbSet<CityEntity> Cities { get; set; } = null!;
 
     // /// <summary>airport</summary>
