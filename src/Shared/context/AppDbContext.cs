@@ -1,16 +1,18 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-// // ── MÓDULO 1: Geografía (5 tablas) ──────────────────────────────────────────
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity;
+// ── MÓDULO 1: Geografía (5 tablas) ──────────────────────────────────────────
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity;
 
-// // ── MÓDULO 2: Aerolíneas y Aeronaves (4 tablas) ──────────────────────────────
+// // ── MÓDULO 2: Aerolíneas y Aeronaves (4 tablas) ─────────────────────────────
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftManufacturer.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Infrastructure.Entity;
@@ -99,19 +101,21 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 /// Contexto principal de EF Core.
 /// Implementa <see cref="IUnitOfWork"/> para que los servicios de aplicación
 /// puedan confirmar transacciones sin depender directamente de EF Core.
-/// Convención de plurales: plurales reales en inglés (Countries, Cities,
-/// FlightStatuses, CheckInStatuses, BoardingPasses, etc.)
+/// Convención de plurales: plurales reales en inglés
+/// (Countries, Cities, FlightStatuses, CheckInStatuses, BoardingPasses, etc.).
 /// </summary>
 public sealed class AppDbContext : DbContext, IUnitOfWork
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
 
     // =========================================================================
     // MÓDULO 1 — Geografía (5 tablas)
     // =========================================================================
 
-    // /// <summary>country</summary>
-    // public DbSet<CountryEntity> Countries { get; set; } = null!;
+    /// <summary>country</summary>
+    public DbSet<CountryEntity> Countries { get; set; } = null!;
 
     // /// <summary>city</summary>
     // public DbSet<CityEntity> Cities { get; set; } = null!;
@@ -154,7 +158,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>base_flight</summary>
     // public DbSet<BaseFlightEntity> BaseFlights { get; set; } = null!;
 
-    // /// <summary>route_schedule [TN-4]</summary>
+    // /// <summary>route_schedule</summary>
     // public DbSet<RouteScheduleEntity> RouteSchedules { get; set; } = null!;
 
     // /// <summary>scheduled_flight</summary>
@@ -167,7 +171,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>crew_role</summary>
     // public DbSet<CrewRoleEntity> CrewRoles { get; set; } = null!;
 
-    // /// <summary>job_position [TN-3]</summary>
+    // /// <summary>job_position</summary>
     // public DbSet<JobPositionEntity> JobPositions { get; set; } = null!;
 
     // /// <summary>employee</summary>
@@ -186,7 +190,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>gender</summary>
     // public DbSet<GenderEntity> Genders { get; set; } = null!;
 
-    // /// <summary>nationality — plural irregular inglés</summary>
+    // /// <summary>nationality</summary>
     // public DbSet<NationalityEntity> Nationalities { get; set; } = null!;
 
     // /// <summary>person</summary>
@@ -208,16 +212,16 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 6 — Cabina y Asientos (5 tablas)
     // // =========================================================================
 
-    // /// <summary>cabin_class — plural irregular inglés</summary>
+    // /// <summary>cabin_class</summary>
     // public DbSet<CabinClassEntity> CabinClasses { get; set; } = null!;
 
-    // /// <summary>seat_status — plural irregular inglés</summary>
+    // /// <summary>seat_status</summary>
     // public DbSet<SeatStatusEntity> SeatStatuses { get; set; } = null!;
 
     // /// <summary>seat_map</summary>
     // public DbSet<SeatMapEntity> SeatMaps { get; set; } = null!;
 
-    // /// <summary>flight_seat [IR-1]</summary>
+    // /// <summary>flight_seat</summary>
     // public DbSet<FlightSeatEntity> FlightSeats { get; set; } = null!;
 
     // /// <summary>flight_cabin_price</summary>
@@ -233,7 +237,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>discount_type</summary>
     // public DbSet<DiscountTypeEntity> DiscountTypes { get; set; } = null!;
 
-    // /// <summary>passenger_discount [IR-5]</summary>
+    // /// <summary>passenger_discount</summary>
     // public DbSet<PassengerDiscountEntity> PassengerDiscounts { get; set; } = null!;
 
     // /// <summary>promotion</summary>
@@ -246,7 +250,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 8 — Reservas (3 tablas)
     // // =========================================================================
 
-    // /// <summary>reservation_status — plural irregular inglés</summary>
+    // /// <summary>reservation_status</summary>
     // public DbSet<ReservationStatusEntity> ReservationStatuses { get; set; } = null!;
 
     // /// <summary>reservation</summary>
@@ -259,7 +263,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 9 — Tiquetes y Equipaje (5 tablas)
     // // =========================================================================
 
-    // /// <summary>ticket_status — plural irregular inglés</summary>
+    // /// <summary>ticket_status</summary>
     // public DbSet<TicketStatusEntity> TicketStatuses { get; set; } = null!;
 
     // /// <summary>ticket</summary>
@@ -278,32 +282,32 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 10 — Check-in y Abordaje (3 tablas)
     // // =========================================================================
 
-    // /// <summary>check_in_status — plural irregular inglés</summary>
+    // /// <summary>check_in_status</summary>
     // public DbSet<CheckInStatusEntity> CheckInStatuses { get; set; } = null!;
 
     // /// <summary>check_in</summary>
     // public DbSet<CheckInEntity> CheckIns { get; set; } = null!;
 
-    // /// <summary>boarding_pass — plural irregular inglés [IR-4]</summary>
+    // /// <summary>boarding_pass</summary>
     // public DbSet<BoardingPassEntity> BoardingPasses { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 11 — Pagos y Reembolsos (6 tablas)
     // // =========================================================================
 
-    // /// <summary>currency — plural irregular inglés [TN-1]</summary>
+    // /// <summary>currency</summary>
     // public DbSet<CurrencyEntity> Currencies { get; set; } = null!;
 
-    // /// <summary>payment_status — plural irregular inglés</summary>
+    // /// <summary>payment_status</summary>
     // public DbSet<PaymentStatusEntity> PaymentStatuses { get; set; } = null!;
 
     // /// <summary>payment_method</summary>
     // public DbSet<PaymentMethodEntity> PaymentMethods { get; set; } = null!;
 
-    // /// <summary>payment [TN-1 currency_id]</summary>
+    // /// <summary>payment</summary>
     // public DbSet<PaymentEntity> Payments { get; set; } = null!;
 
-    // /// <summary>refund_status — plural irregular inglés</summary>
+    // /// <summary>refund_status</summary>
     // public DbSet<RefundStatusEntity> RefundStatuses { get; set; } = null!;
 
     // /// <summary>refund</summary>
@@ -329,13 +333,13 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 13 — Historial de Estados (3 tablas)
     // // =========================================================================
 
-    // /// <summary>reservation_status_history — plural compuesto</summary>
+    // /// <summary>reservation_status_history</summary>
     // public DbSet<ReservationStatusHistoryEntity> ReservationStatusHistories { get; set; } = null!;
 
-    // /// <summary>ticket_status_history — plural compuesto</summary>
+    // /// <summary>ticket_status_history</summary>
     // public DbSet<TicketStatusHistoryEntity> TicketStatusHistories { get; set; } = null!;
 
-    // /// <summary>flight_status_history — plural compuesto [TN-2]</summary>
+    // /// <summary>flight_status_history</summary>
     // public DbSet<FlightStatusHistoryEntity> FlightStatusHistories { get; set; } = null!;
 
     // // =========================================================================
@@ -345,10 +349,10 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>loyalty_program</summary>
     // public DbSet<LoyaltyProgramEntity> LoyaltyPrograms { get; set; } = null!;
 
-    // /// <summary>loyalty_tier [IR-3]</summary>
+    // /// <summary>loyalty_tier</summary>
     // public DbSet<LoyaltyTierEntity> LoyaltyTiers { get; set; } = null!;
 
-    // /// <summary>loyalty_account [IR-3]</summary>
+    // /// <summary>loyalty_account</summary>
     // public DbSet<LoyaltyAccountEntity> LoyaltyAccounts { get; set; } = null!;
 
     // /// <summary>loyalty_transaction</summary>
@@ -370,10 +374,10 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     }
 
     // =========================================================================
-    // IUnitOfWork  implementación delegada a UnitOfWork (ver UnitOfWork.cs) ;
+    // IUnitOfWork
     // =========================================================================
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public async Task<int> CommitAsync(CancellationToken cancellationToken = default)
         => await SaveChangesAsync(cancellationToken);
 }
