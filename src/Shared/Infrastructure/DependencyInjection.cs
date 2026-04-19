@@ -14,9 +14,10 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? configuration.GetConnectionString("MySqlDB")
             ?? throw new InvalidOperationException(
-                "La cadena de conexión 'DefaultConnection' no está configurada. " +
-                "Verifica appsettings.json o las variables de entorno.");
+                "No se encontró una cadena de conexión válida. " +
+                "Configura 'DefaultConnection' o 'MySqlDB' en appsettings.json o variables de entorno.");
 
         var serverVersion = ServerVersion.AutoDetect(connectionString);
 

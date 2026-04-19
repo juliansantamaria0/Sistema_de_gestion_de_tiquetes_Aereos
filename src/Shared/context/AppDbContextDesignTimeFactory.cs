@@ -24,8 +24,9 @@ public sealed class AppDbContextDesignTimeFactory : IDesignTimeDbContextFactory<
             .Build();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? configuration.GetConnectionString("MySqlDB")
             ?? throw new InvalidOperationException(
-                "Connection string 'DefaultConnection' not found in appsettings.json.");
+                "Connection string 'DefaultConnection' or 'MySqlDB' not found in appsettings.json.");
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
