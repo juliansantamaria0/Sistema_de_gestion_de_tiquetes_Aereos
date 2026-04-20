@@ -79,7 +79,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Infrastructure.Enti
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Infrastructure.Entity;
 
 // // ── MÓDULO 12: Incidencias Operativas (4 tablas) ────────────────────────────
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DelayReason.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DelayReason.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightDelay.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CancellationReason.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Infrastructure.Entity;
@@ -313,8 +313,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 12 — Incidencias Operativas (4 tablas)
     // // =========================================================================
 
-    // /// <summary>delay_reason</summary>
-    // public DbSet<DelayReasonEntity> DelayReasons { get; set; } = null!;
+    /// <summary>delay_reason</summary>
+    public DbSet<DelayReasonEntity> DelayReasons { get; set; } = null!;
 
     // /// <summary>flight_delay</summary>
     // public DbSet<FlightDelayEntity> FlightDelays { get; set; } = null!;
