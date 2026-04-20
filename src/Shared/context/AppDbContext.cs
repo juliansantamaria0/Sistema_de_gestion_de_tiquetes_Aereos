@@ -7,7 +7,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity;
 
 // // ── MÓDULO 2: Aerolíneas y Aeronaves (4 tablas) ──────────────────────────────
@@ -119,8 +119,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>airport</summary>
     public DbSet<AirportEntity> Airports { get; set; } = null!;
 
-    // /// <summary>terminal</summary>
-    // public DbSet<TerminalEntity> Terminals { get; set; } = null!;
+    /// <summary>terminal</summary>
+    public DbSet<TerminalEntity> Terminals { get; set; } = null!;
 
     /// <summary>gate</summary>
     public DbSet<GateEntity> Gates { get; set; } = null!;
