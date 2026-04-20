@@ -11,7 +11,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity;
 
 // // ── MÓDULO 2: Aerolíneas y Aeronaves (4 tablas) ──────────────────────────────
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftManufacturer.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Infrastructure.Entity;
@@ -129,8 +129,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 2 — Aerolíneas y Aeronaves (4 tablas)
     // // =========================================================================
 
-    // /// <summary>airline</summary>
-    // public DbSet<AirlineEntity> Airlines { get; set; } = null!;
+    /// <summary>airline</summary>
+    public DbSet<AirlineEntity> Airlines { get; set; } = null!;
 
     /// <summary>aircraft_manufacturer</summary>
     public DbSet<AircraftManufacturerEntity> AircraftManufacturers { get; set; } = null!;
