@@ -82,7 +82,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Infrastructure.Enti
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DelayReason.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightDelay.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CancellationReason.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Infrastructure.Entity;
 
 // // ── MÓDULO 13: Historial de Estados (3 tablas) ──────────────────────────────
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatusHistory.Infrastructure.Entity;
@@ -322,8 +322,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>cancellation_reason</summary>
     public DbSet<CancellationReasonEntity> CancellationReasons { get; set; } = null!;
 
-    // /// <summary>flight_cancellation</summary>
-    // public DbSet<FlightCancellationEntity> FlightCancellations { get; set; } = null!;
+    /// <summary>flight_cancellation</summary>
+    public DbSet<FlightCancellationEntity> FlightCancellations { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 13 — Historial de Estados (3 tablas)

@@ -1,0 +1,41 @@
+namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Infrastructure.Entity;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+public sealed class FlightCancellationEntityConfiguration : IEntityTypeConfiguration<FlightCancellationEntity>
+{
+    public void Configure(EntityTypeBuilder<FlightCancellationEntity> builder)
+    {
+        builder.ToTable("flight_cancellation");
+
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.Id)
+               .HasColumnName("cancellation_id")
+               .ValueGeneratedOnAdd();
+
+        builder.Property(e => e.ScheduledFlightId)
+               .HasColumnName("scheduled_flight_id")
+               .IsRequired();
+
+        builder.HasIndex(e => e.ScheduledFlightId)
+               .IsUnique()
+               .HasDatabaseName("uq_flight_cancellation_flight");
+
+        builder.Property(e => e.CancellationReasonId)
+               .HasColumnName("cancellation_reason_id")
+               .IsRequired();
+
+        builder.Property(e => e.CancelledAt)
+               .HasColumnName("cancelled_at")
+               .HasColumnType("datetime(6)")
+               .IsRequired()
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        builder.Property(e => e.Notes)
+               .HasColumnName("notes")
+               .IsRequired(false)
+               .HasMaxLength(250);
+    }
+}
