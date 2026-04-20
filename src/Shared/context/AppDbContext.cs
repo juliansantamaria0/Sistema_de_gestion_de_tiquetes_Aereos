@@ -8,7 +8,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entit
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity;
 
 // // ── MÓDULO 2: Aerolíneas y Aeronaves (4 tablas) ──────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity;
@@ -122,8 +122,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>terminal</summary>
     // public DbSet<TerminalEntity> Terminals { get; set; } = null!;
 
-    // /// <summary>gate</summary>
-    // public DbSet<GateEntity> Gates { get; set; } = null!;
+    /// <summary>gate</summary>
+    public DbSet<GateEntity> Gates { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 2 — Aerolíneas y Aeronaves (4 tablas)
