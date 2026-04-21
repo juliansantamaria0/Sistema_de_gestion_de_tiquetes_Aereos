@@ -64,7 +64,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Infrastruc
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageType.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Infrastructure.Entity;
 
 // // ── MÓDULO 10: Check-in y Abordaje (3 tablas) ───────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckInStatus.Infrastructure.Entity;
@@ -273,8 +273,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>baggage_type</summary>
     public DbSet<BaggageTypeEntity> BaggageTypes { get; set; } = null!;
 
-    // /// <summary>ticket_baggage</summary>
-    // public DbSet<TicketBaggageEntity> TicketBaggages { get; set; } = null!;
+    /// <summary>ticket_baggage</summary>
+    public DbSet<TicketBaggageEntity> TicketBaggages { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 10 — Check-in y Abordaje (3 tablas)
