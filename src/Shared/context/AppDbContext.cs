@@ -42,7 +42,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Infrastructure.En
 // // ── MÓDULO 6: Cabina y Asientos (5 tablas) ──────────────────────────────────
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatStatus.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Infrastructure.Entity;
 
@@ -214,8 +214,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>seat_status — plural irregular inglés</summary>
     public DbSet<SeatStatusEntity> SeatStatuses { get; set; } = null!;
 
-    // /// <summary>seat_map</summary>
-    // public DbSet<SeatMapEntity> SeatMaps { get; set; } = null!;
+    /// <summary>seat_map</summary>
+    public DbSet<SeatMapEntity> SeatMaps { get; set; } = null!;
 
     /// <summary>flight_seat [IR-1]</summary>
     public DbSet<FlightSeatEntity> FlightSeats { get; set; } = null!;
