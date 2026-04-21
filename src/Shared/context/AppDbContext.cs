@@ -31,7 +31,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Infrastructure.En
 
 // // ── MÓDULO 5: Personas (8 tablas) ───────────────────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DocumentType.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Infrastructure.Entity;
@@ -185,8 +185,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>document_type</summary>
     public DbSet<DocumentTypeEntity> DocumentTypes { get; set; } = null!;
 
-    // /// <summary>gender</summary>
-    // public DbSet<GenderEntity> Genders { get; set; } = null!;
+    /// <summary>gender</summary>
+    public DbSet<GenderEntity> Genders { get; set; } = null!;
 
     // /// <summary>nationality — plural irregular inglés</summary>
     // public DbSet<NationalityEntity> Nationalities { get; set; } = null!;
