@@ -29,8 +29,9 @@ public sealed class PaymentEntityConfiguration : IEntityTypeConfiguration<Paymen
 
         builder.Property(e => e.PaymentDate)
                .HasColumnName("payment_date")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.Amount)
                .HasColumnName("amount")
@@ -57,11 +58,13 @@ public sealed class PaymentEntityConfiguration : IEntityTypeConfiguration<Paymen
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
     }
 }

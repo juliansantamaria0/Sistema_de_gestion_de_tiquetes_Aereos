@@ -75,7 +75,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BoardingPass.Infrastructure.
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentStatus.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentMethod.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RefundStatus.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Infrastructure.Entity;
 
@@ -302,8 +302,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>payment_method</summary>
     // public DbSet<PaymentMethodEntity> PaymentMethods { get; set; } = null!;
 
-    // /// <summary>payment [TN-1 currency_id]</summary>
-    // public DbSet<PaymentEntity> Payments { get; set; } = null!;
+    /// <summary>payment [TN-1 currency_id]</summary>
+    public DbSet<PaymentEntity> Payments { get; set; } = null!;
 
     // /// <summary>refund_status — plural irregular inglés</summary>
     // public DbSet<RefundStatusEntity> RefundStatuses { get; set; } = null!;
