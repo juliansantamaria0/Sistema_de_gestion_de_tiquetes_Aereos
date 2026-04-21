@@ -31,10 +31,10 @@ public sealed class LoyaltyAccountEntityConfiguration : IEntityTypeConfiguration
                .HasColumnName("loyalty_tier_id")
                .IsRequired();
 
-       //  builder.HasOne(e => e.LoyaltyTier)
-       //         .WithMany(e => e.LoyaltyAccounts)
-       //         .HasPrincipalKey(e => new { e.LoyaltyProgramId, e.Id })
-       //         .HasForeignKey(e => new { e.LoyaltyProgramId, e.LoyaltyTierId });
+        builder.HasOne(e => e.LoyaltyTier)
+               .WithMany(e => e.LoyaltyAccounts)
+               .HasPrincipalKey(e => new { e.LoyaltyProgramId, e.Id })
+               .HasForeignKey(e => new { e.LoyaltyProgramId, e.LoyaltyTierId });
 
         builder.Property(e => e.TotalMiles)
                .HasColumnName("total_miles")

@@ -92,7 +92,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatusHistory.Infrastr
 
 // // ── MÓDULO 14: Fidelización (4 tablas) ──────────────────────────────────────
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Infrastructure.Entity;
 
@@ -348,8 +348,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>loyalty_program</summary>
     // public DbSet<LoyaltyProgramEntity> LoyaltyPrograms { get; set; } = null!;
 
-    // /// <summary>loyalty_tier [IR-3]</summary>
-    // public DbSet<LoyaltyTierEntity> LoyaltyTiers { get; set; } = null!;
+    /// <summary>loyalty_tier [IR-3]</summary>
+    public DbSet<LoyaltyTierEntity> LoyaltyTiers { get; set; } = null!;
 
     /// <summary>loyalty_account [IR-3]</summary>
     public DbSet<LoyaltyAccountEntity> LoyaltyAccounts { get; set; } = null!;

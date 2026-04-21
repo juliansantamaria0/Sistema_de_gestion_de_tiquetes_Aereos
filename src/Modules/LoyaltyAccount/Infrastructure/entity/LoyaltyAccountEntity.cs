@@ -10,5 +10,5 @@ public sealed class LoyaltyAccountEntity
     public int      AvailableMiles   { get; set; }
     public DateTime JoinedAt         { get; set; }
 
-    // public Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.Entity.LoyaltyTierEntity? LoyaltyTier { get; set; }
+    public Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.Entity.LoyaltyTierEntity? LoyaltyTier { get; set; }
 }
