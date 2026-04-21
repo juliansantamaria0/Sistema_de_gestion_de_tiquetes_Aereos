@@ -337,6 +337,7 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
 
     /// <summary>flight_status_history — plural compuesto [TN-2]</summary>
     public DbSet<FlightStatusHistoryEntity> FlightStatusHistories { get; set; } = null!;
+    
 
     // // =========================================================================
     // // MÓDULO 14 — Fidelización (4 tablas)
