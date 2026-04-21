@@ -1,0 +1,45 @@
+namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Infrastructure.Entity;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+public sealed class RefundEntityConfiguration : IEntityTypeConfiguration<RefundEntity>
+{
+    public void Configure(EntityTypeBuilder<RefundEntity> builder)
+    {
+        builder.ToTable("refund");
+
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.Id)
+               .HasColumnName("refund_id")
+               .ValueGeneratedOnAdd();
+
+        builder.Property(e => e.PaymentId)
+               .HasColumnName("payment_id")
+               .IsRequired();
+
+        builder.Property(e => e.RefundStatusId)
+               .HasColumnName("refund_status_id")
+               .IsRequired();
+
+        builder.Property(e => e.Amount)
+               .HasColumnName("amount")
+               .IsRequired()
+               .HasColumnType("decimal(12,2)");
+
+        builder.Property(e => e.RequestedAt)
+               .HasColumnName("requested_at")
+               .IsRequired()
+               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+        builder.Property(e => e.ProcessedAt)
+               .HasColumnName("processed_at")
+               .IsRequired(false);
+
+        builder.Property(e => e.Reason)
+               .HasColumnName("reason")
+               .IsRequired(false)
+               .HasMaxLength(250);
+    }
+}
