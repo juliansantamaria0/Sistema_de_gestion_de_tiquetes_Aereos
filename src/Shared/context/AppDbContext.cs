@@ -27,7 +27,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.En
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CrewRole.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.JobPosition.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Employee.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Infrastructure.Entity;
 
 // // ── MÓDULO 5: Personas (8 tablas) ───────────────────────────────────────────
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DocumentType.Infrastructure.Entity;
@@ -173,8 +173,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>employee</summary>
     public DbSet<EmployeeEntity> Employees { get; set; } = null!;
 
-    // /// <summary>flight_crew</summary>
-    // public DbSet<FlightCrewEntity> FlightCrews { get; set; } = null!;
+    /// <summary>flight_crew</summary>
+    public DbSet<FlightCrewEntity> FlightCrews { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 5 — Personas (8 tablas)

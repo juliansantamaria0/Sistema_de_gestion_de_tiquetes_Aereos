@@ -29,10 +29,10 @@ public sealed class FlightCrewEntityConfiguration : IEntityTypeConfiguration<Fli
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
-        // UNIQUE (scheduled_flight_id, employee_id) — espejo de uq_fc_employee
         builder.HasIndex(e => new { e.ScheduledFlightId, e.EmployeeId })
                .IsUnique()
                .HasDatabaseName("uq_fc_employee");
