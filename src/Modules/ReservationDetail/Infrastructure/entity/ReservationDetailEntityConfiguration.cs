@@ -33,19 +33,19 @@ public sealed class ReservationDetailEntityConfiguration : IEntityTypeConfigurat
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
 
-        // UNIQUE (reservation_id, passenger_id) — espejo de uq_rd_passenger
         builder.HasIndex(e => new { e.ReservationId, e.PassengerId })
                .IsUnique()
                .HasDatabaseName("uq_rd_passenger");
 
-        // UNIQUE (reservation_id, flight_seat_id) — espejo de uq_rd_seat
         builder.HasIndex(e => new { e.ReservationId, e.FlightSeatId })
                .IsUnique()
                .HasDatabaseName("uq_rd_seat");
