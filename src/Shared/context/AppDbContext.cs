@@ -45,7 +45,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatStatus.Infrastructure.En
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Infrastructure.Entity;
 
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Infrastructure.Entity;
 
 // // ── MÓDULO 7: Tarifas y Descuentos (5 tablas) ───────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Infrastructure.Entity;
@@ -222,8 +222,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>flight_seat [IR-1]</summary>
     public DbSet<FlightSeatEntity> FlightSeats { get; set; } = null!;
 
-    // /// <summary>flight_cabin_price</summary>
-    // public DbSet<FlightCabinPriceEntity> FlightCabinPrices { get; set; } = null!;
+    /// <summary>flight_cabin_price</summary>
+    public DbSet<FlightCabinPriceEntity> FlightCabinPrices { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 7 — Tarifas y Descuentos (5 tablas)
