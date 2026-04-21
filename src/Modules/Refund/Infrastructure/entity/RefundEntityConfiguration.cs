@@ -30,11 +30,13 @@ public sealed class RefundEntityConfiguration : IEntityTypeConfiguration<RefundE
 
         builder.Property(e => e.RequestedAt)
                .HasColumnName("requested_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.ProcessedAt)
                .HasColumnName("processed_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
 
         builder.Property(e => e.Reason)

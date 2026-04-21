@@ -77,7 +77,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentStatus.Infrastructure
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentMethod.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RefundStatus.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Infrastructure.Entity;
 
 // // ── MÓDULO 12: Incidencias Operativas (4 tablas) ────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DelayReason.Infrastructure.Entity;
@@ -308,8 +308,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>refund_status — plural irregular inglés</summary>
     // public DbSet<RefundStatusEntity> RefundStatuses { get; set; } = null!;
 
-    // /// <summary>refund</summary>
-    // public DbSet<RefundEntity> Refunds { get; set; } = null!;
+    /// <summary>refund</summary>
+    public DbSet<RefundEntity> Refunds { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 12 — Incidencias Operativas (4 tablas)
