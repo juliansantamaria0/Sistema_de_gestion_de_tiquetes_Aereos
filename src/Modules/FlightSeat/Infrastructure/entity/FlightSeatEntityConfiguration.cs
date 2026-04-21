@@ -29,14 +29,15 @@ public sealed class FlightSeatEntityConfiguration : IEntityTypeConfiguration<Fli
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
 
-        // UNIQUE (scheduled_flight_id, seat_map_id) — espejo de uq_flight_seat
         builder.HasIndex(e => new { e.ScheduledFlightId, e.SeatMapId })
                .IsUnique()
                .HasDatabaseName("uq_flight_seat");
