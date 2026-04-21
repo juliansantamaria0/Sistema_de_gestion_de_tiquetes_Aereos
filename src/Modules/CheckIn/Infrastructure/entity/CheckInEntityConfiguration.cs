@@ -19,15 +19,15 @@ public sealed class CheckInEntityConfiguration : IEntityTypeConfiguration<CheckI
                .HasColumnName("ticket_id")
                .IsRequired();
 
-        // UNIQUE (ticket_id) — un tiquete = un check-in
         builder.HasIndex(e => e.TicketId)
                .IsUnique()
                .HasDatabaseName("uq_check_in_ticket");
 
         builder.Property(e => e.CheckInTime)
                .HasColumnName("check_in_time")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.CheckInStatusId)
                .HasColumnName("check_in_status_id")
