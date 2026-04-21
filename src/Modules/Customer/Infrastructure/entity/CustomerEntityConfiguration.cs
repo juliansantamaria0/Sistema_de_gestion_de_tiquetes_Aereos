@@ -19,7 +19,6 @@ public sealed class CustomerEntityConfiguration : IEntityTypeConfiguration<Custo
                .HasColumnName("person_id")
                .IsRequired();
 
-        // person_id UNIQUE — una persona solo puede ser cliente una vez.
         builder.HasIndex(e => e.PersonId)
                .IsUnique()
                .HasDatabaseName("uq_customer_person_id");
@@ -34,8 +33,6 @@ public sealed class CustomerEntityConfiguration : IEntityTypeConfiguration<Custo
                .IsRequired(false)
                .HasMaxLength(120);
 
-        // UNIQUE (email) con filtro para no violar unicidad entre NULLs.
-        // MySQL: múltiples NULL en columna UNIQUE son permitidos, EF aplica filtro.
         builder.HasIndex(e => e.Email)
                .IsUnique()
                .HasFilter("email IS NOT NULL")
@@ -43,11 +40,13 @@ public sealed class CustomerEntityConfiguration : IEntityTypeConfiguration<Custo
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
     }
 }
