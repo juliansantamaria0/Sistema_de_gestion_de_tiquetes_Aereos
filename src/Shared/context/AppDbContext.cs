@@ -141,7 +141,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>aircraft</summary>
     public DbSet<AircraftEntity> Aircrafts { get; set; } = null!;
 
-    // // =========================================================================
+    // // ============================================
+    // =============================
     // // MÓDULO 3 — Rutas y Vuelos (5 tablas)
     // // =========================================================================
 
