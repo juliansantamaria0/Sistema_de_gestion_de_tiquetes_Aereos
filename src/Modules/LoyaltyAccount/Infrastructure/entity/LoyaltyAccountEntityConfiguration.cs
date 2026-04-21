@@ -23,7 +23,6 @@ public sealed class LoyaltyAccountEntityConfiguration : IEntityTypeConfiguration
                .HasColumnName("loyalty_program_id")
                .IsRequired();
 
-        // UNIQUE (passenger_id, loyalty_program_id) — espejo de uq_la
         builder.HasIndex(e => new { e.PassengerId, e.LoyaltyProgramId })
                .IsUnique()
                .HasDatabaseName("uq_la");
@@ -31,11 +30,11 @@ public sealed class LoyaltyAccountEntityConfiguration : IEntityTypeConfiguration
         builder.Property(e => e.LoyaltyTierId)
                .HasColumnName("loyalty_tier_id")
                .IsRequired();
-        // FK compuesta activa hacia loyalty_tier
-        builder.HasOne(e => e.LoyaltyTier)
-               .WithMany(e => e.LoyaltyAccounts)
-               .HasPrincipalKey(e => new { e.LoyaltyProgramId, e.Id })
-               .HasForeignKey(e => new { e.LoyaltyProgramId, e.LoyaltyTierId });
+
+       //  builder.HasOne(e => e.LoyaltyTier)
+       //         .WithMany(e => e.LoyaltyAccounts)
+       //         .HasPrincipalKey(e => new { e.LoyaltyProgramId, e.Id })
+       //         .HasForeignKey(e => new { e.LoyaltyProgramId, e.LoyaltyTierId });
 
         builder.Property(e => e.TotalMiles)
                .HasColumnName("total_miles")
@@ -49,7 +48,8 @@ public sealed class LoyaltyAccountEntityConfiguration : IEntityTypeConfiguration
 
         builder.Property(e => e.JoinedAt)
                .HasColumnName("joined_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
     }
 }
