@@ -51,7 +51,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Infrastruct
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DiscountType.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerDiscount.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Promotion.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Promotion.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Infrastructure.Entity;
 
 // // ── MÓDULO 8: Reservas (3 tablas) ───────────────────────────────────────────
@@ -238,8 +238,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>passenger_discount [IR-5]</summary>
     public DbSet<PassengerDiscountEntity> PassengerDiscounts { get; set; } = null!;
 
-    // /// <summary>promotion</summary>
-    // public DbSet<PromotionEntity> Promotions { get; set; } = null!;
+    /// <summary>promotion</summary>
+    public DbSet<PromotionEntity> Promotions { get; set; } = null!;
 
     /// <summary>flight_promotion</summary>
     public DbSet<FlightPromotionEntity> FlightPromotions { get; set; } = null!;
