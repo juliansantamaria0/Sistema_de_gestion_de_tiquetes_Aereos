@@ -1,0 +1,42 @@
+namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Infrastructure.Entity;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+public sealed class TicketBaggageEntityConfiguration : IEntityTypeConfiguration<TicketBaggageEntity>
+{
+    public void Configure(EntityTypeBuilder<TicketBaggageEntity> builder)
+    {
+        builder.ToTable("ticket_baggage");
+
+        builder.HasKey(e => e.Id);
+
+        builder.Property(e => e.Id)
+               .HasColumnName("ticket_baggage_id")
+               .ValueGeneratedOnAdd();
+
+        builder.Property(e => e.TicketId)
+               .HasColumnName("ticket_id")
+               .IsRequired();
+
+        builder.Property(e => e.BaggageTypeId)
+               .HasColumnName("baggage_type_id")
+               .IsRequired();
+
+        // UNIQUE (ticket_id, baggage_type_id) — espejo de uq_tb
+        builder.HasIndex(e => new { e.TicketId, e.BaggageTypeId })
+               .IsUnique()
+               .HasDatabaseName("uq_tb");
+
+        builder.Property(e => e.Quantity)
+               .HasColumnName("quantity")
+               .IsRequired()
+               .HasDefaultValue(1);
+
+        builder.Property(e => e.FeeCharged)
+               .HasColumnName("fee_charged")
+               .IsRequired()
+               .HasColumnType("decimal(10,2)")
+               .HasDefaultValue(0m);
+    }
+}
