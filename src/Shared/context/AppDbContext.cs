@@ -44,6 +44,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Infrastructure.En
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatStatus.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Infrastructure.Entity;
+
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Infrastructure.Entity;
 
 // // ── MÓDULO 7: Tarifas y Descuentos (5 tablas) ───────────────────────────────
