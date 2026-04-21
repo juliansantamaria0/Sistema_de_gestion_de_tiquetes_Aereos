@@ -26,7 +26,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.En
 // // ── MÓDULO 4: Tripulación (4 tablas) ────────────────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CrewRole.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.JobPosition.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Employee.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Employee.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Infrastructure.Entity;
 
 // // ── MÓDULO 5: Personas (8 tablas) ───────────────────────────────────────────
@@ -170,8 +170,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // /// <summary>job_position [TN-3]</summary>
     // public DbSet<JobPositionEntity> JobPositions { get; set; } = null!;
 
-    // /// <summary>employee</summary>
-    // public DbSet<EmployeeEntity> Employees { get; set; } = null!;
+    /// <summary>employee</summary>
+    public DbSet<EmployeeEntity> Employees { get; set; } = null!;
 
     // /// <summary>flight_crew</summary>
     // public DbSet<FlightCrewEntity> FlightCrews { get; set; } = null!;

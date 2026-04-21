@@ -10,13 +10,24 @@ public sealed class EmployeeConfiguration : IEntityTypeConfiguration<EmployeeEnt
         builder.ToTable("employee");
         builder.HasKey(e => e.EmployeeId);
 
-        // person_id UNIQUE (un empleado por persona)
         builder.HasIndex(e => e.PersonId).IsUnique();
 
         builder.Property(e => e.HireDate).IsRequired();
-        builder.Property(e => e.IsActive).IsRequired().HasDefaultValue(true);
-        builder.Property(e => e.JobPositionId).IsRequired(false);
-        builder.Property(e => e.CreatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP");
-        builder.Property(e => e.UpdatedAt).IsRequired(false);
+
+        builder.Property(e => e.IsActive)
+            .IsRequired()
+            .HasDefaultValue(true);
+
+        builder.Property(e => e.JobPositionId)
+            .IsRequired(false);
+
+        builder.Property(e => e.CreatedAt)
+            .HasColumnType("datetime(6)")
+            .IsRequired()
+            .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+        builder.Property(e => e.UpdatedAt)
+            .HasColumnType("datetime(6)")
+            .IsRequired(false);
     }
 }
