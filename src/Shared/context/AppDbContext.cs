@@ -55,7 +55,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Promotion.Infrastructure.Ent
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Infrastructure.Entity;
 
 // // ── MÓDULO 8: Reservas (3 tablas) ───────────────────────────────────────────
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatus.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatus.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Infrastructure.Entity;
 
@@ -248,8 +248,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 8 — Reservas (3 tablas)
     // // =========================================================================
 
-    // /// <summary>reservation_status — plural irregular inglés</summary>
-    // public DbSet<ReservationStatusEntity> ReservationStatuses { get; set; } = null!;
+    /// <summary>reservation_status — plural irregular inglés</summary>
+    public DbSet<ReservationStatusEntity> ReservationStatuses { get; set; } = null!;
 
     /// <summary>reservation</summary>
     public DbSet<ReservationEntity> Reservations { get; set; } = null!;
