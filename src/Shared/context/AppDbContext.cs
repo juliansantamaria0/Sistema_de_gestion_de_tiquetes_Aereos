@@ -66,7 +66,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.En
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Infrastructure.Entity;
 
 // // ── MÓDULO 10: Check-in y Abordaje (3 tablas) ───────────────────────────────
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckInStatus.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckInStatus.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BoardingPass.Infrastructure.Entity;
 
@@ -278,8 +278,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 10 — Check-in y Abordaje (3 tablas)
     // // =========================================================================
 
-    // /// <summary>check_in_status — plural irregular inglés</summary>
-    // public DbSet<CheckInStatusEntity> CheckInStatuses { get; set; } = null!;
+    /// <summary>check_in_status — plural irregular inglés</summary>
+    public DbSet<CheckInStatusEntity> CheckInStatuses { get; set; } = null!;
 
     /// <summary>check_in</summary>
     public DbSet<CheckInEntity> CheckIns { get; set; } = null!;
