@@ -28,15 +28,15 @@ public sealed class TicketEntityConfiguration : IEntityTypeConfiguration<TicketE
                .HasColumnName("reservation_detail_id")
                .IsRequired();
 
-        // UNIQUE (reservation_detail_id) — un tiquete por línea de reserva
         builder.HasIndex(e => e.ReservationDetailId)
                .IsUnique()
                .HasDatabaseName("uq_ticket_reservation_detail");
 
         builder.Property(e => e.IssueDate)
                .HasColumnName("issue_date")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.TicketStatusId)
                .HasColumnName("ticket_status_id")
@@ -44,11 +44,13 @@ public sealed class TicketEntityConfiguration : IEntityTypeConfiguration<TicketE
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
     }
 }
