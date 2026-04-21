@@ -19,7 +19,6 @@ public sealed class PassengerEntityConfiguration : IEntityTypeConfiguration<Pass
                .HasColumnName("person_id")
                .IsRequired();
 
-        // UNIQUE (person_id) — un rol pasajero por persona
         builder.HasIndex(e => e.PersonId)
                .IsUnique()
                .HasDatabaseName("uq_passenger_person");
@@ -29,7 +28,6 @@ public sealed class PassengerEntityConfiguration : IEntityTypeConfiguration<Pass
                .IsRequired(false)
                .HasMaxLength(30);
 
-        // UNIQUE (frequent_flyer_number) cuando no es null
         builder.HasIndex(e => e.FrequentFlyerNumber)
                .IsUnique()
                .HasFilter("frequent_flyer_number IS NOT NULL")
@@ -41,11 +39,13 @@ public sealed class PassengerEntityConfiguration : IEntityTypeConfiguration<Pass
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
     }
 }

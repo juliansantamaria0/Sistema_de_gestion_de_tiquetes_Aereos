@@ -35,7 +35,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Infrastructure.Entity
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ContactType.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Infrastructure.Entity;
 
@@ -197,8 +197,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>customer</summary>
     public DbSet<CustomerEntity> Customers { get; set; } = null!;
 
-    // /// <summary>passenger</summary>
-    // public DbSet<PassengerEntity> Passengers { get; set; } = null!;
+    /// <summary>passenger</summary>
+    public DbSet<PassengerEntity> Passengers { get; set; } = null!;
 
     /// <summary>contact_type</summary>
     public DbSet<ContactTypeEntity> ContactTypes { get; set; } = null!;
