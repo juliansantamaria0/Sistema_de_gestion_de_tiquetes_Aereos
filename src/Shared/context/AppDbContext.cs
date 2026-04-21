@@ -17,7 +17,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Infrastructure.
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Infrastructure.Entity;
 
 // // ── MÓDULO 3: Rutas y Vuelos (5 tablas) ─────────────────────────────────────
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatus.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RouteSchedule.Infrastructure.Entity;
@@ -145,8 +145,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 3 — Rutas y Vuelos (5 tablas)
     // // =========================================================================
 
-    // /// <summary>route</summary>
-    // public DbSet<RouteEntity> Routes { get; set; } = null!;
+    /// <summary>route</summary>
+    public DbSet<RouteEntity> Routes { get; set; } = null!;
 
     /// <summary>flight_status — plural irregular inglés</summary>
     public DbSet<FlightStatusEntity> FlightStatuses { get; set; } = null!;

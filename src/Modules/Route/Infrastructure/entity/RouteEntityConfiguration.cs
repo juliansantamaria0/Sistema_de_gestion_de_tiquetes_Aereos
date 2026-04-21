@@ -23,14 +23,14 @@ public sealed class RouteEntityConfiguration : IEntityTypeConfiguration<RouteEnt
                .HasColumnName("destination_airport_id")
                .IsRequired();
 
-        // UNIQUE (origin_airport_id, destination_airport_id) — espejo de uq_route
         builder.HasIndex(e => new { e.OriginAirportId, e.DestinationAirportId })
                .IsUnique()
                .HasDatabaseName("uq_route");
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
     }
 }
