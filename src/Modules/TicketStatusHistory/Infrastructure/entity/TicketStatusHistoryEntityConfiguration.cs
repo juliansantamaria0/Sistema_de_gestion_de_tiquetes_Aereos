@@ -26,15 +26,15 @@ public sealed class TicketStatusHistoryEntityConfiguration
 
         builder.Property(e => e.ChangedAt)
                .HasColumnName("changed_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.Notes)
                .HasColumnName("notes")
                .IsRequired(false)
                .HasMaxLength(250);
 
-        // UNIQUE (ticket_id, ticket_status_id, changed_at) — espejo de uq_tsh
         builder.HasIndex(e => new { e.TicketId, e.TicketStatusId, e.ChangedAt })
                .IsUnique()
                .HasDatabaseName("uq_tsh");

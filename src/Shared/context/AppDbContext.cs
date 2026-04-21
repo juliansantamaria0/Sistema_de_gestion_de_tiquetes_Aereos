@@ -86,7 +86,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Infrastru
 
 // // ── MÓDULO 13: Historial de Estados (3 tablas) ──────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatusHistory.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatusHistory.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatusHistory.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatusHistory.Infrastructure.Entity;
 
 // // ── MÓDULO 14: Fidelización (4 tablas) ──────────────────────────────────────
@@ -332,8 +332,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>reservation_status_history — plural compuesto</summary>
     public DbSet<ReservationStatusHistoryEntity> ReservationStatusHistories { get; set; } = null!;
 
-    // /// <summary>ticket_status_history — plural compuesto</summary>
-    // public DbSet<TicketStatusHistoryEntity> TicketStatusHistories { get; set; } = null!;
+    /// <summary>ticket_status_history — plural compuesto</summary>
+    public DbSet<TicketStatusHistoryEntity> TicketStatusHistories { get; set; } = null!;
 
     /// <summary>flight_status_history — plural compuesto [TN-2]</summary>
     public DbSet<FlightStatusHistoryEntity> FlightStatusHistories { get; set; } = null!;
