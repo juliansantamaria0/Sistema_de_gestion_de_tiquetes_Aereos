@@ -1,0 +1,13 @@
+# Carpetas de compilación
+bin/
+obj/
+
+# Configuraciones de Visual Studio y VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Archivos temporales
+*.tmp
+*.log
