@@ -34,8 +34,9 @@ public sealed class ReservationEntityConfiguration : IEntityTypeConfiguration<Re
 
         builder.Property(e => e.ReservationDate)
                .HasColumnName("reservation_date")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.ReservationStatusId)
                .HasColumnName("reservation_status_id")
@@ -43,19 +44,23 @@ public sealed class ReservationEntityConfiguration : IEntityTypeConfiguration<Re
 
         builder.Property(e => e.ConfirmedAt)
                .HasColumnName("confirmed_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
 
         builder.Property(e => e.CancelledAt)
                .HasColumnName("cancelled_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
     }
 }
