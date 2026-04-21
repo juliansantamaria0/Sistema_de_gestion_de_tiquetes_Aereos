@@ -28,10 +28,11 @@ public sealed class BaseFlightEntityConfiguration : IEntityTypeConfiguration<Bas
                .HasColumnName("route_id")
                .IsRequired();
 
-        builder.Property(e => e.CreatedAt)
-               .HasColumnName("created_at")
-               .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+builder.Property(e => e.CreatedAt)
+       .HasColumnName("created_at")
+       .HasColumnType("datetime(6)")
+       .IsRequired()
+       .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
