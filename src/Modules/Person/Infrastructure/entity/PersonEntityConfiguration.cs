@@ -24,7 +24,6 @@ public sealed class PersonEntityConfiguration : IEntityTypeConfiguration<PersonE
                .IsRequired()
                .HasMaxLength(30);
 
-        // UNIQUE (document_type_id, document_number) — espejo de uq_person_document
         builder.HasIndex(e => new { e.DocumentTypeId, e.DocumentNumber })
                .IsUnique()
                .HasDatabaseName("uq_person_document");
@@ -39,7 +38,6 @@ public sealed class PersonEntityConfiguration : IEntityTypeConfiguration<PersonE
                .IsRequired()
                .HasMaxLength(100);
 
-        // DateOnly? — columna DATE en MySQL, Pomelo 8.x mapea nativamente
         builder.Property(e => e.BirthDate)
                .HasColumnName("birth_date")
                .IsRequired(false);
@@ -50,11 +48,13 @@ public sealed class PersonEntityConfiguration : IEntityTypeConfiguration<PersonE
 
         builder.Property(e => e.CreatedAt)
                .HasColumnName("created_at")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
+               .HasColumnType("datetime(6)")
                .IsRequired(false);
     }
 }
