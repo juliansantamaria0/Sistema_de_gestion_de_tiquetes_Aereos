@@ -35,7 +35,8 @@ public sealed class LoyaltyTransactionEntityConfiguration
 
         builder.Property(e => e.TransactionDate)
                .HasColumnName("transaction_date")
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
     }
 }

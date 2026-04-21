@@ -94,7 +94,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatusHistory.Infrastr
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Infrastructure.Entity;
 
 /// <summary>
 /// Contexto principal de EF Core.
@@ -354,8 +354,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>loyalty_account [IR-3]</summary>
     public DbSet<LoyaltyAccountEntity> LoyaltyAccounts { get; set; } = null!;
 
-    // /// <summary>loyalty_transaction</summary>
-    // public DbSet<LoyaltyTransactionEntity> LoyaltyTransactions { get; set; } = null!;
+    /// <summary>loyalty_transaction</summary>
+    public DbSet<LoyaltyTransactionEntity> LoyaltyTransactions { get; set; } = null!;
 
     // =========================================================================
     // OnModelCreating
