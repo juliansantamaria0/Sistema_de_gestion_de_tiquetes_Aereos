@@ -21,7 +21,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatus.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RouteSchedule.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity;
 
 // // ── MÓDULO 4: Tripulación (4 tablas) ────────────────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CrewRole.Infrastructure.Entity;
@@ -157,8 +157,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>route_schedule [TN-4]</summary>
     public DbSet<RouteScheduleEntity> RouteSchedules { get; set; } = null!;
 
-    // /// <summary>scheduled_flight</summary>
-    // public DbSet<ScheduledFlightEntity> ScheduledFlights { get; set; } = null!;
+    /// <summary>scheduled_flight</summary>
+    public DbSet<ScheduledFlightEntity> ScheduledFlights { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 4 — Tripulación (4 tablas)
