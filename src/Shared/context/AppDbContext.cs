@@ -37,7 +37,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Infrastructure.E
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ContactType.Infrastructure.Entity;
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Infrastructure.Entity;
 
 // // ── MÓDULO 6: Cabina y Asientos (5 tablas) ──────────────────────────────────
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Infrastructure.Entity;
@@ -203,8 +203,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     /// <summary>contact_type</summary>
     public DbSet<ContactTypeEntity> ContactTypes { get; set; } = null!;
 
-    // /// <summary>passenger_contact</summary>
-    // public DbSet<PassengerContactEntity> PassengerContacts { get; set; } = null!;
+    /// <summary>passenger_contact</summary>
+    public DbSet<PassengerContactEntity> PassengerContacts { get; set; } = null!;
 
     // // =========================================================================
     // // MÓDULO 6 — Cabina y Asientos (5 tablas)
