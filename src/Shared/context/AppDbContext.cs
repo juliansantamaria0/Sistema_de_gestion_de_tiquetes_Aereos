@@ -72,7 +72,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Infrastructure.Entit
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BoardingPass.Infrastructure.Entity;
 
 // // ── MÓDULO 11: Pagos y Reembolsos (6 tablas) ────────────────────────────────
-// using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentStatus.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentMethod.Infrastructure.Entity;
 // using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Infrastructure.Entity;
@@ -293,8 +293,8 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
     // // MÓDULO 11 — Pagos y Reembolsos (6 tablas)
     // // =========================================================================
 
-    // /// <summary>currency — plural irregular inglés [TN-1]</summary>
-    // public DbSet<CurrencyEntity> Currencies { get; set; } = null!;
+    /// <summary>currency — plural irregular inglés [TN-1]</summary>
+    public DbSet<CurrencyEntity> Currencies { get; set; } = null!;
 
     // /// <summary>payment_status — plural irregular inglés</summary>
     // public DbSet<PaymentStatusEntity> PaymentStatuses { get; set; } = null!;
