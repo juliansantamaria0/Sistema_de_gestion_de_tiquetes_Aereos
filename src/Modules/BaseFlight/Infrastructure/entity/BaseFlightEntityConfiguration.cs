@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class BaseFlightEntityConfiguration : IEntityTypeConfiguration<BaseFlightEntity>
@@ -41,6 +41,15 @@ builder.Property(e => e.CreatedAt)
         // UNIQUE (flight_code, airline_id) — espejo de uq_base_flight
         builder.HasIndex(e => new { e.FlightCode, e.AirlineId })
                .IsUnique()
-               .HasDatabaseName("uq_base_flight");
-    }
+               .HasDatabaseName("uq_base_flight");builder.HasOne<AirlineEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AirlineId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_bf_airline");
+
+        builder.HasOne<RouteEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.RouteId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_bf_route");}
 }

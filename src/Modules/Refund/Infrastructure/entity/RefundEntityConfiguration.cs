@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RefundStatus.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class RefundEntityConfiguration : IEntityTypeConfiguration<RefundEntity>
@@ -42,6 +42,15 @@ public sealed class RefundEntityConfiguration : IEntityTypeConfiguration<RefundE
         builder.Property(e => e.Reason)
                .HasColumnName("reason")
                .IsRequired(false)
-               .HasMaxLength(250);
-    }
+               .HasMaxLength(250);builder.HasOne<PaymentEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PaymentId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_refund_payment");
+
+        builder.HasOne<RefundStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.RefundStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_refund_status");}
 }

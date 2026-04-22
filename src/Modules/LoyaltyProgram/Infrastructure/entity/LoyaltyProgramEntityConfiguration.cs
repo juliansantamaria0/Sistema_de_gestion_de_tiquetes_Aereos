@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class LoyaltyProgramEntityConfiguration : IEntityTypeConfiguration<LoyaltyProgramEntity>
@@ -36,6 +36,9 @@ public sealed class LoyaltyProgramEntityConfiguration : IEntityTypeConfiguration
                .HasColumnName("miles_per_dollar")
                .IsRequired()
                .HasColumnType("decimal(6,2)")
-               .HasDefaultValue(1m);
-    }
+               .HasDefaultValue(1m);builder.HasOne<AirlineEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AirlineId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_lp_airline");}
 }

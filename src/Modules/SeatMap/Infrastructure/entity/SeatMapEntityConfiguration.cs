@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class SeatMapEntityConfiguration : IEntityTypeConfiguration<SeatMapEntity>
@@ -36,6 +36,15 @@ public sealed class SeatMapEntityConfiguration : IEntityTypeConfiguration<SeatMa
         // UNIQUE (aircraft_type_id, seat_number) — espejo de uq_seat_map
         builder.HasIndex(e => new { e.AircraftTypeId, e.SeatNumber })
                .IsUnique()
-               .HasDatabaseName("uq_seat_map");
-    }
+               .HasDatabaseName("uq_seat_map");builder.HasOne<AircraftTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AircraftTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_sm_aircraft_type");
+
+        builder.HasOne<CabinClassEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CabinClassId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_sm_cabin_class");}
 }

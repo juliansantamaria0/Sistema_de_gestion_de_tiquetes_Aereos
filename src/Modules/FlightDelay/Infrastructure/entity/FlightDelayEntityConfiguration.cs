@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightDelay.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DelayReason.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class FlightDelayEntityConfiguration : IEntityTypeConfiguration<FlightDelayEntity>
@@ -31,6 +31,15 @@ public sealed class FlightDelayEntityConfiguration : IEntityTypeConfiguration<Fl
                .HasColumnName("reported_at")
                .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
-    }
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fd_flight");
+
+        builder.HasOne<DelayReasonEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.DelayReasonId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fd_reason");}
 }

@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftManufacturer.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class AircraftTypeConfiguration : IEntityTypeConfiguration<AircraftTypeEntity>
@@ -17,6 +17,9 @@ public sealed class AircraftTypeConfiguration : IEntityTypeConfiguration<Aircraf
         // Índice único compuesto (manufacturer_id, model)
         builder.HasIndex(e => new { e.ManufacturerId, e.Model })
                .IsUnique()
-               .HasDatabaseName("uq_aircraft_type");
-    }
+               .HasDatabaseName("uq_aircraft_type");builder.HasOne<AircraftManufacturerEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ManufacturerId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_atype_manufacturer");}
 }

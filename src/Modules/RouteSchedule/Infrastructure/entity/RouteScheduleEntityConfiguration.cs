@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.RouteSchedule.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class RouteScheduleEntityConfiguration : IEntityTypeConfiguration<RouteScheduleEntity>
@@ -31,6 +31,9 @@ public sealed class RouteScheduleEntityConfiguration : IEntityTypeConfiguration<
         // UNIQUE (base_flight_id, day_of_week, departure_time) — espejo de uq_rs
         builder.HasIndex(e => new { e.BaseFlightId, e.DayOfWeek, e.DepartureTime })
                .IsUnique()
-               .HasDatabaseName("uq_rs");
-    }
+               .HasDatabaseName("uq_rs");builder.HasOne<BaseFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.BaseFlightId)
+               .OnDelete(DeleteBehavior.Cascade)
+               .HasConstraintName("fk_rs_base_flight");}
 }

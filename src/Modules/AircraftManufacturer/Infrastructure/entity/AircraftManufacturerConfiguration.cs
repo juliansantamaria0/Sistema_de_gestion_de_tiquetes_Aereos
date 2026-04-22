@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftManufacturer.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class AircraftManufacturerConfiguration : IEntityTypeConfiguration<AircraftManufacturerEntity>
@@ -13,6 +13,9 @@ public sealed class AircraftManufacturerConfiguration : IEntityTypeConfiguration
         builder.HasKey(e => e.ManufacturerId);
 
         builder.Property(e => e.Name).IsRequired().HasMaxLength(100);
-        builder.HasIndex(e => e.Name).IsUnique();
-    }
+        builder.HasIndex(e => e.Name).IsUnique();builder.HasOne<CountryEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CountryId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_manufacturer_country");}
 }

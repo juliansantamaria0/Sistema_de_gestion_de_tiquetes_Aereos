@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class CustomerEntityConfiguration : IEntityTypeConfiguration<CustomerEntity>
@@ -47,6 +47,9 @@ public sealed class CustomerEntityConfiguration : IEntityTypeConfiguration<Custo
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
                .HasColumnType("datetime(6)")
-               .IsRequired(false);
-    }
+               .IsRequired(false);builder.HasOne<PersonEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PersonId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_customer_person");}
 }

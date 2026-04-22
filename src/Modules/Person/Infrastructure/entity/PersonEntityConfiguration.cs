@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DocumentType.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class PersonEntityConfiguration : IEntityTypeConfiguration<PersonEntity>
@@ -55,6 +55,15 @@ public sealed class PersonEntityConfiguration : IEntityTypeConfiguration<PersonE
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
                .HasColumnType("datetime(6)")
-               .IsRequired(false);
-    }
+               .IsRequired(false);builder.HasOne<DocumentTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.DocumentTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_person_doctype");
+
+        builder.HasOne<GenderEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.GenderId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_person_gender");}
 }

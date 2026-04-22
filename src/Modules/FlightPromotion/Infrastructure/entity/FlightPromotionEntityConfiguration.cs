@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Promotion.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class FlightPromotionEntityConfiguration
@@ -26,6 +26,15 @@ public sealed class FlightPromotionEntityConfiguration
         // UNIQUE (scheduled_flight_id, promotion_id) — espejo de uq_fp
         builder.HasIndex(e => new { e.ScheduledFlightId, e.PromotionId })
                .IsUnique()
-               .HasDatabaseName("uq_fp");
-    }
+               .HasDatabaseName("uq_fp");builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fp_flight");
+
+        builder.HasOne<PromotionEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PromotionId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fp_promotion");}
 }

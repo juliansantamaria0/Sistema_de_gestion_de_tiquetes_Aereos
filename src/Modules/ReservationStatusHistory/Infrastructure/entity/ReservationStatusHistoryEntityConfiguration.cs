@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatusHistory.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatus.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class ReservationStatusHistoryEntityConfiguration
@@ -37,6 +37,15 @@ public sealed class ReservationStatusHistoryEntityConfiguration
 
         builder.HasIndex(e => new { e.ReservationId, e.ReservationStatusId, e.ChangedAt })
                .IsUnique()
-               .HasDatabaseName("uq_rsh");
-    }
+               .HasDatabaseName("uq_rsh");builder.HasOne<ReservationEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ReservationId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_rsh_reservation");
+
+        builder.HasOne<ReservationStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ReservationStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_rsh_status");}
 }

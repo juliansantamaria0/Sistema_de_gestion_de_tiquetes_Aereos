@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 /// <summary>Configuración EF Core para <see cref="TerminalEntity"/>.</summary>
@@ -27,6 +27,9 @@ public sealed class TerminalConfiguration : IEntityTypeConfiguration<TerminalEnt
 
         builder.HasIndex(e => new { e.AirportId, e.Name })
                .IsUnique()
-               .HasDatabaseName("uq_terminal");
-    }
+               .HasDatabaseName("uq_terminal");builder.HasOne<AirportEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AirportId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_terminal_airport");}
 }

@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerDiscount.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DiscountType.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class PassengerDiscountEntityConfiguration : IEntityTypeConfiguration<PassengerDiscountEntity>
@@ -31,6 +31,15 @@ public sealed class PassengerDiscountEntityConfiguration : IEntityTypeConfigurat
         // UNIQUE (reservation_detail_id, discount_type_id) — espejo de uq_pd
         builder.HasIndex(e => new { e.ReservationDetailId, e.DiscountTypeId })
                .IsUnique()
-               .HasDatabaseName("uq_pd");
-    }
+               .HasDatabaseName("uq_pd");builder.HasOne<ReservationDetailEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ReservationDetailId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pd_detail");
+
+        builder.HasOne<DiscountTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.DiscountTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pd_discount");}
 }
