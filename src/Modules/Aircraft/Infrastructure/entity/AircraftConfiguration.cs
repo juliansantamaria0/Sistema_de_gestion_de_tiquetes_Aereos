@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class AircraftConfiguration : IEntityTypeConfiguration<AircraftEntity>
@@ -31,6 +31,15 @@ public sealed class AircraftConfiguration : IEntityTypeConfiguration<AircraftEnt
 
         builder.Property(e => e.UpdatedAt)
             .HasColumnType("datetime(6)")
-            .IsRequired(false);
-    }
+            .IsRequired(false);builder.HasOne<AirlineEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AirlineId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_aircraft_airline");
+
+        builder.HasOne<AircraftTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AircraftTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_aircraft_type");}
 }

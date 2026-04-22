@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Promotion.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class PromotionEntityConfiguration : IEntityTypeConfiguration<PromotionEntity>
@@ -35,6 +35,9 @@ public sealed class PromotionEntityConfiguration : IEntityTypeConfiguration<Prom
 
         builder.Property(e => e.ValidUntil)
                .HasColumnName("valid_until")
-               .IsRequired();
-    }
+               .IsRequired();builder.HasOne<AirlineEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AirlineId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_promo_airline");}
 }

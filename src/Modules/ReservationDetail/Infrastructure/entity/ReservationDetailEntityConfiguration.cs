@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class ReservationDetailEntityConfiguration : IEntityTypeConfiguration<ReservationDetailEntity>
@@ -48,6 +48,27 @@ public sealed class ReservationDetailEntityConfiguration : IEntityTypeConfigurat
 
         builder.HasIndex(e => new { e.ReservationId, e.FlightSeatId })
                .IsUnique()
-               .HasDatabaseName("uq_rd_seat");
-    }
+               .HasDatabaseName("uq_rd_seat");builder.HasOne<ReservationEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ReservationId)
+               .OnDelete(DeleteBehavior.Cascade)
+               .HasConstraintName("fk_rd_reservation");
+
+        builder.HasOne<PassengerEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PassengerId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_rd_passenger");
+
+        builder.HasOne<FlightSeatEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.FlightSeatId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_rd_seat");
+
+        builder.HasOne<FareTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.FareTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_rd_fare_type");}
 }

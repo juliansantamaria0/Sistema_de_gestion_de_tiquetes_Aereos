@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class PassengerEntityConfiguration : IEntityTypeConfiguration<PassengerEntity>
@@ -46,6 +46,15 @@ public sealed class PassengerEntityConfiguration : IEntityTypeConfiguration<Pass
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
                .HasColumnType("datetime(6)")
-               .IsRequired(false);
-    }
+               .IsRequired(false);builder.HasOne<PersonEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PersonId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_passenger_person");
+
+        builder.HasOne<NationalityEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.NationalityId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_passenger_nationality");}
 }

@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class FlightCabinPriceEntityConfiguration
@@ -35,6 +35,21 @@ public sealed class FlightCabinPriceEntityConfiguration
         builder.Property(e => e.Price)
                .HasColumnName("price")
                .IsRequired()
-               .HasColumnType("decimal(12,2)");
-    }
+               .HasColumnType("decimal(12,2)");builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fcp_flight");
+
+        builder.HasOne<CabinClassEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CabinClassId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fcp_cabin");
+
+        builder.HasOne<FareTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.FareTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fcp_fare_type");}
 }

@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatusHistory.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatus.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class TicketStatusHistoryEntityConfiguration
@@ -37,6 +37,15 @@ public sealed class TicketStatusHistoryEntityConfiguration
 
         builder.HasIndex(e => new { e.TicketId, e.TicketStatusId, e.ChangedAt })
                .IsUnique()
-               .HasDatabaseName("uq_tsh");
-    }
+               .HasDatabaseName("uq_tsh");builder.HasOne<TicketEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.TicketId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_tsh_ticket");
+
+        builder.HasOne<TicketStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.TicketStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_tsh_status");}
 }

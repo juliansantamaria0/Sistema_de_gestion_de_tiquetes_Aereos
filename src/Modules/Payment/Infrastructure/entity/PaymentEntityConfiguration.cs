@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentStatus.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentMethod.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class PaymentEntityConfiguration : IEntityTypeConfiguration<PaymentEntity>
@@ -65,6 +65,33 @@ public sealed class PaymentEntityConfiguration : IEntityTypeConfiguration<Paymen
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
                .HasColumnType("datetime(6)")
-               .IsRequired(false);
-    }
+               .IsRequired(false);builder.HasOne<ReservationEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ReservationId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pay_reservation");
+
+        builder.HasOne<TicketEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.TicketId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pay_ticket");
+
+        builder.HasOne<CurrencyEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CurrencyId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pay_currency");
+
+        builder.HasOne<PaymentStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PaymentStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pay_status");
+
+        builder.HasOne<PaymentMethodEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PaymentMethodId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pay_method");}
 }

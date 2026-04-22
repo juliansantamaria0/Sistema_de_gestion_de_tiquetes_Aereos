@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 /// <summary>Configuración EF Core para <see cref="AirportEntity"/>.</summary>
@@ -27,6 +27,9 @@ public sealed class AirportConfiguration : IEntityTypeConfiguration<AirportEntit
         builder.Property(e => e.CreatedAt)
                .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
-    }
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");builder.HasOne<CityEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CityId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_airport_city");}
 }

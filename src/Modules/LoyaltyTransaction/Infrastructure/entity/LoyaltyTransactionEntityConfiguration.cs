@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class LoyaltyTransactionEntityConfiguration
@@ -37,6 +37,15 @@ public sealed class LoyaltyTransactionEntityConfiguration
                .HasColumnName("transaction_date")
                .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
-    }
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");builder.HasOne<LoyaltyAccountEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.LoyaltyAccountId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_ltx_account");
+
+        builder.HasOne<TicketEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.TicketId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_ltx_ticket");}
 }

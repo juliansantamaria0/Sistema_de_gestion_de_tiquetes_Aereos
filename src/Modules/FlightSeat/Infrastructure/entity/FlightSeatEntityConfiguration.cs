@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatStatus.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class FlightSeatEntityConfiguration : IEntityTypeConfiguration<FlightSeatEntity>
@@ -40,6 +40,21 @@ public sealed class FlightSeatEntityConfiguration : IEntityTypeConfiguration<Fli
 
         builder.HasIndex(e => new { e.ScheduledFlightId, e.SeatMapId })
                .IsUnique()
-               .HasDatabaseName("uq_flight_seat");
-    }
+               .HasDatabaseName("uq_flight_seat");builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fs_flight");
+
+        builder.HasOne<SeatMapEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.SeatMapId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fs_seat_map");
+
+        builder.HasOne<SeatStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.SeatStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fs_status");}
 }

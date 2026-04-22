@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatusHistory.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatus.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class FlightStatusHistoryEntityConfiguration
@@ -37,6 +37,15 @@ public sealed class FlightStatusHistoryEntityConfiguration
 
         builder.HasIndex(e => new { e.ScheduledFlightId, e.FlightStatusId, e.ChangedAt })
                .IsUnique()
-               .HasDatabaseName("uq_fsh");
-    }
+               .HasDatabaseName("uq_fsh");builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fsh_flight");
+
+        builder.HasOne<FlightStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.FlightStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fsh_status");}
 }

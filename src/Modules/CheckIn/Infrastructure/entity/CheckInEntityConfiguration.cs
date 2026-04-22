@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckInStatus.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class CheckInEntityConfiguration : IEntityTypeConfiguration<CheckInEntity>
@@ -36,6 +36,15 @@ public sealed class CheckInEntityConfiguration : IEntityTypeConfiguration<CheckI
         builder.Property(e => e.CounterNumber)
                .HasColumnName("counter_number")
                .IsRequired(false)
-               .HasMaxLength(20);
-    }
+               .HasMaxLength(20);builder.HasOne<TicketEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.TicketId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_ci_ticket");
+
+        builder.HasOne<CheckInStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CheckInStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_ci_status");}
 }

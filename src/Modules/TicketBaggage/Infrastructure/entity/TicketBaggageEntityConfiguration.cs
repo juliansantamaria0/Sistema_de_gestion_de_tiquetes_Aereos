@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageType.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class TicketBaggageEntityConfiguration : IEntityTypeConfiguration<TicketBaggageEntity>
@@ -37,6 +37,15 @@ public sealed class TicketBaggageEntityConfiguration : IEntityTypeConfiguration<
                .HasColumnName("fee_charged")
                .IsRequired()
                .HasColumnType("decimal(10,2)")
-               .HasDefaultValue(0m);
-    }
+               .HasDefaultValue(0m);builder.HasOne<TicketEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.TicketId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_tb_ticket");
+
+        builder.HasOne<BaggageTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.BaggageTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_tb_baggage_type");}
 }

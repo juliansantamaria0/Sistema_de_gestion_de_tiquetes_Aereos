@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class RouteEntityConfiguration : IEntityTypeConfiguration<RouteEntity>
@@ -31,6 +31,15 @@ public sealed class RouteEntityConfiguration : IEntityTypeConfiguration<RouteEnt
                .HasColumnName("created_at")
                .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
-    }
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");builder.HasOne<AirportEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.OriginAirportId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_route_origin");
+
+        builder.HasOne<AirportEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.DestinationAirportId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_route_destination");}
 }

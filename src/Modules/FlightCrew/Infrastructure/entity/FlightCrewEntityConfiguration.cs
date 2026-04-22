@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Employee.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CrewRole.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class FlightCrewEntityConfiguration : IEntityTypeConfiguration<FlightCrewEntity>
@@ -35,6 +35,21 @@ public sealed class FlightCrewEntityConfiguration : IEntityTypeConfiguration<Fli
 
         builder.HasIndex(e => new { e.ScheduledFlightId, e.EmployeeId })
                .IsUnique()
-               .HasDatabaseName("uq_fc_employee");
-    }
+               .HasDatabaseName("uq_fc_employee");builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fc_flight");
+
+        builder.HasOne<EmployeeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.EmployeeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fc_employee");
+
+        builder.HasOne<CrewRoleEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CrewRoleId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fc_role");}
 }

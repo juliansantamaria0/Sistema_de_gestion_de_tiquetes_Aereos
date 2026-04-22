@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatus.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class ReservationEntityConfiguration : IEntityTypeConfiguration<ReservationEntity>
@@ -61,6 +61,21 @@ public sealed class ReservationEntityConfiguration : IEntityTypeConfiguration<Re
         builder.Property(e => e.UpdatedAt)
                .HasColumnName("updated_at")
                .HasColumnType("datetime(6)")
-               .IsRequired(false);
-    }
+               .IsRequired(false);builder.HasOne<CustomerEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CustomerId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_res_customer");
+
+        builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_res_flight");
+
+        builder.HasOne<ReservationStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ReservationStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_res_status");}
 }

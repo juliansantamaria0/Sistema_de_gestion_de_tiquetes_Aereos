@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class BaggageAllowanceEntityConfiguration : IEntityTypeConfiguration<BaggageAllowanceEntity>
@@ -48,6 +48,15 @@ public sealed class BaggageAllowanceEntityConfiguration : IEntityTypeConfigurati
                .HasColumnName("checked_kg")
                .IsRequired()
                .HasColumnType("decimal(5,2)")
-               .HasDefaultValue(0m);
-    }
+               .HasDefaultValue(0m);builder.HasOne<CabinClassEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CabinClassId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_ba_cabin");
+
+        builder.HasOne<FareTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.FareTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_ba_fare_type");}
 }

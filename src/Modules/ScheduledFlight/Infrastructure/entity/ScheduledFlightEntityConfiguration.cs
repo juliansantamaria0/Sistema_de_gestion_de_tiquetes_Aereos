@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatus.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class ScheduledFlightEntityConfiguration : IEntityTypeConfiguration<ScheduledFlightEntity>
@@ -56,6 +56,27 @@ public sealed class ScheduledFlightEntityConfiguration : IEntityTypeConfiguratio
 
         builder.HasIndex(e => new { e.BaseFlightId, e.DepartureDate, e.DepartureTime })
                .IsUnique()
-               .HasDatabaseName("uq_sf");
-    }
+               .HasDatabaseName("uq_sf");builder.HasOne<BaseFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.BaseFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_sf_base_flight");
+
+        builder.HasOne<AircraftEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.AircraftId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_sf_aircraft");
+
+        builder.HasOne<GateEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.GateId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_sf_gate");
+
+        builder.HasOne<FlightStatusEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.FlightStatusId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_sf_status");}
 }

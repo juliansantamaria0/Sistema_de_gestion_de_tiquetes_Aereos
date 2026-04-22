@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ContactType.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class PassengerContactEntityConfiguration
@@ -41,6 +41,15 @@ public sealed class PassengerContactEntityConfiguration
         builder.Property(e => e.Relationship)
                .HasColumnName("relationship")
                .IsRequired(false)
-               .HasMaxLength(50);
-    }
+               .HasMaxLength(50);builder.HasOne<PassengerEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.PassengerId)
+               .OnDelete(DeleteBehavior.Cascade)
+               .HasConstraintName("fk_pc_passenger");
+
+        builder.HasOne<ContactTypeEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ContactTypeId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_pc_contact_type");}
 }

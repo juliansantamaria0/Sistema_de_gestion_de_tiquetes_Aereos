@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Infrastructure.Entity;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity; using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CancellationReason.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class FlightCancellationEntityConfiguration : IEntityTypeConfiguration<FlightCancellationEntity>
@@ -36,6 +36,15 @@ public sealed class FlightCancellationEntityConfiguration : IEntityTypeConfigura
         builder.Property(e => e.Notes)
                .HasColumnName("notes")
                .IsRequired(false)
-               .HasMaxLength(250);
-    }
+               .HasMaxLength(250);builder.HasOne<ScheduledFlightEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.ScheduledFlightId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fcanc_flight");
+
+        builder.HasOne<CancellationReasonEntity>()
+               .WithMany()
+               .HasForeignKey(e => e.CancellationReasonId)
+               .OnDelete(DeleteBehavior.Restrict)
+               .HasConstraintName("fk_fcanc_reason");}
 }
