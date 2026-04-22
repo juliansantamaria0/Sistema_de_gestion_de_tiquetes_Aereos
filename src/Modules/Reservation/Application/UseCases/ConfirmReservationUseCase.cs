@@ -1,19 +1,14 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.UseCases;
 
 using Microsoft.EntityFrameworkCore;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatusHistory.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Extensions;
 
-/// <summary>
-/// Confirma una reserva: establece confirmed_at y actualiza el status.
-/// Además registra trazabilidad y sincroniza disponibilidad de asientos
-/// vinculados a la reserva a OCCUPIED.
-/// </summary>
 public sealed class ConfirmReservationUseCase
 {
     private readonly AppDbContext _context;
-    private readonly IUnitOfWork  _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
 
     public ConfirmReservationUseCase(AppDbContext context, IUnitOfWork unitOfWork)
     {
@@ -22,8 +17,8 @@ public sealed class ConfirmReservationUseCase
     }
 
     public async Task ExecuteAsync(
-        int               id,
-        int               confirmedStatusId,
+        int id,
+        int confirmedStatusId,
         CancellationToken cancellationToken = default)
     {
         var reservation = await _context.Reservations
@@ -37,37 +32,49 @@ public sealed class ConfirmReservationUseCase
         if (!await _context.ReservationStatuses.AsNoTracking().AnyAsync(x => x.Id == confirmedStatusId, cancellationToken))
             throw new InvalidOperationException($"No existe el estado de reserva con id {confirmedStatusId}.");
 
-        var detailSeatIds = await _context.ReservationDetails
+        var details = await _context.ReservationDetails
             .AsNoTracking()
             .Where(x => x.ReservationId == id)
-            .Select(x => x.FlightSeatId)
             .ToListAsync(cancellationToken);
 
-        if (detailSeatIds.Count > 0)
-        {
-            var occupiedStatusId = await GetSeatStatusIdAsync("OCCUPIED", cancellationToken);
-            var seats = await _context.FlightSeats
-                .Where(x => detailSeatIds.Contains(x.Id))
-                .ToListAsync(cancellationToken);
+        if (details.Count == 0)
+            throw new InvalidOperationException("No se puede confirmar una reserva sin detalles ni asientos asociados.");
 
-            foreach (var seat in seats)
-            {
-                seat.SeatStatusId = occupiedStatusId;
-                seat.UpdatedAt = DateTime.UtcNow;
-            }
+        var detailSeatIds = details.Select(x => x.FlightSeatId).Distinct().ToList();
+        var availableStatusId = await GetSeatStatusIdAsync("AVAILABLE", cancellationToken);
+        var occupiedStatusId = await GetSeatStatusIdAsync("OCCUPIED", cancellationToken);
+
+        var seats = await _context.FlightSeats
+            .Where(x => detailSeatIds.Contains(x.Id))
+            .ToListAsync(cancellationToken);
+
+        if (seats.Count != detailSeatIds.Count)
+            throw new InvalidOperationException("La reserva contiene asientos inexistentes o eliminados.");
+
+        if (seats.Any(x => x.ScheduledFlightId != reservation.ScheduledFlightId))
+            throw new InvalidOperationException("Todos los asientos de la reserva deben pertenecer al mismo vuelo programado de la reserva.");
+
+        var unavailableSeats = seats.Where(x => x.SeatStatusId != availableStatusId).Select(x => x.Id).ToList();
+        if (unavailableSeats.Count > 0)
+            throw new InvalidOperationException($"No se puede confirmar la reserva porque estos asientos ya no están disponibles: {string.Join(", ", unavailableSeats)}.");
+
+        var now = DateTime.UtcNow;
+        foreach (var seat in seats)
+        {
+            seat.SeatStatusId = occupiedStatusId;
+            seat.UpdatedAt = now;
         }
 
         reservation.ReservationStatusId = confirmedStatusId;
-        reservation.ConfirmedAt = DateTime.UtcNow;
-        reservation.UpdatedAt = reservation.ConfirmedAt;
+        reservation.ConfirmedAt = now;
+        reservation.UpdatedAt = now;
 
-        await _context.ReservationStatusHistories.AddAsync(new ReservationStatusHistoryEntity
-        {
-            ReservationId = reservation.Id,
-            ReservationStatusId = confirmedStatusId,
-            ChangedAt = DateTime.UtcNow,
-            Notes = "Reserva confirmada"
-        }, cancellationToken);
+        await _context.AddReservationStatusHistoryAsync(
+            reservation.Id,
+            confirmedStatusId,
+            "Reserva confirmada",
+            now,
+            cancellationToken);
 
         await _unitOfWork.CommitAsync(cancellationToken);
     }

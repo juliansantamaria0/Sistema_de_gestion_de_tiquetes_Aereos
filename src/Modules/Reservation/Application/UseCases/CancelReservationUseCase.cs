@@ -1,18 +1,14 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.UseCases;
 
 using Microsoft.EntityFrameworkCore;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatusHistory.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Extensions;
 
-/// <summary>
-/// Cancela una reserva: establece cancelled_at y actualiza el status.
-/// Además registra trazabilidad y libera los asientos vinculados si existían.
-/// </summary>
 public sealed class CancelReservationUseCase
 {
     private readonly AppDbContext _context;
-    private readonly IUnitOfWork  _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CancelReservationUseCase(AppDbContext context, IUnitOfWork unitOfWork)
     {
@@ -21,16 +17,14 @@ public sealed class CancelReservationUseCase
     }
 
     public async Task ExecuteAsync(
-        int               id,
-        int               cancelledStatusId,
+        int id,
+        int cancelledStatusId,
         CancellationToken cancellationToken = default)
     {
         var reservation = await _context.Reservations
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
             ?? throw new KeyNotFoundException($"Reservation with id {id} was not found.");
 
-        if (reservation.ConfirmedAt.HasValue)
-            throw new InvalidOperationException("Cannot cancel a reservation that has already been confirmed.");
         if (reservation.CancelledAt.HasValue)
             throw new InvalidOperationException("Reservation is already cancelled.");
         if (!await _context.ReservationStatuses.AsNoTracking().AnyAsync(x => x.Id == cancelledStatusId, cancellationToken))
@@ -40,7 +34,24 @@ public sealed class CancelReservationUseCase
             .AsNoTracking()
             .Where(x => x.ReservationId == id)
             .Select(x => x.FlightSeatId)
+            .Distinct()
             .ToListAsync(cancellationToken);
+
+        var reservationDetailIds = await _context.ReservationDetails
+            .AsNoTracking()
+            .Where(x => x.ReservationId == id)
+            .Select(x => x.Id)
+            .ToListAsync(cancellationToken);
+
+        if (reservationDetailIds.Count > 0)
+        {
+            var hasIssuedTickets = await _context.Tickets
+                .AsNoTracking()
+                .AnyAsync(x => reservationDetailIds.Contains(x.ReservationDetailId), cancellationToken);
+
+            if (hasIssuedTickets)
+                throw new InvalidOperationException("No se puede cancelar una reserva que ya tiene tiquetes emitidos.");
+        }
 
         if (detailSeatIds.Count > 0)
         {
@@ -49,24 +60,27 @@ public sealed class CancelReservationUseCase
                 .Where(x => detailSeatIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);
 
+            var nowForSeats = DateTime.UtcNow;
             foreach (var seat in seats)
             {
                 seat.SeatStatusId = availableStatusId;
-                seat.UpdatedAt = DateTime.UtcNow;
+                seat.UpdatedAt = nowForSeats;
             }
         }
 
+        var now = DateTime.UtcNow;
         reservation.ReservationStatusId = cancelledStatusId;
-        reservation.CancelledAt = DateTime.UtcNow;
-        reservation.UpdatedAt = reservation.CancelledAt;
+        reservation.CancelledAt = now;
+        reservation.UpdatedAt = now;
 
-        await _context.ReservationStatusHistories.AddAsync(new ReservationStatusHistoryEntity
-        {
-            ReservationId = reservation.Id,
-            ReservationStatusId = cancelledStatusId,
-            ChangedAt = DateTime.UtcNow,
-            Notes = "Reserva cancelada"
-        }, cancellationToken);
+        await _context.AddReservationStatusHistoryAsync(
+            reservation.Id,
+            cancelledStatusId,
+            reservation.ConfirmedAt.HasValue
+                ? "Reserva cancelada y asientos liberados"
+                : "Reserva cancelada",
+            now,
+            cancellationToken);
 
         await _unitOfWork.CommitAsync(cancellationToken);
     }

@@ -11,7 +11,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 public sealed class CreatePaymentUseCase
 {
     private readonly AppDbContext _context;
-    private readonly IUnitOfWork  _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CreatePaymentUseCase(AppDbContext context, IUnitOfWork unitOfWork)
     {
@@ -21,9 +21,12 @@ public sealed class CreatePaymentUseCase
 
     public async Task<PaymentAggregate> ExecuteAsync(
         CreatePaymentRequest request,
-        CancellationToken    cancellationToken = default)
+        CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
+
+        if (request.Amount <= 0)
+            throw new InvalidOperationException("El monto del pago debe ser mayor que cero.");
 
         if (request.ReservationId.HasValue && request.TicketId.HasValue)
             throw new InvalidOperationException("El pago no puede asociarse simultáneamente a una reserva y a un tiquete.");
@@ -39,7 +42,9 @@ public sealed class CreatePaymentUseCase
 
         if (request.ReservationId.HasValue)
         {
-            var reservation = await _context.Reservations.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.ReservationId.Value, cancellationToken)
+            var reservation = await _context.Reservations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == request.ReservationId.Value, cancellationToken)
                 ?? throw new InvalidOperationException($"No existe la reserva con id {request.ReservationId.Value}.");
 
             if (reservation.CancelledAt.HasValue)
@@ -48,8 +53,23 @@ public sealed class CreatePaymentUseCase
 
         if (request.TicketId.HasValue)
         {
-            if (!await _context.Tickets.AsNoTracking().AnyAsync(x => x.Id == request.TicketId.Value, cancellationToken))
-                throw new InvalidOperationException($"No existe el tiquete con id {request.TicketId.Value}.");
+            var ticket = await _context.Tickets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == request.TicketId.Value, cancellationToken)
+                ?? throw new InvalidOperationException($"No existe el tiquete con id {request.TicketId.Value}.");
+
+            var detail = await _context.ReservationDetails
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == ticket.ReservationDetailId, cancellationToken)
+                ?? throw new InvalidOperationException("El tiquete está asociado a un detalle de reserva inexistente.");
+
+            var reservation = await _context.Reservations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == detail.ReservationId, cancellationToken)
+                ?? throw new InvalidOperationException("El tiquete está asociado a una reserva inexistente.");
+
+            if (reservation.CancelledAt.HasValue)
+                throw new InvalidOperationException("No se puede registrar un pago sobre un tiquete asociado a una reserva cancelada.");
         }
 
         var paymentEntity = new PaymentEntity

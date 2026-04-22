@@ -1,18 +1,14 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Application.UseCases;
 
 using Microsoft.EntityFrameworkCore;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatusHistory.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Extensions;
 
-/// <summary>
-/// Cambia el estado del tiquete (ISSUED → USED, ISSUED → CANCELLED, etc.)
-/// y registra trazabilidad automáticamente.
-/// </summary>
 public sealed class ChangeTicketStatusUseCase
 {
     private readonly AppDbContext _context;
-    private readonly IUnitOfWork  _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
 
     public ChangeTicketStatusUseCase(AppDbContext context, IUnitOfWork unitOfWork)
     {
@@ -21,8 +17,8 @@ public sealed class ChangeTicketStatusUseCase
     }
 
     public async Task ExecuteAsync(
-        int               id,
-        int               ticketStatusId,
+        int id,
+        int ticketStatusId,
         CancellationToken cancellationToken = default)
     {
         var ticket = await _context.Tickets
@@ -32,16 +28,19 @@ public sealed class ChangeTicketStatusUseCase
         if (!await _context.TicketStatuses.AsNoTracking().AnyAsync(x => x.Id == ticketStatusId, cancellationToken))
             throw new InvalidOperationException($"No existe el estado de tiquete con id {ticketStatusId}.");
 
-        ticket.TicketStatusId = ticketStatusId;
-        ticket.UpdatedAt = DateTime.UtcNow;
+        if (ticket.TicketStatusId == ticketStatusId)
+            throw new InvalidOperationException("El tiquete ya tiene ese estado.");
 
-        await _context.TicketStatusHistories.AddAsync(new TicketStatusHistoryEntity
-        {
-            TicketId = ticket.Id,
-            TicketStatusId = ticketStatusId,
-            ChangedAt = DateTime.UtcNow,
-            Notes = "Cambio de estado de tiquete"
-        }, cancellationToken);
+        var now = DateTime.UtcNow;
+        ticket.TicketStatusId = ticketStatusId;
+        ticket.UpdatedAt = now;
+
+        await _context.AddTicketStatusHistoryAsync(
+            ticket.Id,
+            ticketStatusId,
+            "Cambio de estado de tiquete",
+            now,
+            cancellationToken);
 
         await _unitOfWork.CommitAsync(cancellationToken);
     }

@@ -4,14 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatusHistory.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Extensions;
 
 public sealed class CreateTicketUseCase
 {
     private readonly AppDbContext _context;
-    private readonly IUnitOfWork  _unitOfWork;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CreateTicketUseCase(AppDbContext context, IUnitOfWork unitOfWork)
     {
@@ -20,12 +20,16 @@ public sealed class CreateTicketUseCase
     }
 
     public async Task<TicketAggregate> ExecuteAsync(
-        string            ticketCode,
-        int               reservationDetailId,
-        int               ticketStatusId,
+        string ticketCode,
+        int reservationDetailId,
+        int ticketStatusId,
         CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
+        var normalizedCode = ticketCode.Trim().ToUpperInvariant();
+
+        if (string.IsNullOrWhiteSpace(normalizedCode))
+            throw new InvalidOperationException("El código del tiquete es obligatorio.");
 
         var detail = await _context.ReservationDetails
             .AsNoTracking()
@@ -43,12 +47,15 @@ public sealed class CreateTicketUseCase
         if (await _context.Tickets.AsNoTracking().AnyAsync(x => x.ReservationDetailId == reservationDetailId, cancellationToken))
             throw new InvalidOperationException("Ya existe un tiquete emitido para este detalle de reserva.");
 
+        if (await _context.Tickets.AsNoTracking().AnyAsync(x => x.TicketCode == normalizedCode, cancellationToken))
+            throw new InvalidOperationException($"Ya existe un tiquete con el código {normalizedCode}.");
+
         if (!await _context.TicketStatuses.AsNoTracking().AnyAsync(x => x.Id == ticketStatusId, cancellationToken))
             throw new InvalidOperationException($"No existe el estado de tiquete con id {ticketStatusId}.");
 
         var ticketEntity = new TicketEntity
         {
-            TicketCode = ticketCode.Trim().ToUpperInvariant(),
+            TicketCode = normalizedCode,
             ReservationDetailId = reservationDetailId,
             IssueDate = now,
             TicketStatusId = ticketStatusId,
@@ -56,17 +63,20 @@ public sealed class CreateTicketUseCase
             UpdatedAt = null
         };
 
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
         await _context.Tickets.AddAsync(ticketEntity, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
 
-        await _context.TicketStatusHistories.AddAsync(new TicketStatusHistoryEntity
-        {
-            TicketId = ticketEntity.Id,
-            TicketStatusId = ticketStatusId,
-            ChangedAt = now,
-            Notes = "Tiquete emitido"
-        }, cancellationToken);
+        await _context.AddTicketStatusHistoryAsync(
+            ticketEntity.Id,
+            ticketStatusId,
+            "Tiquete emitido",
+            now,
+            cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
 
         return new TicketAggregate(
             new TicketId(ticketEntity.Id),

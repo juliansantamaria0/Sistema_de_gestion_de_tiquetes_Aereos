@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Helpers;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
 
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
@@ -23,7 +24,7 @@ public static class DependencyInjection
 
         var configuredServerVersion = configuration["MySqlServerVersion"];
         var serverVersion = string.IsNullOrWhiteSpace(configuredServerVersion)
-            ? ServerVersion.AutoDetect(connectionString)
+            ? MySqlVersionResolver.Resolve(connectionString)
             : ServerVersion.Parse(configuredServerVersion);
 
         services.AddDbContext<AppDbContext>(options =>
@@ -57,7 +58,6 @@ public static class DependencyInjection
             .Where(t => t is { IsClass: true, IsAbstract: false })
             .ToList();
 
-        // Registra todos los casos de uso y otras clases concretas para resolución por constructor.
         foreach (var type in concreteTypes.Where(t => t.Namespace?.Contains(".UseCases") == true))
         {
             services.AddScoped(type);
@@ -72,7 +72,7 @@ public static class DependencyInjection
         foreach (var type in concreteTypes)
         {
             var interfaces = type.GetInterfaces()
-                .Where(i => !IsFrameworkInterface(i))
+                .Where(i => !IsFrameworkInterface(i) && i.Namespace?.StartsWith("Sistema_de_gestion_de_tiquetes_Aereos", StringComparison.Ordinal) == true)
                 .ToList();
 
             foreach (var @interface in interfaces)
