@@ -27,7 +27,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0" />
-    <PackageReference Include="Spectre.Console" Version="0.55.1" />
+    <PackageReference Include="Spectre.Console" Version="0.55.2" />
   </ItemGroup>
 
 </Project>
