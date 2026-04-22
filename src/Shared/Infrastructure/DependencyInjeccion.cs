@@ -21,7 +21,10 @@ public static class DependencyInjection
             throw new InvalidOperationException(
                 "No se encontro la cadena de conexion 'DefaultConnection' o 'MySqlDB'.");
 
-        var serverVersion = ServerVersion.AutoDetect(connectionString);
+        var configuredServerVersion = configuration["MySqlServerVersion"];
+        var serverVersion = string.IsNullOrWhiteSpace(configuredServerVersion)
+            ? ServerVersion.AutoDetect(connectionString)
+            : ServerVersion.Parse(configuredServerVersion);
 
         services.AddDbContext<AppDbContext>(options =>
         {

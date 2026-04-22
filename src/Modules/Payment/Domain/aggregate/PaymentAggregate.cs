@@ -118,8 +118,8 @@ public sealed class PaymentAggregate
 
     private static void ValidateAmount(decimal amount)
     {
-        if (amount < 0)
-            throw new ArgumentException("Amount must be >= 0.", nameof(amount));
+        if (amount <= 0)
+            throw new ArgumentException("Amount must be greater than 0.", nameof(amount));
     }
 
     private static void ValidateForeignKeys(int currencyId, int paymentStatusId, int paymentMethodId)
