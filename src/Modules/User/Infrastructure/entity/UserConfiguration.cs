@@ -13,9 +13,12 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<UserEntity>
         builder.Property(e => e.Username)
                .IsRequired()
                .HasMaxLength(60);
-        builder.HasIndex(e => e.Username).IsUnique();
 
-        builder.HasIndex(e => e.PersonId).IsUnique(); // person_id UNIQUE
+        builder.HasIndex(e => e.Username)
+               .IsUnique();
+
+        builder.HasIndex(e => e.PersonId)
+               .IsUnique();
 
         builder.Property(e => e.PasswordHash)
                .IsRequired()
@@ -26,9 +29,12 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<UserEntity>
                .HasDefaultValue(true);
 
         builder.Property(e => e.CreatedAt)
+               .HasColumnType("datetime(6)")
                .IsRequired()
-               .HasDefaultValueSql("CURRENT_TIMESTAMP");
+               .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
-        builder.Property(e => e.UpdatedAt).IsRequired(false);
+        builder.Property(e => e.UpdatedAt)
+               .HasColumnType("datetime(6)")
+               .IsRequired(false);
     }
 }

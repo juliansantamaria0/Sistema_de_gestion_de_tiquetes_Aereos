@@ -96,6 +96,17 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.E
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Infrastructure.Entity;
 
+
+
+
+// // ── MÓDULO 15: Extra-Security (4 tablas) ──────────────────────────────────────
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RolePermission.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Permission.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Role.Infrastructure.Entity;
+
+
+
 /// <summary>
 /// Contexto principal de EF Core.
 /// Implementa <see cref="IUnitOfWork"/> para que los servicios de aplicación
@@ -356,6 +367,24 @@ public sealed class AppDbContext : DbContext, IUnitOfWork
 
     /// <summary>loyalty_transaction</summary>
     public DbSet<LoyaltyTransactionEntity> LoyaltyTransactions { get; set; } = null!;
+
+    // =========================================================================
+    // Extra-security 
+    // =========================================================================
+
+      /// <summary>loyalty_transaction</summary>
+       public DbSet<PermissionEntity> Permissions { get; set; } = null!;
+
+        // / <summary>loyalty_transaction</summary>
+       public DbSet<RoleEntity> Roles { get; set; } = null!;
+
+
+          // / <summary>loyalty_transaction</summary>
+        public DbSet<RolePermissionEntity> RolePermissions { get; set; } = null!;
+
+
+    // / <summary>loyalty_transaction</summary>
+        public DbSet<UserEntity> Users { get; set; } = null!;
 
     // =========================================================================
     // OnModelCreating
