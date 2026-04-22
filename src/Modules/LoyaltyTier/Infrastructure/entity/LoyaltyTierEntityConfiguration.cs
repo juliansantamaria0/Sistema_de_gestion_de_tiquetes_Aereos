@@ -1,6 +1,7 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.Entity;
 
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Infrastructure.Entity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 public sealed class LoyaltyTierEntityConfiguration : IEntityTypeConfiguration<LoyaltyTierEntity>
@@ -45,9 +46,12 @@ public sealed class LoyaltyTierEntityConfiguration : IEntityTypeConfiguration<Lo
         builder.Property(e => e.Benefits)
                .HasColumnName("benefits")
                .IsRequired(false);
-        // TEXT en MySQL — sin HasMaxLength para dejar que EF use el tipo nativobuilder.HasOne<LoyaltyProgramEntity>()
+
+        // TEXT en MySQL — sin HasMaxLength para dejar que EF use el tipo nativo
+        builder.HasOne<LoyaltyProgramEntity>()
                .WithMany()
                .HasForeignKey(e => e.LoyaltyProgramId)
                .OnDelete(DeleteBehavior.Restrict)
-               .HasConstraintName("fk_lt_program");}
+               .HasConstraintName("fk_lt_program");
+    }
 }
