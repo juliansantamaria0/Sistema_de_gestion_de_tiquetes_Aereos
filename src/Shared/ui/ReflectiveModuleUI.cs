@@ -586,6 +586,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["manufacturerId"] = "Fabricante",
         ["employeeId"] = "Empleado",
         ["checkInStatusId"] = "Estado de check-in",
+        ["flightStatusId"] = "FlightStatus",
     };
 
     private static readonly Dictionary<string, string> RelationAliases = new(StringComparer.OrdinalIgnoreCase)
@@ -603,6 +604,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["seatStatusId"] = "SeatStatus",
         ["flightStatusId"] = "FlightStatus",
         ["checkInStatusId"] = "CheckInStatus",
+        ["manufacturerId"] = "Fabricante",
+        ["manufacturerId"] = "AircraftManufacturer",
+        ["flightStatusId"] = "FlightStatus",
     };
 
     private static string HumanizeParameter(string parameterName)

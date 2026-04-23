@@ -7,6 +7,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
 
+
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Configuration
@@ -416,7 +417,8 @@ internal static class FunctionalNavigation
         ["role"] = "Roles",
         ["permission"] = "Permisos",
         ["rolepermission"] = "Permisos por rol",
-        ["user"] = "Usuarios"
+        ["user"] = "Usuarios",
+        ["aircraftmanufacturer"] = "Fabricantes de aeronaves",
     };
 
     public static IReadOnlyList<MenuCategory> Categories { get; } =
