@@ -24,7 +24,7 @@ public sealed class CreateFlightDelayUseCase
     {
         // FlightDelayId(1) es placeholder; EF Core asigna el Id real al insertar.
         var flightDelay = new FlightDelayAggregate(
-            new FlightDelayId(1),
+            new FlightDelayId(await GetNextIdAsync(cancellationToken)),
             scheduledFlightId,
             delayReasonId,
             delayMinutes,
@@ -33,5 +33,11 @@ public sealed class CreateFlightDelayUseCase
         await _repository.AddAsync(flightDelay, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return flightDelay;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

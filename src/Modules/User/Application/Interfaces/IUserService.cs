@@ -18,6 +18,6 @@ public sealed record UserDto(
     DateTime CreatedAt,
     DateTime? UpdatedAt);
 
-/// <summary>PasswordHash debe venir ya hasheado desde la capa UI/aplicación.</summary>
-public sealed record CreateUserRequest(int PersonId, int RoleId, string Username, string PasswordHash, bool IsActive = true);
+/// <summary>La contraseña se recibe en texto plano y se hashea en la capa de aplicación.</summary>
+public sealed record CreateUserRequest(int PersonId, int RoleId, string Username, string Password, bool IsActive = true);
 public sealed record UpdateUserRequest(int RoleId, string Username, bool IsActive);

@@ -42,10 +42,10 @@ public sealed class ReservationService : IReservationService
         string            code,
         int               customerId,
         int               scheduledFlightId,
-        int               statusId,
+        int               reservationStatusId,
         CancellationToken cancellationToken = default)
     {
-        var agg = await _create.ExecuteAsync(code, customerId, scheduledFlightId, statusId, cancellationToken);
+        var agg = await _create.ExecuteAsync(code, customerId, scheduledFlightId, reservationStatusId, cancellationToken);
         return ToDto(agg);
     }
 
@@ -75,15 +75,15 @@ public sealed class ReservationService : IReservationService
 
     public async Task ConfirmAsync(
         int               id,
-        int               confirmedStatusId,
+        int               confirmedReservationStatusId,
         CancellationToken cancellationToken = default)
-        => await _confirm.ExecuteAsync(id, confirmedStatusId, cancellationToken);
+        => await _confirm.ExecuteAsync(id, confirmedReservationStatusId, cancellationToken);
 
     public async Task CancelAsync(
         int               id,
-        int               cancelledStatusId,
+        int               cancelledReservationStatusId,
         CancellationToken cancellationToken = default)
-        => await _cancel.ExecuteAsync(id, cancelledStatusId, cancellationToken);
+        => await _cancel.ExecuteAsync(id, cancelledReservationStatusId, cancellationToken);
 
     public async Task<IEnumerable<ReservationDto>> GetByCustomerAsync(
         int               customerId,

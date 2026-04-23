@@ -25,11 +25,17 @@ public sealed class CreateBoardingPassUseCase
     {
         // BoardingPassId(1) es placeholder; EF Core asigna el Id real al insertar.
         var boardingPass = new BoardingPassAggregate(
-            new BoardingPassId(1),
+            new BoardingPassId(await GetNextIdAsync(cancellationToken)),
             checkInId, gateId, boardingGroup, flightSeatId);
 
         await _repository.AddAsync(boardingPass, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return boardingPass;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

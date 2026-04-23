@@ -25,10 +25,16 @@ public sealed class CreateLoyaltyTierUseCase
     {
         // LoyaltyTierId(1) es placeholder; EF Core asigna el Id real al insertar.
         var tier = new LoyaltyTierAggregate(
-            new LoyaltyTierId(1), loyaltyProgramId, name, minMiles, benefits);
+            new LoyaltyTierId(await GetNextIdAsync(cancellationToken)), loyaltyProgramId, name, minMiles, benefits);
 
         await _repository.AddAsync(tier, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return tier;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

@@ -27,7 +27,7 @@ public sealed class CreateBaggageAllowanceUseCase
     {
         // BaggageAllowanceId(1) es placeholder; EF Core asigna el Id real al insertar.
         var baggageAllowance = new BaggageAllowanceAggregate(
-            new BaggageAllowanceId(1),
+            new BaggageAllowanceId(await GetNextIdAsync(cancellationToken)),
             cabinClassId, fareTypeId,
             carryOnPieces, carryOnKg,
             checkedPieces, checkedKg);
@@ -35,5 +35,11 @@ public sealed class CreateBaggageAllowanceUseCase
         await _repository.AddAsync(baggageAllowance, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return baggageAllowance;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

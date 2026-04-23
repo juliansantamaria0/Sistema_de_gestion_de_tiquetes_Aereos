@@ -29,6 +29,16 @@ public sealed class UserRepository : IUserRepository
         return list.Select(ToAggregate).ToList();
     }
 
+    public async Task<UserAggregate?> GetByUsernameAsync(string username, CancellationToken ct = default)
+    {
+        var normalized = username.Trim().ToLowerInvariant();
+        var entity = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Username == normalized, ct);
+
+        return entity is null ? null : ToAggregate(entity);
+    }
+
     public async Task AddAsync(UserAggregate entity, CancellationToken ct = default)
         => await _context.Users.AddAsync(ToEntity(entity), ct);
 

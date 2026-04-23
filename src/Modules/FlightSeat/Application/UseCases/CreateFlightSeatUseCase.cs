@@ -68,7 +68,7 @@ public sealed class CreateFlightSeatUseCase
             throw new InvalidOperationException("Ese asiento ya fue registrado para el vuelo programado.");
 
         var flightSeat = new FlightSeatAggregate(
-            new FlightSeatId(1),
+            new FlightSeatId(await GetNextIdAsync(cancellationToken)),
             scheduledFlightId,
             seatMapId,
             seatStatusId,
@@ -77,5 +77,11 @@ public sealed class CreateFlightSeatUseCase
         await _repository.AddAsync(flightSeat, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return flightSeat;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

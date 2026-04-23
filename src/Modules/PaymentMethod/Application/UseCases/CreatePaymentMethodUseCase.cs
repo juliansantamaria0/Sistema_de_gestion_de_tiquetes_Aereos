@@ -21,10 +21,16 @@ public sealed class CreatePaymentMethodUseCase
         CancellationToken cancellationToken = default)
     {
         // PaymentMethodId(1) es placeholder; EF Core asigna el Id real al insertar.
-        var paymentMethod = new PaymentMethodAggregate(new PaymentMethodId(1), name);
+        var paymentMethod = new PaymentMethodAggregate(new PaymentMethodId(await GetNextIdAsync(cancellationToken)), name);
 
         await _repository.AddAsync(paymentMethod, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return paymentMethod;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

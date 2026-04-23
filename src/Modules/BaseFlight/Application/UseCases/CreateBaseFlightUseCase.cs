@@ -24,7 +24,7 @@ public sealed class CreateBaseFlightUseCase
     {
         // BaseFlightId(1) es placeholder; EF Core asigna el Id real al insertar (ValueGeneratedOnAdd).
         var baseFlight = new BaseFlightAggregate(
-            new BaseFlightId(1),
+            new BaseFlightId(await GetNextIdAsync(cancellationToken)),
             flightCode,
             airlineId,
             routeId,
@@ -33,5 +33,11 @@ public sealed class CreateBaseFlightUseCase
         await _repository.AddAsync(baseFlight, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return baseFlight;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

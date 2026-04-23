@@ -24,7 +24,7 @@ public sealed class CreateRouteScheduleUseCase
     {
         // RouteScheduleId(1) es placeholder; EF Core asigna el Id real al insertar.
         var routeSchedule = new RouteScheduleAggregate(
-            new RouteScheduleId(1),
+            new RouteScheduleId(await GetNextIdAsync(cancellationToken)),
             baseFlightId,
             dayOfWeek,
             departureTime);
@@ -32,5 +32,11 @@ public sealed class CreateRouteScheduleUseCase
         await _repository.AddAsync(routeSchedule, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return routeSchedule;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

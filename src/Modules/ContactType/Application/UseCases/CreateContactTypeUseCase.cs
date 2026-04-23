@@ -20,9 +20,15 @@ public sealed class CreateContactTypeUseCase
         string            name,
         CancellationToken cancellationToken = default)
     {
-        var contactType = new ContactTypeAggregate(new ContactTypeId(1), name);
+        var contactType = new ContactTypeAggregate(new ContactTypeId(await GetNextIdAsync(cancellationToken)), name);
         await _repository.AddAsync(contactType, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return contactType;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

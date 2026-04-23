@@ -418,7 +418,7 @@ internal static class FunctionalNavigation
         ["permission"] = "Permisos",
         ["rolepermission"] = "Permisos por rol",
         ["user"] = "Usuarios",
-        ["aircraftmanufacturer"] = "Fabricantes de aeronaves",
+        ["statusId"] = "ReservationStatus",
     };
 
     public static IReadOnlyList<MenuCategory> Categories { get; } =

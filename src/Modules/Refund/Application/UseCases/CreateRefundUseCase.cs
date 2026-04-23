@@ -27,7 +27,7 @@ public sealed class CreateRefundUseCase
 
         // RefundId(1) es placeholder; EF Core asigna el Id real al insertar.
         var refund = new RefundAggregate(
-            new RefundId(1),
+            new RefundId(await GetNextIdAsync(cancellationToken)),
             paymentId,
             refundStatusId,
             amount,
@@ -38,5 +38,11 @@ public sealed class CreateRefundUseCase
         await _repository.AddAsync(refund, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return refund;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

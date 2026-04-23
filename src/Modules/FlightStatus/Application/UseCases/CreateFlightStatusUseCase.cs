@@ -20,9 +20,15 @@ public sealed class CreateFlightStatusUseCase
         string            name,
         CancellationToken cancellationToken = default)
     {
-        var flightStatus = new FlightStatusAggregate(new FlightStatusId(1), name);
+        var flightStatus = new FlightStatusAggregate(new FlightStatusId(await GetNextIdAsync(cancellationToken)), name);
         await _repository.AddAsync(flightStatus, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return flightStatus;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

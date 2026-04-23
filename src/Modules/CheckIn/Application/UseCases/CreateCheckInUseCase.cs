@@ -24,7 +24,7 @@ public sealed class CreateCheckInUseCase
     {
         // CheckInId(1) es placeholder; EF Core asigna el Id real al insertar.
         var checkIn = new CheckInAggregate(
-            new CheckInId(1),
+            new CheckInId(await GetNextIdAsync(cancellationToken)),
             ticketId,
             DateTime.UtcNow,
             checkInStatusId,
@@ -33,5 +33,11 @@ public sealed class CreateCheckInUseCase
         await _repository.AddAsync(checkIn, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return checkIn;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

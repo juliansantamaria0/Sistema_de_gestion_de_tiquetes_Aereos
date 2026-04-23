@@ -27,7 +27,7 @@ public sealed class CreatePersonUseCase
     {
         var now = DateTime.UtcNow;
         var person = new PersonAggregate(
-            new PersonId(1),
+            new PersonId(await GetNextIdAsync(cancellationToken)),
             documentTypeId, documentNumber,
             firstName, lastName,
             birthDate, genderId,
@@ -36,5 +36,11 @@ public sealed class CreatePersonUseCase
         await _repository.AddAsync(person, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return person;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

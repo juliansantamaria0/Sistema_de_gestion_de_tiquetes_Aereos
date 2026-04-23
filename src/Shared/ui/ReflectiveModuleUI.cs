@@ -272,7 +272,11 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
 
         if (type == typeof(string))
         {
-            var raw = AnsiConsole.Ask<string>($"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)}");
+            var promptTitle = $"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)}";
+            var raw = IsSensitiveParameter(parameter.Name)
+                ? AnsiConsole.Prompt(new TextPrompt<string>(promptTitle).Secret())
+                : AnsiConsole.Ask<string>(promptTitle);
+
             return string.IsNullOrWhiteSpace(raw) && defaultValue is string s
                 ? s
                 : raw?.Trim() ?? string.Empty;
@@ -431,6 +435,16 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             .Where(p => p.Name is not "CreatedAt" and not "UpdatedAt" and not "CancelledAt" and not "ConfirmedAt")
             .ToArray();
 
+    private static bool IsSensitiveParameter(string? parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(parameterName))
+            return false;
+
+        return parameterName.Contains("password", StringComparison.OrdinalIgnoreCase) ||
+               parameterName.Contains("secret", StringComparison.OrdinalIgnoreCase) ||
+               parameterName.Contains("token", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool IsIdentityParameter(ParameterInfo parameter) =>
         string.Equals(parameter.Name, "id", StringComparison.OrdinalIgnoreCase) &&
         (Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType) == typeof(int);
@@ -560,6 +574,11 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["reservationId"] = "Reserva",
         ["reservationDetailId"] = "Detalle de reserva",
         ["reservationStatusId"] = "Estado de reserva",
+        ["statusId"] = "Estado de reserva",
+        ["confirmedReservationStatusId"] = "Estado de reserva confirmado",
+        ["cancelledReservationStatusId"] = "Estado de reserva cancelado",
+        ["confirmedStatusId"] = "Estado de reserva confirmado",
+        ["cancelledStatusId"] = "Estado de reserva cancelado",
         ["ticketId"] = "Tiquete",
         ["ticketStatusId"] = "Estado de tiquete",
         ["paymentId"] = "Pago",
@@ -586,7 +605,6 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["manufacturerId"] = "Fabricante",
         ["employeeId"] = "Empleado",
         ["checkInStatusId"] = "Estado de check-in",
-        ["flightStatusId"] = "FlightStatus",
     };
 
     private static readonly Dictionary<string, string> RelationAliases = new(StringComparer.OrdinalIgnoreCase)
@@ -597,6 +615,11 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["arrivalGateId"] = "Gate",
         ["documentTypeId"] = "DocumentType",
         ["reservationStatusId"] = "ReservationStatus",
+        ["statusId"] = "ReservationStatus",
+        ["confirmedReservationStatusId"] = "ReservationStatus",
+        ["cancelledReservationStatusId"] = "ReservationStatus",
+        ["confirmedStatusId"] = "ReservationStatus",
+        ["cancelledStatusId"] = "ReservationStatus",
         ["ticketStatusId"] = "TicketStatus",
         ["paymentStatusId"] = "PaymentStatus",
         ["paymentMethodId"] = "PaymentMethod",
@@ -604,9 +627,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["seatStatusId"] = "SeatStatus",
         ["flightStatusId"] = "FlightStatus",
         ["checkInStatusId"] = "CheckInStatus",
-        ["manufacturerId"] = "Fabricante",
         ["manufacturerId"] = "AircraftManufacturer",
-        ["flightStatusId"] = "FlightStatus",
     };
 
     private static string HumanizeParameter(string parameterName)

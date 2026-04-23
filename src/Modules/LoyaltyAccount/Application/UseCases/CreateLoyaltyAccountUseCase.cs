@@ -24,7 +24,7 @@ public sealed class CreateLoyaltyAccountUseCase
     {
         // LoyaltyAccountId(1) es placeholder; EF Core asigna el Id real al insertar.
         var account = new LoyaltyAccountAggregate(
-            new LoyaltyAccountId(1),
+            new LoyaltyAccountId(await GetNextIdAsync(cancellationToken)),
             passengerId,
             loyaltyProgramId,
             loyaltyTierId,
@@ -35,5 +35,11 @@ public sealed class CreateLoyaltyAccountUseCase
         await _repository.AddAsync(account, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return account;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

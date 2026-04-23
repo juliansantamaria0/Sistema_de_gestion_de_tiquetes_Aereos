@@ -27,7 +27,7 @@ public sealed class RedeemMilesTransactionUseCase
         CancellationToken cancellationToken = default)
     {
         var transaction = new LoyaltyTransactionAggregate(
-            new LoyaltyTransactionId(1),
+            new LoyaltyTransactionId(await GetNextIdAsync(cancellationToken)),
             loyaltyAccountId,
             ticketId,
             LoyaltyTransactionAggregate.TypeRedeem,
@@ -37,5 +37,11 @@ public sealed class RedeemMilesTransactionUseCase
         await _repository.AddAsync(transaction, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return transaction;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

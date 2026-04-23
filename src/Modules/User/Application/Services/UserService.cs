@@ -5,6 +5,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class UserService : IUserService
 {
@@ -21,10 +22,12 @@ public sealed class UserService : IUserService
     {
         var user = UserAggregate.Create(
             request.PersonId, request.RoleId,
-            request.Username, request.PasswordHash, request.IsActive);
+            request.Username, PasswordHasher.Hash(request.Password), request.IsActive);
         await _repository.AddAsync(user, ct);
         await _unitOfWork.CommitAsync(ct);
-        return Map(user);
+
+        var created = await _repository.GetByUsernameAsync(user.Username, ct);
+        return created is null ? Map(user) : Map(created);
     }
 
     public async Task<UserDto?> GetByIdAsync(int id, CancellationToken ct = default)

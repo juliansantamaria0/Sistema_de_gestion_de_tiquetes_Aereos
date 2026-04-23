@@ -7,6 +7,7 @@ public interface IUserRepository
 {
     Task<UserAggregate?>          GetByIdAsync(UserId id, CancellationToken ct = default);
     Task<IReadOnlyList<UserAggregate>> GetAllAsync(CancellationToken ct = default);
+    Task<UserAggregate?> GetByUsernameAsync(string username, CancellationToken ct = default);
     Task AddAsync(UserAggregate entity, CancellationToken ct = default);
     void Update(UserAggregate entity);
     void Delete(UserAggregate entity);

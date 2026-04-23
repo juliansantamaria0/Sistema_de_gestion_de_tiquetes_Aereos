@@ -23,10 +23,16 @@ public sealed class AssignFlightPromotionUseCase
         CancellationToken cancellationToken = default)
     {
         var fp = new FlightPromotionAggregate(
-            new FlightPromotionId(1), scheduledFlightId, promotionId);
+            new FlightPromotionId(await GetNextIdAsync(cancellationToken)), scheduledFlightId, promotionId);
 
         await _repository.AddAsync(fp, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return fp;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

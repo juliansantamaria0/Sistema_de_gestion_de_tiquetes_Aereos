@@ -26,11 +26,17 @@ public sealed class CreatePassengerContactUseCase
         CancellationToken cancellationToken = default)
     {
         var contact = new PassengerContactAggregate(
-            new PassengerContactId(1),
+            new PassengerContactId(await GetNextIdAsync(cancellationToken)),
             passengerId, contactTypeId, fullName, phone, relationship);
 
         await _repository.AddAsync(contact, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return contact;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

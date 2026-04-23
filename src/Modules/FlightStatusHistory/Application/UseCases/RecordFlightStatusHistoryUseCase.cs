@@ -25,11 +25,17 @@ public sealed class RecordFlightStatusHistoryUseCase
         CancellationToken cancellationToken = default)
     {
         var entry = new FlightStatusHistoryAggregate(
-            new FlightStatusHistoryId(1),
+            new FlightStatusHistoryId(await GetNextIdAsync(cancellationToken)),
             scheduledFlightId, flightStatusId, DateTime.UtcNow, notes);
 
         await _repository.AddAsync(entry, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return entry;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

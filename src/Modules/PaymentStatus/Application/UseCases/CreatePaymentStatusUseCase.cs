@@ -21,10 +21,16 @@ public sealed class CreatePaymentStatusUseCase
         CancellationToken cancellationToken = default)
     {
         // PaymentStatusId(1) es placeholder; EF Core asigna el Id real al insertar.
-        var paymentStatus = new PaymentStatusAggregate(new PaymentStatusId(1), name);
+        var paymentStatus = new PaymentStatusAggregate(new PaymentStatusId(await GetNextIdAsync(cancellationToken)), name);
 
         await _repository.AddAsync(paymentStatus, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return paymentStatus;
+    }
+
+    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
+    {
+        var items = await _repository.GetAllAsync(cancellationToken);
+        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }
