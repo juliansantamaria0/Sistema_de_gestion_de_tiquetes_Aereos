@@ -23,7 +23,7 @@ public sealed class FlightPromotionEntityConfiguration
                .HasColumnName("promotion_id")
                .IsRequired();
 
-        // UNIQUE (scheduled_flight_id, promotion_id) — espejo de uq_fp
+        
         builder.HasIndex(e => new { e.ScheduledFlightId, e.PromotionId })
                .IsUnique()
                .HasDatabaseName("uq_fp");builder.HasOne<ScheduledFlightEntity>()

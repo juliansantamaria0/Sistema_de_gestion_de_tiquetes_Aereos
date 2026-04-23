@@ -22,17 +22,11 @@ public sealed class CreateFlightCabinPriceUseCase
         CancellationToken cancellationToken = default)
     {
         var fcp = new FlightCabinPriceAggregate(
-            new FlightCabinPriceId(await GetNextIdAsync(cancellationToken)),
+            new FlightCabinPriceId(0),
             scheduledFlightId, cabinClassId, fareTypeId, price);
 
         await _repository.AddAsync(fcp, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return fcp;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

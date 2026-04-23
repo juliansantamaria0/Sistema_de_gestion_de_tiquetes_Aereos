@@ -3,10 +3,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Applica
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Domain.Repositories;
 
-/// <summary>
-/// Consulta la franquicia para una combinación específica de clase + tarifa.
-/// Caso de uso clave para informar al pasajero durante la reserva.
-/// </summary>
+
+
+
+
 public sealed class GetBaggageAllowanceByCabinAndFareUseCase
 {
     private readonly IBaggageAllowanceRepository _repository;

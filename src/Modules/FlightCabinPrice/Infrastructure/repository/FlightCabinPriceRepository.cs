@@ -65,7 +65,7 @@ public sealed class FlightCabinPriceRepository : IFlightCabinPriceRepository
             ?? throw new KeyNotFoundException(
                 $"FlightCabinPriceEntity with id {fcp.Id.Value} not found.");
 
-        // La terna (ScheduledFlightId, CabinClassId, FareTypeId) es inmutable.
+        
         e.Price = fcp.Price;
         _context.FlightCabinPrices.Update(e);
     }

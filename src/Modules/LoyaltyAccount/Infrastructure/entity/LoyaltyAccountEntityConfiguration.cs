@@ -62,10 +62,10 @@ public sealed class LoyaltyAccountEntityConfiguration : IEntityTypeConfiguration
                .OnDelete(DeleteBehavior.Restrict)
                .HasConstraintName("fk_la_program");
 
-        // IR-3: FK compuesta (program_id, tier_id) — requiere tabla de join o config especial
-        // EF Core no soporta FK compuesta a tabla diferente directamente via Fluent API simple.
-        // Solución: configurar la relación hacia LoyaltyTier usando solo loyalty_tier_id
-        // y aplicar el CHECK/validación en capa de aplicación o via trigger como en el SQL.
+        
+        
+        
+        
         builder.HasOne<LoyaltyTierEntity>()
                .WithMany()
                .HasForeignKey(e => e.LoyaltyTierId)

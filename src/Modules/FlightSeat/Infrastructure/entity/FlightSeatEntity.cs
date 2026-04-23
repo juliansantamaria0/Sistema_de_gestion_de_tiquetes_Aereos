@@ -6,6 +6,7 @@ public sealed class FlightSeatEntity
     public int       ScheduledFlightId { get; set; }
     public int       SeatMapId         { get; set; }
     public int       SeatStatusId      { get; set; }
+    public byte[] Version { get; set; } = null!;
     public DateTime  CreatedAt         { get; set; }
     public DateTime? UpdatedAt         { get; set; }
 }

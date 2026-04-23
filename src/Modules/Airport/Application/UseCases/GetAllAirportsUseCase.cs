@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Application.UseC
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Application.Interfaces;
 
-/// <summary>Caso de uso: Obtener todos los aeropuertos.</summary>
+
 public sealed class GetAllAirportsUseCase
 {
     private readonly IAirportService _service;

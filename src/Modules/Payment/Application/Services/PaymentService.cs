@@ -82,7 +82,7 @@ public sealed class PaymentService : IPaymentService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static PaymentDto ToDto(PaymentAggregate agg)
         => new(

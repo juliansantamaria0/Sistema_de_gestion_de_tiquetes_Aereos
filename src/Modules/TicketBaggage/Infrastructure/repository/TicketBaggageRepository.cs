@@ -16,7 +16,7 @@ public sealed class TicketBaggageRepository : ITicketBaggageRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static TicketBaggageAggregate ToDomain(TicketBaggageEntity entity)
         => new(
@@ -26,7 +26,7 @@ public sealed class TicketBaggageRepository : ITicketBaggageRepository
             entity.Quantity,
             entity.FeeCharged);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<TicketBaggageAggregate?> GetByIdAsync(
         TicketBaggageId   id,
@@ -87,8 +87,8 @@ public sealed class TicketBaggageRepository : ITicketBaggageRepository
             ?? throw new KeyNotFoundException(
                 $"TicketBaggageEntity with id {ticketBaggage.Id.Value} not found.");
 
-        // Solo Quantity y FeeCharged son mutables.
-        // TicketId y BaggageTypeId son la clave de negocio — inmutables.
+        
+        
         entity.Quantity   = ticketBaggage.Quantity;
         entity.FeeCharged = ticketBaggage.FeeCharged;
 

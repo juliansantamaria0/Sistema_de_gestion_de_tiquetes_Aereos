@@ -16,12 +16,12 @@ public sealed class RefundStatusRepository : IRefundStatusRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static RefundStatusAggregate ToDomain(RefundStatusEntity entity)
         => new(new RefundStatusId(entity.Id), entity.Name);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<RefundStatusAggregate?> GetByIdAsync(
         RefundStatusId    id,

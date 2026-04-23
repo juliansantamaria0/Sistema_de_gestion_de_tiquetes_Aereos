@@ -22,17 +22,11 @@ public sealed class CreateCurrencyUseCase
         string            symbol,
         CancellationToken cancellationToken = default)
     {
-        // CurrencyId(1) es placeholder; EF Core asigna el Id real al insertar.
-        var currency = new CurrencyAggregate(new CurrencyId(await GetNextIdAsync(cancellationToken)), isoCode, name, symbol);
+        
+        var currency = new CurrencyAggregate(new CurrencyId(0), isoCode, name, symbol);
 
         await _repository.AddAsync(currency, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return currency;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

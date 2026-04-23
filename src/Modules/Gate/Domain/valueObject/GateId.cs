@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.ValueObject;
 
-/// <summary>Value Object que representa el identificador único de una puerta de embarque.</summary>
+
 public readonly record struct GateId(int Value)
 {
     public static GateId New(int value)

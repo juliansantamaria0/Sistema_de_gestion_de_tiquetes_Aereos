@@ -2,18 +2,18 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Domai
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Domain.ValueObject;
 
-/// <summary>
-/// Registro de acumulación o redención de millas en una cuenta de fidelización.
-/// SQL: loyalty_transaction. [NC-11] id renombrado a loyalty_transaction_id.
-///
-/// CHECKs del DDL espejados:
-///   - transaction_type IN ('EARN', 'REDEEM').
-///   - miles > 0 (siempre positivo; la dirección la da transaction_type).
-///
-/// Tabla de auditoría — INMUTABLE tras inserción.
-/// No se provee ningún método de mutación; el repositorio no expone UpdateAsync.
-/// ticket_id es nullable: si es null, la transacción es un ajuste manual.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class LoyaltyTransactionAggregate
 {
     public static readonly string TypeEarn   = "EARN";
@@ -59,7 +59,7 @@ public sealed class LoyaltyTransactionAggregate
         TransactionDate  = transactionDate;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateTransactionType(string type)
     {

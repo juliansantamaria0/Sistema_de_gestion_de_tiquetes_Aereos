@@ -2,14 +2,14 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.CancellationReason.Domai
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CancellationReason.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de razones de cancelación de vuelos.
-/// SQL: cancellation_reason.
-///
-/// Valores esperados: WEATHER, TECHNICAL, COMMERCIAL, FORCE_MAJEURE.
-/// El nombre se normaliza a mayúsculas para consistencia con el catálogo SQL.
-/// Nota: a diferencia de delay_reason, NO tiene campo category en el DDL.
-/// </summary>
+
+
+
+
+
+
+
+
 public sealed class CancellationReasonAggregate
 {
     public CancellationReasonId Id   { get; private set; }

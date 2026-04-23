@@ -20,17 +20,11 @@ public sealed class CreateTicketStatusUseCase
         string            name,
         CancellationToken cancellationToken = default)
     {
-        // TicketStatusId(1) es placeholder; EF Core asigna el Id real al insertar.
-        var ticketStatus = new TicketStatusAggregate(new TicketStatusId(await GetNextIdAsync(cancellationToken)), name);
+        
+        var ticketStatus = new TicketStatusAggregate(new TicketStatusId(0), name);
 
         await _repository.AddAsync(ticketStatus, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return ticketStatus;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

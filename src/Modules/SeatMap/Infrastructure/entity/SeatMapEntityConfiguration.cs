@@ -33,7 +33,7 @@ public sealed class SeatMapEntityConfiguration : IEntityTypeConfiguration<SeatMa
                .IsRequired(false)
                .HasMaxLength(100);
 
-        // UNIQUE (aircraft_type_id, seat_number) — espejo de uq_seat_map
+        
         builder.HasIndex(e => new { e.AircraftTypeId, e.SeatNumber })
                .IsUnique()
                .HasDatabaseName("uq_seat_map");builder.HasOne<AircraftTypeEntity>()

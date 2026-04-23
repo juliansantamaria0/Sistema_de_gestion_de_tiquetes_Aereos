@@ -3,11 +3,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Application.U
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Domain.Repositories;
 
-/// <summary>
-/// Obtiene únicamente los asientos disponibles de un vuelo programado.
-/// Caso de uso clave para el proceso de reserva: permite al cliente
-/// elegir entre los asientos libres antes de confirmar.
-/// </summary>
+
+
+
+
+
 public sealed class GetAvailableFlightSeatsByFlightUseCase
 {
     private readonly IFlightSeatRepository _repository;

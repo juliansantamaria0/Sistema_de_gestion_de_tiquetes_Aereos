@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.E
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-/// <summary>Configuración EF Core para <see cref="AirportEntity"/>.</summary>
+
 public sealed class AirportConfiguration : IEntityTypeConfiguration<AirportEntity>
 {
     public void Configure(EntityTypeBuilder<AirportEntity> builder)

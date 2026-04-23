@@ -1,9 +1,11 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Application.Services;
 
+using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.ValueObject;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
@@ -11,18 +13,37 @@ public sealed class UserService : IUserService
 {
     private readonly IUserRepository _repository;
     private readonly IUnitOfWork     _unitOfWork;
+    private readonly AppDbContext    _context;
 
-    public UserService(IUserRepository repository, IUnitOfWork unitOfWork)
+    public UserService(IUserRepository repository, IUnitOfWork unitOfWork, AppDbContext context)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _context    = context;
     }
 
     public async Task<UserDto> CreateAsync(CreateUserRequest request, CancellationToken ct = default)
     {
+        var normalizedUsername = (request.Username ?? string.Empty).Trim().ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(normalizedUsername))
+            throw new InvalidOperationException("El username es obligatorio.");
+
+        if (!await _context.Persons.AsNoTracking().AnyAsync(x => x.Id == request.PersonId, ct))
+            throw new InvalidOperationException($"No existe la persona con id {request.PersonId}.");
+
+        if (!await _context.Roles.AsNoTracking().AnyAsync(x => x.RoleId == request.RoleId, ct))
+            throw new InvalidOperationException($"No existe el rol con id {request.RoleId}.");
+
+        if (await _context.Users.AsNoTracking().AnyAsync(x => x.PersonId == request.PersonId, ct))
+            throw new InvalidOperationException("Ya existe un usuario asociado a esta persona.");
+
+        if (await _context.Users.AsNoTracking().AnyAsync(x => x.Username == normalizedUsername, ct))
+            throw new InvalidOperationException("El username ya está en uso.");
+
         var user = UserAggregate.Create(
             request.PersonId, request.RoleId,
-            request.Username, PasswordHasher.Hash(request.Password), request.IsActive);
+            normalizedUsername, PasswordHasher.Hash(request.Password), request.IsActive);
         await _repository.AddAsync(user, ct);
         await _unitOfWork.CommitAsync(ct);
 

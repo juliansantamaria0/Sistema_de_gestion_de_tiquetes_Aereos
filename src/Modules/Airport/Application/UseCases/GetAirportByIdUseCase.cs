@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Application.UseC
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Application.Interfaces;
 
-/// <summary>Caso de uso: Obtener aeropuerto por ID.</summary>
+
 public sealed class GetAirportByIdUseCase
 {
     private readonly IAirportService _service;

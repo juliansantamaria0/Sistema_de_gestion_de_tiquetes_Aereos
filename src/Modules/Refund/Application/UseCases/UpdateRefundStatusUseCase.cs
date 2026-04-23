@@ -4,11 +4,11 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Actualiza el estado del reembolso y opcionalmente registra
-/// la fecha de procesamiento y el motivo.
-/// payment_id, amount y requested_at son inmutables.
-/// </summary>
+
+
+
+
+
 public sealed class UpdateRefundStatusUseCase
 {
     private readonly IRefundRepository _repository;

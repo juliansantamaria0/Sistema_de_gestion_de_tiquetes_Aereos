@@ -16,12 +16,12 @@ public sealed class SeatStatusRepository : ISeatStatusRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static SeatStatusAggregate ToDomain(SeatStatusEntity entity)
         => new(new SeatStatusId(entity.Id), entity.Name);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<SeatStatusAggregate?> GetByIdAsync(
         SeatStatusId      id,

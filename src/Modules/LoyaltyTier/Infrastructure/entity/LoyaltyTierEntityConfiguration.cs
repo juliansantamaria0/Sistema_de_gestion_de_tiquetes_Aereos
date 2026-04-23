@@ -25,13 +25,13 @@ public sealed class LoyaltyTierEntityConfiguration : IEntityTypeConfiguration<Lo
                .IsRequired()
                .HasMaxLength(50);
 
-        // UNIQUE (loyalty_program_id, name) — espejo de uq_lt
+        
         builder.HasIndex(e => new { e.LoyaltyProgramId, e.Name })
                .IsUnique()
                .HasDatabaseName("uq_lt");
 
-        // UNIQUE (loyalty_program_id, loyalty_tier_id) — espejo de uq_lt_fk [IR-3]
-        // Soporte para FK compuesta en loyalty_account
+        
+        
         builder.HasIndex(e => new { e.LoyaltyProgramId, e.Id })
                .IsUnique()
                .HasDatabaseName("uq_lt_fk");
@@ -47,7 +47,7 @@ public sealed class LoyaltyTierEntityConfiguration : IEntityTypeConfiguration<Lo
                .HasColumnName("benefits")
                .IsRequired(false);
 
-        // TEXT en MySQL — sin HasMaxLength para dejar que EF use el tipo nativo
+        
         builder.HasOne<LoyaltyProgramEntity>()
                .WithMany()
                .HasForeignKey(e => e.LoyaltyProgramId)

@@ -16,7 +16,7 @@ public sealed class ReservationDetailRepository : IReservationDetailRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static ReservationDetailAggregate ToDomain(ReservationDetailEntity entity)
         => new(
@@ -28,7 +28,7 @@ public sealed class ReservationDetailRepository : IReservationDetailRepository
             entity.CreatedAt,
             entity.UpdatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<ReservationDetailAggregate?> GetByIdAsync(
         ReservationDetailId id,
@@ -91,8 +91,8 @@ public sealed class ReservationDetailRepository : IReservationDetailRepository
             ?? throw new KeyNotFoundException(
                 $"ReservationDetailEntity with id {reservationDetail.Id.Value} not found.");
 
-        // Solo FareTypeId y UpdatedAt son mutables.
-        // ReservationId, PassengerId y FlightSeatId forman la clave de negocio.
+        
+        
         entity.FareTypeId = reservationDetail.FareTypeId;
         entity.UpdatedAt  = reservationDetail.UpdatedAt;
 

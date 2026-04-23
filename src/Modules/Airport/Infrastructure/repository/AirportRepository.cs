@@ -7,7 +7,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 
-/// <summary>Repositorio EF Core para Airport.</summary>
+
 public sealed class AirportRepository : IAirportRepository
 {
     private readonly AppDbContext _context;

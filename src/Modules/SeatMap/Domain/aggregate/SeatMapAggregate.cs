@@ -2,20 +2,20 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Domain.Aggregate
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Domain.ValueObject;
 
-/// <summary>
-/// Asiento estático en el mapa de configuración de un tipo de aeronave.
-/// SQL: seat_map.
-///
-/// Representa la disposición física permanente de asientos de un tipo de avión.
-/// No cambia entre vuelos — es la fuente de verdad estructural.
-///
-/// 4NF: (aircraft_type_id, seat_number) → cabin_class_id.
-/// No hay dependencias multivaluadas independientes.
-///
-/// UNIQUE: (aircraft_type_id, seat_number).
-/// seat_number normalizado a mayúsculas (ej.: 12A, 1C, 30F).
-/// seat_features es nullable: WINDOW, AISLE, EXTRA_LEGROOM, etc.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class SeatMapAggregate
 {
     public SeatMapId Id             { get; private set; }
@@ -58,10 +58,10 @@ public sealed class SeatMapAggregate
         SeatFeatures   = seatFeatures?.Trim();
     }
 
-    /// <summary>
-    /// Actualiza la clase de cabina y las características del asiento.
-    /// AircraftTypeId y SeatNumber forman la clave de negocio y no son modificables.
-    /// </summary>
+    
+    
+    
+    
     public void Update(int cabinClassId, string? seatFeatures)
     {
         if (cabinClassId <= 0)
@@ -76,7 +76,7 @@ public sealed class SeatMapAggregate
         SeatFeatures = seatFeatures?.Trim();
     }
 
-    // ── Helpers privados ──────────────────────────────────────────────────────
+    
 
     private static void ValidateSeatNumber(string seatNumber)
     {

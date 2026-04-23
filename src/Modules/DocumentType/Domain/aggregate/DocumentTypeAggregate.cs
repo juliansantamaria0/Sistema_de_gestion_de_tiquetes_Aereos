@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.DocumentType.Domain.Aggr
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DocumentType.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de tipos de documento de identidad.
-/// SQL: document_type. Ejemplos: CC, TI, PA, CE, NIT.
-/// Invariantes: name ≤ 50 chars, code ≤ 10 chars, ambos únicos en BD.
-/// </summary>
+
+
+
+
+
 public sealed class DocumentTypeAggregate
 {
     public DocumentTypeId Id   { get; private set; }

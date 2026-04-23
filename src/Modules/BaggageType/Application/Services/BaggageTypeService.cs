@@ -61,7 +61,7 @@ public sealed class BaggageTypeService : IBaggageTypeService
         CancellationToken cancellationToken = default)
         => await _update.ExecuteAsync(id, name, maxWeightKg, extraFee, cancellationToken);
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static BaggageTypeDto ToDto(
         Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageType.Domain.Aggregate.BaggageTypeAggregate agg)

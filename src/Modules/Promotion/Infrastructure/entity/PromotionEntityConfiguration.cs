@@ -28,7 +28,7 @@ public sealed class PromotionEntityConfiguration : IEntityTypeConfiguration<Prom
                .IsRequired()
                .HasColumnType("decimal(5,2)");
 
-        // DateOnly — columnas DATE de MySQL, Pomelo 8.x mapea nativamente
+        
         builder.Property(e => e.ValidFrom)
                .HasColumnName("valid_from")
                .IsRequired();

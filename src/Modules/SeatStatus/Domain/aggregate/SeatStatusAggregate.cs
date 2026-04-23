@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatStatus.Domain.Aggreg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatStatus.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de estados de un asiento en un vuelo.
-/// Valores esperados en producción: AVAILABLE, OCCUPIED, BLOCKED.
-/// El nombre se normaliza a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class SeatStatusAggregate
 {
     public SeatStatusId Id   { get; private set; }

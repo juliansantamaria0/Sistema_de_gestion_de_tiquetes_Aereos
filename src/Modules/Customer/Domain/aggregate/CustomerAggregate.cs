@@ -3,20 +3,20 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.Aggregat
 using System.Text.RegularExpressions;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.ValueObject;
 
-/// <summary>
-/// Rol cliente: la persona que compra o realiza reservas.
-/// SQL: customer. person_id UNIQUE — una persona es cliente como máximo una vez.
-///
-/// Invariantes:
-///   - email nullable pero, si se provee, debe respetar el formato
-///     '^[^@]+@[^@]+\.[^@]+$' (espejo del CHECK SQL).
-///   - email UNIQUE en la BD — la unicidad se garantiza a nivel de base de datos.
-///   - phone nullable, máximo 30 caracteres.
-///   - El email se normaliza a minúsculas para evitar duplicados por capitalización.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class CustomerAggregate
 {
-    // Espejo del CHECK SQL: ^[^@]+@[^@]+\.[^@]+$
+    
     private static readonly Regex EmailRegex =
         new(@"^[^@]+@[^@]+\.[^@]+$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -54,10 +54,10 @@ public sealed class CustomerAggregate
         UpdatedAt = updatedAt;
     }
 
-    /// <summary>
-    /// Actualiza teléfono y email del cliente.
-    /// PersonId no es modificable: identifica a quién es el cliente.
-    /// </summary>
+    
+    
+    
+    
     public void UpdateContact(string? phone, string? email)
     {
         ValidatePhone(phone);
@@ -68,7 +68,7 @@ public sealed class CustomerAggregate
         UpdatedAt = DateTime.UtcNow;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidatePhone(string? phone)
     {

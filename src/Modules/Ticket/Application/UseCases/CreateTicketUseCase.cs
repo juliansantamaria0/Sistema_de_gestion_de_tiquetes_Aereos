@@ -1,22 +1,30 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Application.UseCases;
 
-using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Domain.Repositories;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Domain.ValueObject;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.Repositories;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.Aggregate;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.ValueObject;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity;
-using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
-using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
-using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Extensions;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.Repositories;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Domain.Repositories;
 
 public sealed class CreateTicketUseCase
 {
-    private readonly AppDbContext _context;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly ITicketRepository _ticketRepository;
+    private readonly IReservationRepository _reservationRepository;
+    private readonly IReservationDetailRepository _reservationDetailRepository;
+    private readonly IPaymentRepository _paymentRepository;
 
-    public CreateTicketUseCase(AppDbContext context, IUnitOfWork unitOfWork)
+    public CreateTicketUseCase(
+        ITicketRepository ticketRepository,
+        IReservationRepository reservationRepository,
+        IReservationDetailRepository reservationDetailRepository,
+        IPaymentRepository paymentRepository)
     {
-        _context = context;
-        _unitOfWork = unitOfWork;
+        _ticketRepository = ticketRepository;
+        _reservationRepository = reservationRepository;
+        _reservationDetailRepository = reservationDetailRepository;
+        _paymentRepository = paymentRepository;
     }
 
     public async Task<TicketAggregate> ExecuteAsync(
@@ -25,66 +33,47 @@ public sealed class CreateTicketUseCase
         int ticketStatusId,
         CancellationToken cancellationToken = default)
     {
-        var now = DateTime.UtcNow;
         var normalizedCode = ticketCode.Trim().ToUpperInvariant();
 
         if (string.IsNullOrWhiteSpace(normalizedCode))
             throw new InvalidOperationException("El código del tiquete es obligatorio.");
 
-        var detail = await _context.ReservationDetails
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == reservationDetailId, cancellationToken)
+        var detail = await _reservationDetailRepository.GetByIdAsync(
+            new ReservationDetailId(reservationDetailId),
+            cancellationToken)
             ?? throw new InvalidOperationException($"No existe el detalle de reserva con id {reservationDetailId}.");
 
-        var reservation = await _context.Reservations
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == detail.ReservationId, cancellationToken)
+        var reservation = await _reservationRepository.GetByIdAsync(
+            new ReservationId(detail.ReservationId),
+            cancellationToken)
             ?? throw new InvalidOperationException($"No existe la reserva asociada al detalle {reservationDetailId}.");
 
         if (!reservation.ConfirmedAt.HasValue || reservation.CancelledAt.HasValue)
             throw new InvalidOperationException("Solo se pueden emitir tiquetes desde reservas válidas y confirmadas.");
 
-        if (await _context.Tickets.AsNoTracking().AnyAsync(x => x.ReservationDetailId == reservationDetailId, cancellationToken))
+        if (await _ticketRepository.TicketExistsForReservationDetailAsync(reservationDetailId, cancellationToken))
             throw new InvalidOperationException("Ya existe un tiquete emitido para este detalle de reserva.");
 
-        if (await _context.Tickets.AsNoTracking().AnyAsync(x => x.TicketCode == normalizedCode, cancellationToken))
+        if (await _ticketRepository.TicketCodeExistsAsync(normalizedCode, cancellationToken))
             throw new InvalidOperationException($"Ya existe un tiquete con el código {normalizedCode}.");
 
-        if (!await _context.TicketStatuses.AsNoTracking().AnyAsync(x => x.Id == ticketStatusId, cancellationToken))
+        if (!await _ticketRepository.TicketStatusExistsAsync(ticketStatusId, cancellationToken))
             throw new InvalidOperationException($"No existe el estado de tiquete con id {ticketStatusId}.");
 
-        var ticketEntity = new TicketEntity
-        {
-            TicketCode = normalizedCode,
-            ReservationDetailId = reservationDetailId,
-            IssueDate = now,
-            TicketStatusId = ticketStatusId,
-            CreatedAt = now,
-            UpdatedAt = null
-        };
-
-        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-
-        await _context.Tickets.AddAsync(ticketEntity, cancellationToken);
-        await _unitOfWork.CommitAsync(cancellationToken);
-
-        await _context.AddTicketStatusHistoryAsync(
-            ticketEntity.Id,
-            ticketStatusId,
-            "Tiquete emitido",
-            now,
+        var expectedTotal = await _reservationRepository.GetQuotedFareTotalForReservationAsync(
+            detail.ReservationId,
             cancellationToken);
-        await _unitOfWork.CommitAsync(cancellationToken);
+        var paidTotal = await _paymentRepository.SumApprovedPaymentsForReservationAsync(
+            detail.ReservationId,
+            cancellationToken);
 
-        await transaction.CommitAsync(cancellationToken);
+        if (paidTotal <= 0m || paidTotal < expectedTotal)
+            throw new Exception("No se puede emitir el tiquete: Faltan pagos asociados o fondos insuficientes.");
 
-        return new TicketAggregate(
-            new TicketId(ticketEntity.Id),
-            ticketEntity.TicketCode,
-            ticketEntity.ReservationDetailId,
-            ticketEntity.IssueDate,
-            ticketEntity.TicketStatusId,
-            ticketEntity.CreatedAt,
-            ticketEntity.UpdatedAt);
+        return await _ticketRepository.IssueTicketWithHistoryAsync(
+            normalizedCode,
+            reservationDetailId,
+            ticketStatusId,
+            cancellationToken);
     }
 }

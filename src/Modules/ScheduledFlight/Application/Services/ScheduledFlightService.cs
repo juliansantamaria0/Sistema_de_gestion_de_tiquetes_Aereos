@@ -80,7 +80,7 @@ public sealed class ScheduledFlightService : IScheduledFlightService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static ScheduledFlightDto ToDto(ScheduledFlightAggregate agg)
         => new(

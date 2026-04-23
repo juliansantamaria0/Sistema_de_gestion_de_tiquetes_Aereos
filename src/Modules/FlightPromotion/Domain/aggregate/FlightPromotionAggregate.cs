@@ -2,15 +2,15 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.A
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.ValueObject;
 
-/// <summary>
-/// Relación M:N entre un vuelo programado y una promoción.
-/// SQL: flight_promotion.
-///
-/// UNIQUE: (scheduled_flight_id, promotion_id).
-/// Tabla inmutable — no hay mutaciones; si la relación cambia
-/// se elimina y se crea una nueva.
-/// Sin UpdateAsync en el repositorio.
-/// </summary>
+
+
+
+
+
+
+
+
+
 public sealed class FlightPromotionAggregate
 {
     public FlightPromotionId Id                { get; private set; }

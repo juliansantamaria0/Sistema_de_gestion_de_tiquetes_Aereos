@@ -2,10 +2,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Employee.Domain.Aggregat
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Employee.Domain.ValueObject;
 
-/// <summary>
-/// Empleado de la aerolínea — extiende Person con datos laborales.
-/// hire_date usa DateOnly (.NET 8). job_position_id es nullable.
-/// </summary>
+
+
+
+
 public sealed class EmployeeAggregate
 {
     public EmployeeId Id            { get; private set; }

@@ -2,24 +2,24 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Domain.
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Domain.ValueObject;
 
-/// <summary>
-/// Precio por combinación (vuelo + clase de cabina + tipo de tarifa).
-/// SQL: flight_cabin_price.
-///
-/// 4NF ANÁLISIS:
-///   MVD1: scheduled_flight_id →→ cabin_class_id (un vuelo ofrece varias clases)
-///   MVD2: scheduled_flight_id →→ fare_type_id   (un vuelo ofrece varias tarifas)
-///   ¿Son independientes? SÍ → violaría 4NF si se almacenaran por separado.
-///   SOLUCIÓN: PK incluye las tres FKs → cada precio es para la combinación
-///   específica (vuelo, clase, tarifa) → NO viola 4NF.
-///
-/// UNIQUE: (scheduled_flight_id, cabin_class_id, fare_type_id).
-/// CHECK:  price >= 0 — espejado en dominio.
-///
-/// La terna (scheduled_flight_id, cabin_class_id, fare_type_id) es la
-/// clave de negocio — inmutable.
-/// UpdatePrice(): única mutación válida.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class FlightCabinPriceAggregate
 {
     public FlightCabinPriceId Id                { get; private set; }
@@ -61,17 +61,17 @@ public sealed class FlightCabinPriceAggregate
         Price             = price;
     }
 
-    /// <summary>
-    /// Actualiza el precio de esta combinación (vuelo + clase + tarifa).
-    /// La terna de FKs es la clave de negocio — inmutable.
-    /// </summary>
+    
+    
+    
+    
     public void UpdatePrice(decimal newPrice)
     {
         ValidatePrice(newPrice);
         Price = newPrice;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidatePrice(decimal price)
     {

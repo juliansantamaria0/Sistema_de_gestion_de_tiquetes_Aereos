@@ -2,19 +2,19 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Domain.Ag
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Domain.ValueObject;
 
-/// <summary>
-/// Programa de fidelización de una aerolínea.
-/// SQL: loyalty_program. [NC-6] id renombrado a loyalty_program_id.
-///
-/// UNIQUE: airline_id — una aerolínea tiene un único programa.
-/// UNIQUE: name — el nombre del programa es único globalmente.
-///
-/// Invariantes:
-///   - miles_per_dollar > 0 — un programa que no acumula millas no tiene sentido.
-///   - airline_id es inmutable (la aerolínea propietaria no cambia).
-///
-/// Update(): modifica nombre y tasa de acumulación.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class LoyaltyProgramAggregate
 {
     public LoyaltyProgramId Id             { get; private set; }
@@ -47,10 +47,10 @@ public sealed class LoyaltyProgramAggregate
         MilesPerDollar = milesPerDollar;
     }
 
-    /// <summary>
-    /// Actualiza el nombre y la tasa de acumulación de millas.
-    /// airline_id es inmutable — la aerolínea propietaria no cambia.
-    /// </summary>
+    
+    
+    
+    
     public void Update(string name, decimal milesPerDollar)
     {
         ValidateName(name);
@@ -60,7 +60,7 @@ public sealed class LoyaltyProgramAggregate
         MilesPerDollar = milesPerDollar;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateName(string name)
     {

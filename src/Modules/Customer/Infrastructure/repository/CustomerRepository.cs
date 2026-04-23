@@ -16,7 +16,7 @@ public sealed class CustomerRepository : ICustomerRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static CustomerAggregate ToDomain(CustomerEntity entity)
         => new(
@@ -27,7 +27,7 @@ public sealed class CustomerRepository : ICustomerRepository
             entity.CreatedAt,
             entity.UpdatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<CustomerAggregate?> GetByIdAsync(
         CustomerId        id,
@@ -75,7 +75,7 @@ public sealed class CustomerRepository : ICustomerRepository
             ?? throw new KeyNotFoundException(
                 $"CustomerEntity with id {customer.Id.Value} not found.");
 
-        // PersonId no se modifica — es la clave de negocio.
+        
         entity.Phone     = customer.Phone;
         entity.Email     = customer.Email;
         entity.UpdatedAt = customer.UpdatedAt;

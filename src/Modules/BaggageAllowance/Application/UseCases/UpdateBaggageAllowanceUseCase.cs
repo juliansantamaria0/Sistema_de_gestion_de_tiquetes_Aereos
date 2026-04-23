@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Domain.Repo
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Actualiza los límites de franquicia.
-/// cabin_class_id y fare_type_id son la clave de negocio — inmutables.
-/// </summary>
+
+
+
+
 public sealed class UpdateBaggageAllowanceUseCase
 {
     private readonly IBaggageAllowanceRepository _repository;

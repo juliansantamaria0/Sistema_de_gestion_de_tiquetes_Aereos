@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de géneros.
-/// Valores esperados: MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class GenderAggregate
 {
     public GenderId Id   { get; private set; }

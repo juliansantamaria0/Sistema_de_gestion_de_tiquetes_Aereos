@@ -2,21 +2,21 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Refund.Domain.ValueObject;
 
-/// <summary>
-/// Solicitud de reembolso de un pago.
-/// SQL: refund.
-///
-/// Invariantes:
-///   - amount >= 0 (espejo del chk_refund_amount).
-///   - payment_id, amount y requested_at son inmutables tras la creación.
-///
-/// Ciclo de vida típico: PENDING → APPROVED → PROCESSED
-///                        PENDING → REJECTED
-///
-/// UpdateStatus(): única mutación válida.
-///   - Registra processed_at cuando el estado indica que fue procesado/rechazado.
-///   - reason: puede actualizarse al cambiar el estado.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class RefundAggregate
 {
     public RefundId  Id              { get; private set; }
@@ -65,12 +65,12 @@ public sealed class RefundAggregate
         Reason         = reason?.Trim();
     }
 
-    /// <summary>
-    /// Actualiza el estado del reembolso.
-    /// Opcionalmente registra processed_at (cuando se aprueba, rechaza o procesa)
-    /// y actualiza el motivo.
-    /// payment_id, amount y requested_at son inmutables.
-    /// </summary>
+    
+    
+    
+    
+    
+    
     public void UpdateStatus(int refundStatusId, DateTime? processedAt = null, string? reason = null)
     {
         if (refundStatusId <= 0)
@@ -88,7 +88,7 @@ public sealed class RefundAggregate
         Reason         = reason?.Trim() ?? Reason;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateAmount(decimal amount)
     {

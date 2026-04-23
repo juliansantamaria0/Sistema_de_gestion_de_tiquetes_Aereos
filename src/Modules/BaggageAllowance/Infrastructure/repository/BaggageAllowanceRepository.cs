@@ -16,7 +16,7 @@ public sealed class BaggageAllowanceRepository : IBaggageAllowanceRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static BaggageAllowanceAggregate ToDomain(BaggageAllowanceEntity entity)
         => new(
@@ -28,7 +28,7 @@ public sealed class BaggageAllowanceRepository : IBaggageAllowanceRepository
             entity.CheckedPieces,
             entity.CheckedKg);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<BaggageAllowanceAggregate?> GetByIdAsync(
         BaggageAllowanceId id,
@@ -58,7 +58,7 @@ public sealed class BaggageAllowanceRepository : IBaggageAllowanceRepository
         int               fareTypeId,
         CancellationToken cancellationToken = default)
     {
-        // UNIQUE (cabin_class_id, fare_type_id) — FirstOrDefault es correcto.
+        
         var entity = await _context.BaggageAllowances
             .AsNoTracking()
             .FirstOrDefaultAsync(
@@ -93,8 +93,8 @@ public sealed class BaggageAllowanceRepository : IBaggageAllowanceRepository
             ?? throw new KeyNotFoundException(
                 $"BaggageAllowanceEntity with id {baggageAllowance.Id.Value} not found.");
 
-        // Solo los límites de equipaje son mutables.
-        // CabinClassId y FareTypeId son la clave de negocio — inmutables.
+        
+        
         entity.CarryOnPieces = baggageAllowance.CarryOnPieces;
         entity.CarryOnKg     = baggageAllowance.CarryOnKg;
         entity.CheckedPieces = baggageAllowance.CheckedPieces;

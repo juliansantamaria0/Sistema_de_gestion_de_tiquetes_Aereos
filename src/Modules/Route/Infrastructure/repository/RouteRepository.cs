@@ -51,7 +51,7 @@ public sealed class RouteRepository : IRouteRepository
         int               destinationId,
         CancellationToken cancellationToken = default)
     {
-        // UNIQUE (origin, destination) — FirstOrDefault correcto.
+        
         var entity = await _context.Routes
             .AsNoTracking()
             .FirstOrDefaultAsync(

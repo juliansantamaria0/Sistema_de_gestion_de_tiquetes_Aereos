@@ -2,17 +2,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Domain.Aggrega
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Domain.ValueObject;
 
-/// <summary>
-/// Rol pasajero: quien viaja.
-/// SQL: passenger.
-///
-/// UNIQUE: person_id — una persona, un rol pasajero.
-/// UNIQUE: frequent_flyer_number (cuando no es null).
-/// nationality_id: para documentación aduanera (distinto de país de residencia).
-///
-/// person_id es inmutable — la persona asociada no cambia.
-/// Update(): modifica frequent_flyer_number y nationality_id.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class PassengerAggregate
 {
     public PassengerId Id                  { get; private set; }
@@ -50,10 +50,10 @@ public sealed class PassengerAggregate
         UpdatedAt           = updatedAt;
     }
 
-    /// <summary>
-    /// Actualiza el número de viajero frecuente y la nacionalidad.
-    /// PersonId es inmutable.
-    /// </summary>
+    
+    
+    
+    
     public void Update(string? frequentFlyerNumber, int? nationalityId)
     {
         ValidateFrequentFlyerNumber(frequentFlyerNumber);
@@ -64,7 +64,7 @@ public sealed class PassengerAggregate
         UpdatedAt           = DateTime.UtcNow;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateFrequentFlyerNumber(string? number)
     {

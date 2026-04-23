@@ -7,6 +7,7 @@ public interface IEmployeeRepository
 {
     Task<EmployeeAggregate?>          GetByIdAsync(EmployeeId id, CancellationToken ct = default);
     Task<IReadOnlyList<EmployeeAggregate>> GetAllAsync(CancellationToken ct = default);
+    Task<bool>                        ExistsByPersonIdAsync(int personId, CancellationToken ct = default);
     Task AddAsync(EmployeeAggregate entity, CancellationToken ct = default);
     void Update(EmployeeAggregate entity);
     void Delete(EmployeeAggregate entity);

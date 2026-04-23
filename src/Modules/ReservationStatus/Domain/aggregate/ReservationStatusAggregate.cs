@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatus.Domain
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatus.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de estados del ciclo de vida de una reserva.
-/// Valores esperados en producción: PENDING, CONFIRMED, CANCELLED.
-/// El nombre se normaliza a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class ReservationStatusAggregate
 {
     public ReservationStatusId Id   { get; private set; }

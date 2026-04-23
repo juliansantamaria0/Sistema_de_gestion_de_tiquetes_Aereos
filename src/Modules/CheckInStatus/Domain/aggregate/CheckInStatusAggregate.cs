@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckInStatus.Domain.Agg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckInStatus.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de estados del proceso de check-in.
-/// Valores esperados: PENDING, CHECKED_IN, BOARDED, NO_SHOW.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class CheckInStatusAggregate
 {
     public CheckInStatusId Id   { get; private set; }

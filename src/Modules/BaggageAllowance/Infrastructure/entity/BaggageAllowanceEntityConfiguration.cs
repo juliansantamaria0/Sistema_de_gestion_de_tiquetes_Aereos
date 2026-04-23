@@ -23,7 +23,7 @@ public sealed class BaggageAllowanceEntityConfiguration : IEntityTypeConfigurati
                .HasColumnName("fare_type_id")
                .IsRequired();
 
-        // UNIQUE (cabin_class_id, fare_type_id) — espejo de uq_ba
+        
         builder.HasIndex(e => new { e.CabinClassId, e.FareTypeId })
                .IsUnique()
                .HasDatabaseName("uq_ba");

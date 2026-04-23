@@ -6,7 +6,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>Servicio de aplicación para el módulo Airport.</summary>
+
 public sealed class AirportService : IAirportService
 {
     private readonly IAirportRepository _repository;

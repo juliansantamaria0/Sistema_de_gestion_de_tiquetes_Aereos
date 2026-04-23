@@ -16,7 +16,7 @@ public sealed class SeatMapRepository : ISeatMapRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static SeatMapAggregate ToDomain(SeatMapEntity entity)
         => new(
@@ -26,7 +26,7 @@ public sealed class SeatMapRepository : ISeatMapRepository
             entity.CabinClassId,
             entity.SeatFeatures);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<SeatMapAggregate?> GetByIdAsync(
         SeatMapId         id,
@@ -87,7 +87,7 @@ public sealed class SeatMapRepository : ISeatMapRepository
             ?? throw new KeyNotFoundException(
                 $"SeatMapEntity with id {seatMap.Id.Value} not found.");
 
-        // AircraftTypeId y SeatNumber son la clave de negocio — no se modifican.
+        
         entity.CabinClassId = seatMap.CabinClassId;
         entity.SeatFeatures = seatMap.SeatFeatures;
 

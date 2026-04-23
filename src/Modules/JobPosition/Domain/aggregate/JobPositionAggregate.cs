@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.JobPosition.Domain.Aggre
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.JobPosition.Domain.ValueObject;
 
-/// <summary>
-/// Puesto laboral estructural del empleado en la aerolínea [TN-3].
-/// Distinto de crew_role (rol operativo en un vuelo concreto).
-/// Ejemplos: PILOT, CABIN_CREW, GROUND_STAFF, MAINTENANCE, ADMIN.
-/// </summary>
+
+
+
+
+
 public sealed class JobPositionAggregate
 {
     public JobPositionId Id         { get; private set; }

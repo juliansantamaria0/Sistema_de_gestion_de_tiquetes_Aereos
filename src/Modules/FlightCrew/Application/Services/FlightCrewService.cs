@@ -71,7 +71,7 @@ public sealed class FlightCrewService : IFlightCrewService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static FlightCrewDto ToDto(FlightCrewAggregate agg)
         => new(agg.Id.Value, agg.ScheduledFlightId, agg.EmployeeId, agg.CrewRoleId, agg.CreatedAt);

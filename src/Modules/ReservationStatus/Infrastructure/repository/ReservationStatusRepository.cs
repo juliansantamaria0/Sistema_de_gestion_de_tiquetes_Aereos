@@ -16,12 +16,12 @@ public sealed class ReservationStatusRepository : IReservationStatusRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static ReservationStatusAggregate ToDomain(ReservationStatusEntity entity)
         => new(new ReservationStatusId(entity.Id), entity.Name);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<ReservationStatusAggregate?> GetByIdAsync(
         ReservationStatusId id,

@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentStatus.Domain.Agg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentStatus.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de estados de pago.
-/// Valores esperados: PENDING, PAID, REJECTED.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class PaymentStatusAggregate
 {
     public PaymentStatusId Id   { get; private set; }

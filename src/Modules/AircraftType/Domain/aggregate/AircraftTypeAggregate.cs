@@ -2,10 +2,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Domain.Aggr
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Domain.ValueObject;
 
-/// <summary>
-/// Configuración estática de un tipo de aeronave.
-/// SQL: aircraft_type. Regla de negocio: total_seats > 0, cargo_capacity_kg >= 0.
-/// </summary>
+
+
+
+
 public sealed class AircraftTypeAggregate
 {
     public AircraftTypeId Id               { get; private set; }

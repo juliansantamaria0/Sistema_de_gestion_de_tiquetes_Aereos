@@ -2,19 +2,19 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Domai
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Domain.ValueObject;
 
-/// <summary>
-/// Registro de cancelación de un vuelo programado.
-/// SQL: flight_cancellation. PK: cancellation_id.
-///
-/// Invariante clave: UNIQUE (scheduled_flight_id) — un vuelo solo puede
-/// cancelarse una vez. La unicidad se garantiza a nivel de base de datos
-/// y también operativamente: si ya existe un registro para el vuelo,
-/// la BD rechazará el INSERT con violación de unique constraint.
-///
-/// cancelled_at se fija al momento del registro — inmutable.
-/// notes es nullable: observaciones opcionales sobre la cancelación.
-/// La única modificación válida es actualizar notes (UpdateNotes).
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class FlightCancellationAggregate
 {
     public FlightCancellationId Id                    { get; private set; }
@@ -52,17 +52,17 @@ public sealed class FlightCancellationAggregate
         Notes                = notes?.Trim();
     }
 
-    /// <summary>
-    /// Actualiza las notas adicionales de la cancelación.
-    /// ScheduledFlightId, CancellationReasonId y CancelledAt son inmutables.
-    /// </summary>
+    
+    
+    
+    
     public void UpdateNotes(string? notes)
     {
         ValidateNotes(notes);
         Notes = notes?.Trim();
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateNotes(string? notes)
     {

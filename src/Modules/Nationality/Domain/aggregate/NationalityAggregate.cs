@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Domain.Aggre
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Domain.ValueObject;
 
-/// <summary>
-/// Nacionalidad para documentación aduanera.
-/// SQL: nationality. country_id UNIQUE (un país → una nacionalidad).
-/// Demonym: gentilicio en inglés (Colombian, American, French…).
-/// </summary>
+
+
+
+
+
 public sealed class NationalityAggregate
 {
     public NationalityId Id        { get; private set; }

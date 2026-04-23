@@ -74,7 +74,7 @@ public sealed class SeatMapService : ISeatMapService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static SeatMapDto ToDto(SeatMapAggregate agg)
         => new(agg.Id.Value, agg.AircraftTypeId, agg.SeatNumber, agg.CabinClassId, agg.SeatFeatures);

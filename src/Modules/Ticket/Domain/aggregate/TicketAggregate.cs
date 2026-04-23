@@ -2,17 +2,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.ValueObject;
 
-/// <summary>
-/// Tiquete aéreo emitido para un pasajero sobre una línea de reserva.
-/// SQL: ticket.
-///
-/// UNIQUE: ticket_code — código de negocio del tiquete.
-/// UNIQUE: reservation_detail_id — un tiquete por línea de reserva.
-///
-/// ticket_code normalizado a mayúsculas.
-/// issue_date y reservation_detail_id son inmutables tras la emisión.
-/// ChangeStatus(): única mutación válida sobre el ciclo de vida del tiquete.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class TicketAggregate
 {
     public TicketId  Id                  { get; private set; }
@@ -57,10 +57,10 @@ public sealed class TicketAggregate
         UpdatedAt           = updatedAt;
     }
 
-    /// <summary>
-    /// Cambia el estado del tiquete (ISSUED → USED, ISSUED → CANCELLED, etc.).
-    /// ticket_code, reservation_detail_id e issue_date son inmutables.
-    /// </summary>
+    
+    
+    
+    
     public void ChangeStatus(int ticketStatusId)
     {
         if (ticketStatusId <= 0)
@@ -71,7 +71,7 @@ public sealed class TicketAggregate
         UpdatedAt      = DateTime.UtcNow;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateTicketCode(string ticketCode)
     {

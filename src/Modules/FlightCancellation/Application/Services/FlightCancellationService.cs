@@ -72,7 +72,7 @@ public sealed class FlightCancellationService : IFlightCancellationService
         return agg is null ? null : ToDto(agg);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static FlightCancellationDto ToDto(FlightCancellationAggregate agg)
         => new(

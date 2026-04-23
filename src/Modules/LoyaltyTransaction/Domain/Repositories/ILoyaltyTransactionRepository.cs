@@ -10,5 +10,5 @@ public interface ILoyaltyTransactionRepository
     Task<IEnumerable<LoyaltyTransactionAggregate>> GetByAccountAsync(int loyaltyAccountId,                   CancellationToken cancellationToken = default);
     Task                                           AddAsync(LoyaltyTransactionAggregate loyaltyTransaction,  CancellationToken cancellationToken = default);
     Task                                           DeleteAsync(LoyaltyTransactionId id,                      CancellationToken cancellationToken = default);
-    // UpdateAsync deliberadamente omitido — tabla de auditoría inmutable.
+    
 }

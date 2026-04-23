@@ -12,4 +12,15 @@ public interface IReservationRepository
     Task                                    AddAsync(ReservationAggregate reservation,          CancellationToken cancellationToken = default);
     Task                                    UpdateAsync(ReservationAggregate reservation,       CancellationToken cancellationToken = default);
     Task                                    DeleteAsync(ReservationId id,                       CancellationToken cancellationToken = default);
+
+    Task<decimal> GetQuotedFareTotalForReservationAsync(int reservationId, CancellationToken cancellationToken = default);
+
+    Task<ReservationAggregate> CreateReservationWithInitialHistoryAsync(
+        string reservationCodeNormalized,
+        int customerId,
+        int scheduledFlightId,
+        int reservationStatusId,
+        CancellationToken cancellationToken = default);
+
+    Task PrepareConfirmReservationAsync(int reservationId, int confirmedStatusId, CancellationToken cancellationToken = default);
 }

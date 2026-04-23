@@ -2,17 +2,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Domain.ValueObject;
 
-/// <summary>
-/// Ruta entre dos aeropuertos distintos.
-/// SQL: route.
-///
-/// Invariante (espejo de chk_route_different):
-///   origin_airport_id ≠ destination_airport_id.
-/// UNIQUE: (origin_airport_id, destination_airport_id).
-///
-/// Una ruta es inmutable tras su creación — los aeropuertos no cambian.
-/// Si se necesita una ruta diferente, se crea una nueva.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class RouteAggregate
 {
     public RouteId   Id                   { get; private set; }
@@ -39,10 +39,8 @@ public sealed class RouteAggregate
             throw new ArgumentException(
                 "DestinationAirportId must be a positive integer.", nameof(destinationAirportId));
 
-        // Espejo de chk_route_different
         if (originAirportId == destinationAirportId)
-            throw new ArgumentException(
-                "Origin and destination airports must be different. [chk_route_different]");
+            throw new Exception("El aeropuerto de origen y el de destino deben ser distintos.");
 
         Id                   = id;
         OriginAirportId      = originAirportId;

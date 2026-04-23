@@ -4,11 +4,11 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BoardingPass.Domain.Reposito
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BoardingPass.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Actualiza la puerta y/o grupo de embarque del boarding pass.
-/// Necesario para gestionar cambios de última hora (gate changes).
-/// check_in_id y flight_seat_id son inmutables.
-/// </summary>
+
+
+
+
+
 public sealed class UpdateBoardingPassUseCase
 {
     private readonly IBoardingPassRepository _repository;

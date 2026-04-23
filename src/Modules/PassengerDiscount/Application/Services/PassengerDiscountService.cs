@@ -72,7 +72,7 @@ public sealed class PassengerDiscountService : IPassengerDiscountService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static PassengerDiscountDto ToDto(PassengerDiscountAggregate agg)
         => new(agg.Id.Value, agg.ReservationDetailId, agg.DiscountTypeId, agg.AmountApplied);

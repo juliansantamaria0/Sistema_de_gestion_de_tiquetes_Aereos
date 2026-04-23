@@ -75,7 +75,7 @@ public sealed class RefundService : IRefundService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static RefundDto ToDto(RefundAggregate agg)
         => new(

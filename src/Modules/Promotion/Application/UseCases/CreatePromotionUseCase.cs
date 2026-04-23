@@ -25,16 +25,10 @@ public sealed class CreatePromotionUseCase
         CancellationToken cancellationToken = default)
     {
         var promotion = new PromotionAggregate(
-            new PromotionId(await GetNextIdAsync(cancellationToken)), airlineId, name, discountPct, validFrom, validUntil);
+            new PromotionId(0), airlineId, name, discountPct, validFrom, validUntil);
 
         await _repository.AddAsync(promotion, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return promotion;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

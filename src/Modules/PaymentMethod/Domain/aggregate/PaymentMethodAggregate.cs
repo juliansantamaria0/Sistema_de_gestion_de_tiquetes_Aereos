@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentMethod.Domain.Agg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentMethod.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de métodos de pago aceptados.
-/// Valores esperados: CREDIT_CARD, DEBIT_CARD, CASH, TRANSFER.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class PaymentMethodAggregate
 {
     public PaymentMethodId Id   { get; private set; }

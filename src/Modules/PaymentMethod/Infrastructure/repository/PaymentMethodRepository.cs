@@ -16,12 +16,12 @@ public sealed class PaymentMethodRepository : IPaymentMethodRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static PaymentMethodAggregate ToDomain(PaymentMethodEntity entity)
         => new(new PaymentMethodId(entity.Id), entity.Name);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<PaymentMethodAggregate?> GetByIdAsync(
         PaymentMethodId   id,

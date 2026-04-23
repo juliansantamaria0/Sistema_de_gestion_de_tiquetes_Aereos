@@ -16,7 +16,7 @@ public sealed class BaseFlightRepository : IBaseFlightRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static BaseFlightAggregate ToDomain(BaseFlightEntity entity)
         => new(
@@ -27,7 +27,7 @@ public sealed class BaseFlightRepository : IBaseFlightRepository
             entity.CreatedAt,
             entity.UpdatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<BaseFlightAggregate?> GetByIdAsync(
         BaseFlightId      id,
@@ -55,7 +55,7 @@ public sealed class BaseFlightRepository : IBaseFlightRepository
         BaseFlightAggregate baseFlight,
         CancellationToken   cancellationToken = default)
     {
-        // Id lo asigna la BD (AUTO_INCREMENT); no se incluye en la entidad al insertar.
+        
         var entity = new BaseFlightEntity
         {
             FlightCode = baseFlight.FlightCode,

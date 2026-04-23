@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using System.Collections;
@@ -9,6 +10,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
 
 public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : class
 {
+    private const int VarcharInputMaxLength = 60;
+
+    private static readonly object CancelActionSentinel = new();
+
+    private static string TruncateForVarchar60(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return value ?? string.Empty;
+        return value.Length <= VarcharInputMaxLength ? value : value[..VarcharInputMaxLength];
+    }
+
     public string Key { get; }
     public string Title { get; }
 
@@ -28,13 +40,15 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         using var scope = _scopeFactory.CreateScope();
         var modules = scope.ServiceProvider.GetServices<IModuleUI>();
 
+        var target = ModuleKeyNormalizer.Normalize(relatedServiceName);
+
         return modules.FirstOrDefault(m =>
-            string.Equals(m.Key, relatedServiceName, StringComparison.OrdinalIgnoreCase) ||
-            string.Equals(m.Title, relatedServiceName, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(ModuleKeyNormalizer.Normalize(m.Key), target, StringComparison.Ordinal) ||
+            string.Equals(ModuleKeyNormalizer.Normalize(m.Title), target, StringComparison.Ordinal) ||
             string.Equals(
-                m.Title.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase),
-                relatedServiceName.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase),
-                StringComparison.OrdinalIgnoreCase));
+                ModuleKeyNormalizer.Normalize(m.Title.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase)),
+                target,
+                StringComparison.Ordinal));
     }
 
     public async Task RunAsync(CancellationToken cancellationToken = default)
@@ -53,18 +67,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
                 return;
 
             var selected = actions.First(a => a.Label == choice);
-            try
-            {
-                await selected.Handler(cancellationToken);
-            }
-            catch (TargetInvocationException ex) when (ex.InnerException is not null)
-            {
-                AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.InnerException.Message)}[/]");
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
-            }
+            await selected.Handler(cancellationToken);
 
             AnsiConsole.MarkupLine("[grey]Presiona una tecla para continuar...[/]");
             Console.ReadKey(intercept: true);
@@ -135,7 +138,10 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         var item = await SelectExistingItemAsync(ct, allowNone: true);
         if (item is null)
+        {
+            AnsiConsole.MarkupLine("[grey]Operación cancelada.[/]");
             return;
+        }
 
         var grid = new Grid();
         grid.AddColumn();
@@ -149,39 +155,61 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
 
     private async Task ExecuteActionAsync(MethodInfo method, CancellationToken ct)
     {
-        object? selectedItem = null;
-        var parameters = method.GetParameters().Where(p => p.ParameterType != typeof(CancellationToken)).ToList();
-
-        if (parameters.Count > 0 && IsIdentityParameter(parameters[0]))
+        try
         {
-            selectedItem = await SelectExistingItemAsync(ct, allowNone: true);
-            if (selectedItem is null)
-                return;
-        }
+            object? selectedItem = null;
+            var parameters = method.GetParameters().Where(p => p.ParameterType != typeof(CancellationToken)).ToList();
 
-        var args = new List<object?>();
-        foreach (var parameter in parameters)
-        {
-            if (selectedItem is not null && args.Count == 0 && IsIdentityParameter(parameter))
+            if (parameters.Count > 0 && IsIdentityParameter(parameters[0]))
             {
-                args.Add(GetIdentityValue(selectedItem));
-                continue;
+                selectedItem = await SelectExistingItemAsync(ct, allowNone: true);
+                if (selectedItem is null)
+                {
+                    AnsiConsole.MarkupLine("[grey]Operación cancelada.[/]");
+                    return;
+                }
             }
 
-            var defaultValue = selectedItem is null ? null : FindDefaultValue(selectedItem, parameter.Name!, parameter.ParameterType);
-            args.Add(await PromptForParameterAsync(parameter, defaultValue, ct));
+            var args = new List<object?>();
+            foreach (var parameter in parameters)
+            {
+                if (selectedItem is not null && args.Count == 0 && IsIdentityParameter(parameter))
+                {
+                    args.Add(GetIdentityValue(selectedItem));
+                    continue;
+                }
+
+                var defaultValue = selectedItem is null ? null : FindDefaultValue(selectedItem, parameter.Name!, parameter.ParameterType);
+                args.Add(await PromptForParameterAsync(parameter, defaultValue, ct));
+            }
+
+            if (method.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken)))
+                args.Add(ct);
+
+            await using var scope = _scopeFactory.CreateAsyncScope();
+            var service = scope.ServiceProvider.GetRequiredService<TService>();
+            var result = await InvokeAsync(method, args.ToArray(), service);
+
+            AnsiConsole.MarkupLine("[green]Operación completada.[/]");
+            if (result is not null)
+                RenderSingleObject(result);
         }
-
-        if (method.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken)))
-            args.Add(ct);
-
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var service = scope.ServiceProvider.GetRequiredService<TService>();
-        var result = await InvokeAsync(method, args.ToArray(), service);
-
-        AnsiConsole.MarkupLine("[green]Operación completada.[/]");
-        if (result is not null)
-            RenderSingleObject(result);
+        catch (FlowAbortException)
+        {
+            AnsiConsole.MarkupLine("[grey]Operación cancelada.[/]");
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            AnsiConsole.MarkupLine("[red]El asiento ya fue confirmado por alguien más.[/]");
+        }
+        catch (DbUpdateException ex)
+        {
+            ConsoleErrorHandler.WriteFriendlyDbUpdateException(ex);
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+        }
     }
 
     private async Task DeleteAsync(CancellationToken ct)
@@ -195,7 +223,10 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
 
         var item = await SelectExistingItemAsync(ct, allowNone: true);
         if (item is null)
+        {
+            AnsiConsole.MarkupLine("[grey]Operación cancelada.[/]");
             return;
+        }
 
         if (!AnsiConsole.Confirm($"¿Eliminar [red]{Markup.Escape(GetChoiceLabel(item))}[/]?"))
             return;
@@ -204,11 +235,26 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         if (method.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken)))
             args.Add(ct);
 
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var service = scope.ServiceProvider.GetRequiredService<TService>();
-        await InvokeAsync(method, args.ToArray(), service);
+        try
+        {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+            var service = scope.ServiceProvider.GetRequiredService<TService>();
+            await InvokeAsync(method, args.ToArray(), service);
 
-        AnsiConsole.MarkupLine("[green]Registro eliminado.[/]");
+            AnsiConsole.MarkupLine("[green]Registro eliminado.[/]");
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            AnsiConsole.MarkupLine("[red]El asiento ya fue confirmado por alguien más.[/]");
+        }
+        catch (DbUpdateException ex)
+        {
+            ConsoleErrorHandler.WriteFriendlyDbUpdateException(ex);
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]{Markup.Escape(ex.Message)}[/]");
+        }
     }
 
     private async Task<IReadOnlyList<object>> GetAllItemsAsync(CancellationToken ct)
@@ -241,7 +287,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
 
         var choices = items.Select(i => new ChoiceItem(GetChoiceLabel(i), i)).ToList();
         if (allowNone)
-            choices.Insert(0, new ChoiceItem("Cancelar", null));
+            choices.Insert(0, new ChoiceItem("« Volver / cancelar »", null));
 
         var selected = AnsiConsole.Prompt(
             new SelectionPrompt<ChoiceItem>()
@@ -272,14 +318,19 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
 
         if (type == typeof(string))
         {
-            var promptTitle = $"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)}";
+            var promptTitle = $"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)} [grey](escriba cancelar para volver)[/]";
             var raw = IsSensitiveParameter(parameter.Name)
                 ? AnsiConsole.Prompt(new TextPrompt<string>(promptTitle).Secret())
                 : AnsiConsole.Ask<string>(promptTitle);
 
-            return string.IsNullOrWhiteSpace(raw) && defaultValue is string s
-                ? s
-                : raw?.Trim() ?? string.Empty;
+            var trimmed = raw?.Trim() ?? string.Empty;
+            if (!IsSensitiveParameter(parameter.Name) && IsUserCancelInput(trimmed))
+                throw new FlowAbortException();
+
+            var resolved = string.IsNullOrWhiteSpace(trimmed) && defaultValue is string s
+                ? TruncateForVarchar60(s)
+                : TruncateForVarchar60(trimmed);
+            return resolved;
         }
 
         if (type == typeof(int))
@@ -306,7 +357,11 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         if (type.IsClass && type != typeof(string))
             return await BuildComplexObjectAsync(type, defaultValue, ct);
 
-        var text = AnsiConsole.Ask<string>($"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)}").Trim();
+        var text = TruncateForVarchar60(
+            AnsiConsole.Ask<string>($"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)} [grey](cancelar para volver)[/]").Trim());
+        if (IsUserCancelInput(text))
+            throw new FlowAbortException();
+
         return string.IsNullOrWhiteSpace(text)
             ? defaultValue
             : Convert.ChangeType(text, type, CultureInfo.InvariantCulture);
@@ -367,13 +422,13 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             var createNow = AnsiConsole.Confirm($"¿Deseas crear un registro en [green]{Markup.Escape(moduleTitle)}[/] ahora?");
 
             if (!createNow)
-                return (false, null);
+                throw new FlowAbortException();
 
             var module = ResolveModuleUI(relatedServiceName);
             if (module is null)
             {
                 AnsiConsole.MarkupLine($"[red]No se encontró el módulo UI para {Markup.Escape(moduleTitle)}.[/]");
-                return (false, null);
+                throw new FlowAbortException();
             }
 
             await module.RunAsync(ct);
@@ -392,11 +447,14 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             if (items.Count == 0)
             {
                 AnsiConsole.MarkupLine($"[yellow]Aún no hay datos para {Markup.Escape(friendlyName)}.[/]");
-                return (false, null);
+                throw new FlowAbortException();
             }
         }
 
-        var choices = new List<ChoiceItem>();
+        var choices = new List<ChoiceItem>
+        {
+            new("« Cancelar esta acción »", CancelActionSentinel)
+        };
         if (nullable)
             choices.Add(new ChoiceItem("Ninguno", null));
 
@@ -408,6 +466,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
                 .UseConverter(c => c.Label)
                 .PageSize(15)
                 .AddChoices(choices));
+
+        if (ReferenceEquals(selected.Value, CancelActionSentinel))
+            throw new FlowAbortException();
 
         return (true, selected.Value is null ? null : Convert.ToInt32(selected.Value, CultureInfo.InvariantCulture));
     }
@@ -531,6 +592,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             "checkin" => "Check-in",
             "payment" => "Pagos",
             "refund" => "Reembolsos",
+            "faretype" => "Tipos de tarifa",
             _ => fallback
         };
 
@@ -721,11 +783,18 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         return null;
     }
 
+    private static bool IsUserCancelInput(string raw) =>
+        string.Equals(raw, "cancelar", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(raw, "salir", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(raw, "q", StringComparison.OrdinalIgnoreCase);
+
     private static int? PromptInt(string title, int? defaultValue, bool nullable)
     {
         while (true)
         {
-            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)}").Trim();
+            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)} [grey](cancelar para volver)[/]").Trim();
+            if (IsUserCancelInput(raw))
+                throw new FlowAbortException();
             if (string.IsNullOrWhiteSpace(raw) && defaultValue.HasValue) return defaultValue.Value;
             if (string.IsNullOrWhiteSpace(raw) && nullable) return null;
             if (int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) return value;
@@ -737,7 +806,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         while (true)
         {
-            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)}").Trim();
+            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)} [grey](cancelar para volver)[/]").Trim();
+            if (IsUserCancelInput(raw))
+                throw new FlowAbortException();
             if (string.IsNullOrWhiteSpace(raw) && defaultValue.HasValue) return defaultValue.Value;
             if (string.IsNullOrWhiteSpace(raw) && nullable) return null;
             if (byte.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) return value;
@@ -749,7 +820,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         while (true)
         {
-            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)}").Trim();
+            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)} [grey](cancelar para volver)[/]").Trim();
+            if (IsUserCancelInput(raw))
+                throw new FlowAbortException();
             if (string.IsNullOrWhiteSpace(raw) && defaultValue.HasValue) return defaultValue.Value;
             if (string.IsNullOrWhiteSpace(raw) && nullable) return null;
             if (decimal.TryParse(raw, NumberStyles.Number, CultureInfo.InvariantCulture, out var value)) return value;
@@ -761,7 +834,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         while (true)
         {
-            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)}").Trim();
+            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)} [grey](cancelar para volver)[/]").Trim();
+            if (IsUserCancelInput(raw))
+                throw new FlowAbortException();
             if (string.IsNullOrWhiteSpace(raw) && defaultValue.HasValue) return defaultValue.Value;
             if (DateTime.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) return value;
             AnsiConsole.MarkupLine("[red]Ingrese una fecha válida.[/] [grey](Ej: 2026-04-22 14:30)[/]");
@@ -772,7 +847,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         while (true)
         {
-            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)}").Trim();
+            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)} [grey](cancelar para volver)[/]").Trim();
+            if (IsUserCancelInput(raw))
+                throw new FlowAbortException();
             if (string.IsNullOrWhiteSpace(raw) && defaultValue.HasValue) return defaultValue.Value;
             if (string.IsNullOrWhiteSpace(raw) && nullable) return null;
             if (DateOnly.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) return value;
@@ -784,7 +861,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         while (true)
         {
-            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)}").Trim();
+            var raw = AnsiConsole.Ask<string>($"{title}{RenderDefault(defaultValue)} [grey](cancelar para volver)[/]").Trim();
+            if (IsUserCancelInput(raw))
+                throw new FlowAbortException();
             if (string.IsNullOrWhiteSpace(raw) && defaultValue.HasValue) return defaultValue.Value;
             if (string.IsNullOrWhiteSpace(raw) && nullable) return null;
             if (TimeOnly.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var value)) return value;

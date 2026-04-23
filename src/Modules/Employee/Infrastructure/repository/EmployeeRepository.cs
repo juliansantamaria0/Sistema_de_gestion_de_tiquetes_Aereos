@@ -29,6 +29,9 @@ public sealed class EmployeeRepository : IEmployeeRepository
         return list.Select(ToAggregate).ToList();
     }
 
+    public async Task<bool> ExistsByPersonIdAsync(int personId, CancellationToken ct = default)
+        => await _context.Employees.AsNoTracking().AnyAsync(x => x.PersonId == personId, ct);
+
     public async Task AddAsync(EmployeeAggregate entity, CancellationToken ct = default)
         => await _context.Employees.AddAsync(ToEntity(entity), ct);
 

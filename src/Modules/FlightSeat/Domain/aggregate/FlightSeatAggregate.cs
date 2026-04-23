@@ -2,19 +2,19 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Domain.Aggreg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Domain.ValueObject;
 
-/// <summary>
-/// Estado dinámico de un asiento concreto en un vuelo programado.
-/// SQL: flight_seat.
-///
-/// [IR-1] seat_map_id FK garantiza que el asiento exista en el mapa
-/// estático del tipo de aeronave asignado al vuelo.
-/// cabin_class_id fue eliminado del DDL — se obtiene vía seat_map.
-///
-/// UNIQUE: (scheduled_flight_id, seat_map_id).
-/// La única operación de negocio es cambiar el estado del asiento
-/// (AVAILABLE → OCCUPIED → BLOCKED) a través de ChangeStatus().
-/// scheduled_flight_id y seat_map_id forman la clave de negocio — inmutables.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class FlightSeatAggregate
 {
     public FlightSeatId Id                { get; private set; }
@@ -57,11 +57,11 @@ public sealed class FlightSeatAggregate
         UpdatedAt         = updatedAt;
     }
 
-    /// <summary>
-    /// Cambia el estado del asiento en este vuelo.
-    /// Es la única operación de negocio válida sobre flight_seat.
-    /// Ejemplo: AVAILABLE → OCCUPIED (al reservar), OCCUPIED → AVAILABLE (al cancelar).
-    /// </summary>
+    
+    
+    
+    
+    
     public void ChangeStatus(int seatStatusId)
     {
         if (seatStatusId <= 0)

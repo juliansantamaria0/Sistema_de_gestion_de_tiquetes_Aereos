@@ -16,7 +16,7 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static BoardingPassAggregate ToDomain(BoardingPassEntity entity)
         => new(
@@ -26,7 +26,7 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
             entity.BoardingGroup,
             entity.FlightSeatId);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<BoardingPassAggregate?> GetByIdAsync(
         BoardingPassId    id,
@@ -54,7 +54,7 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
         int               checkInId,
         CancellationToken cancellationToken = default)
     {
-        // check_in_id es UNIQUE — FirstOrDefault es correcto.
+        
         var entity = await _context.BoardingPasses
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.CheckInId == checkInId, cancellationToken);
@@ -85,8 +85,8 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
             ?? throw new KeyNotFoundException(
                 $"BoardingPassEntity with id {boardingPass.Id.Value} not found.");
 
-        // Solo GateId y BoardingGroup son mutables (cambios operativos de última hora).
-        // CheckInId y FlightSeatId son inmutables.
+        
+        
         entity.GateId        = boardingPass.GateId;
         entity.BoardingGroup = boardingPass.BoardingGroup;
 

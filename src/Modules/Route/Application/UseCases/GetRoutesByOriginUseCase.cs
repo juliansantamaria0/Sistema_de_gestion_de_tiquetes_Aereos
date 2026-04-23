@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Application.UseCas
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Domain.Repositories;
 
-/// <summary>Obtiene todas las rutas que parten de un aeropuerto origen.</summary>
+
 public sealed class GetRoutesByOriginUseCase
 {
     private readonly IRouteRepository _repository;

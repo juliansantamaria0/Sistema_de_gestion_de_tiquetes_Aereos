@@ -12,4 +12,6 @@ public interface IPaymentRepository
     Task                                AddAsync(PaymentAggregate payment,                  CancellationToken cancellationToken = default);
     Task                                UpdateAsync(PaymentAggregate payment,               CancellationToken cancellationToken = default);
     Task                                DeleteAsync(PaymentId id,                           CancellationToken cancellationToken = default);
+
+    Task<decimal> SumApprovedPaymentsForReservationAsync(int reservationId, CancellationToken cancellationToken = default);
 }

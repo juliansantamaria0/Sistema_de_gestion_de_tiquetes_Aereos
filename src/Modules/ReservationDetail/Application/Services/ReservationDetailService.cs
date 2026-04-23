@@ -73,7 +73,7 @@ public sealed class ReservationDetailService : IReservationDetailService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static ReservationDetailDto ToDto(ReservationDetailAggregate agg)
         => new(

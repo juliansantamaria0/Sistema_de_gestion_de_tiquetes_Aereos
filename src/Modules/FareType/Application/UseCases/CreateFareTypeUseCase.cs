@@ -25,17 +25,11 @@ public sealed class CreateFareTypeUseCase
         CancellationToken cancellationToken = default)
     {
         var fareType = new FareTypeAggregate(
-            new FareTypeId(await GetNextIdAsync(cancellationToken)), name, isRefundable, isChangeable,
+            new FareTypeId(0), name, isRefundable, isChangeable,
             advancePurchaseDays, baggageIncluded);
 
         await _repository.AddAsync(fareType, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return fareType;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

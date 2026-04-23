@@ -16,12 +16,12 @@ public sealed class DelayReasonRepository : IDelayReasonRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static DelayReasonAggregate ToDomain(DelayReasonEntity entity)
         => new(new DelayReasonId(entity.Id), entity.Name, entity.Category);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<DelayReasonAggregate?> GetByIdAsync(
         DelayReasonId     id,

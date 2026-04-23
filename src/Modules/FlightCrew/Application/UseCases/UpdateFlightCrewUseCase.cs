@@ -4,11 +4,11 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Domain.Repositori
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCrew.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Caso de uso: reasignar el rol operativo de un tripulante en un vuelo.
-/// Solo crew_role_id es modificable; los identificadores del vuelo
-/// y el empleado forman la clave de negocio y no se alteran.
-/// </summary>
+
+
+
+
+
 public sealed class UpdateFlightCrewUseCase
 {
     private readonly IFlightCrewRepository _repository;

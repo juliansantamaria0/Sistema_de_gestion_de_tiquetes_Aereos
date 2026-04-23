@@ -2,12 +2,12 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatusHistory.Doma
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatusHistory.Domain.ValueObject;
 
-/// <summary>
-/// Registro de cambio de estado de un tiquete (RF-14).
-/// SQL: ticket_status_history. [NC-8] id renombrado.
-/// Tabla de auditoría — INMUTABLE tras inserción.
-/// UNIQUE: (ticket_id, ticket_status_id, changed_at).
-/// </summary>
+
+
+
+
+
+
 public sealed class TicketStatusHistoryAggregate
 {
     public TicketStatusHistoryId Id             { get; private set; }

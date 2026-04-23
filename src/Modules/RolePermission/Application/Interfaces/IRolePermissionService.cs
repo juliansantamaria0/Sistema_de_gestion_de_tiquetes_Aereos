@@ -6,10 +6,10 @@ public interface IRolePermissionService
     Task<RolePermissionDto?>              GetByIdAsync(int id,                              CancellationToken ct = default);
     Task<IReadOnlyList<RolePermissionDto>> GetAllAsync(CancellationToken ct = default);
     Task<IReadOnlyList<RolePermissionDto>> GetByRoleIdAsync(int roleId, CancellationToken ct = default);
-    // Update no aplica — se elimina y recrea
+    
     Task                                  DeleteAsync(int id, CancellationToken ct = default);
 }
 
 public sealed record RolePermissionDto(int RolePermissionId, int RoleId, int PermissionId);
 public sealed record CreateRolePermissionRequest(int RoleId, int PermissionId);
-// UpdateRolePermissionRequest intencionalmente omitido (no tiene semántica en tabla de unión)
+

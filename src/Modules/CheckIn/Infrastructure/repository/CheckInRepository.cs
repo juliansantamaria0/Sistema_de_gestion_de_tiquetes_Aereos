@@ -16,7 +16,7 @@ public sealed class CheckInRepository : ICheckInRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static CheckInAggregate ToDomain(CheckInEntity entity)
         => new(
@@ -26,7 +26,7 @@ public sealed class CheckInRepository : ICheckInRepository
             entity.CheckInStatusId,
             entity.CounterNumber);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<CheckInAggregate?> GetByIdAsync(
         CheckInId         id,
@@ -54,7 +54,7 @@ public sealed class CheckInRepository : ICheckInRepository
         int               ticketId,
         CancellationToken cancellationToken = default)
     {
-        // ticket_id es UNIQUE — FirstOrDefault es correcto.
+        
         var entity = await _context.CheckIns
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.TicketId == ticketId, cancellationToken);
@@ -85,8 +85,8 @@ public sealed class CheckInRepository : ICheckInRepository
             ?? throw new KeyNotFoundException(
                 $"CheckInEntity with id {checkIn.Id.Value} not found.");
 
-        // Solo CheckInStatusId y CounterNumber son mutables.
-        // TicketId y CheckInTime son inmutables.
+        
+        
         entity.CheckInStatusId = checkIn.CheckInStatusId;
         entity.CounterNumber   = checkIn.CounterNumber;
 

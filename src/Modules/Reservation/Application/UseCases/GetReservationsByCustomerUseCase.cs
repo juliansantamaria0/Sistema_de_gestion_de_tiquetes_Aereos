@@ -3,10 +3,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Domain.Repositories;
 
-/// <summary>
-/// Obtiene todas las reservas de un cliente.
-/// Caso de uso clave para el historial del cliente.
-/// </summary>
+
+
+
+
 public sealed class GetReservationsByCustomerUseCase
 {
     private readonly IReservationRepository _repository;

@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.Repositories
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Actualiza los datos de contacto del cliente (phone, email).
-/// PersonId no es modificable — define a quién identifica el cliente.
-/// </summary>
+
+
+
+
 public sealed class UpdateCustomerUseCase
 {
     private readonly ICustomerRepository _repository;

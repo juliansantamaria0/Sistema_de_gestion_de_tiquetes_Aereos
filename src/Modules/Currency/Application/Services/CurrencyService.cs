@@ -61,7 +61,7 @@ public sealed class CurrencyService : ICurrencyService
         CancellationToken cancellationToken = default)
         => await _update.ExecuteAsync(id, isoCode, name, symbol, cancellationToken);
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static CurrencyDto ToDto(
         Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Domain.Aggregate.CurrencyAggregate agg)

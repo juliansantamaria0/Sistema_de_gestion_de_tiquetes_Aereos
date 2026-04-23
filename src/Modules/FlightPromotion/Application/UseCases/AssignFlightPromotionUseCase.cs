@@ -5,7 +5,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.Repos
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>Asigna una promoción a un vuelo programado.</summary>
+
 public sealed class AssignFlightPromotionUseCase
 {
     private readonly IFlightPromotionRepository _repository;
@@ -23,16 +23,10 @@ public sealed class AssignFlightPromotionUseCase
         CancellationToken cancellationToken = default)
     {
         var fp = new FlightPromotionAggregate(
-            new FlightPromotionId(await GetNextIdAsync(cancellationToken)), scheduledFlightId, promotionId);
+            new FlightPromotionId(0), scheduledFlightId, promotionId);
 
         await _repository.AddAsync(fp, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return fp;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

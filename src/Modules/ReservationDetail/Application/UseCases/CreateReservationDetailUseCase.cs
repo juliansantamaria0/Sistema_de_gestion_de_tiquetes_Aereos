@@ -5,6 +5,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.Agg
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Constants;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
 public sealed class CreateReservationDetailUseCase
@@ -42,21 +43,14 @@ public sealed class CreateReservationDetailUseCase
             throw new InvalidOperationException($"No existe la tarifa con id {fareTypeId}.");
 
         var seat = await _context.FlightSeats
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == flightSeatId, cancellationToken)
             ?? throw new InvalidOperationException($"No existe el asiento de vuelo con id {flightSeatId}.");
 
         if (seat.ScheduledFlightId != reservation.ScheduledFlightId)
             throw new InvalidOperationException("El asiento seleccionado no pertenece al mismo vuelo programado de la reserva.");
 
-        var availableStatusId = await _context.SeatStatuses
-            .AsNoTracking()
-            .Where(x => x.Name == "AVAILABLE")
-            .Select(x => x.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (availableStatusId <= 0)
-            throw new InvalidOperationException("No existe el estado de asiento 'AVAILABLE'.");
+        var availableStatusId = await GetSeatStatusIdAsync(SeatStatusNames.Available, cancellationToken);
+        var reservedStatusId  = await GetSeatStatusIdAsync(SeatStatusNames.Reserved, cancellationToken);
 
         if (seat.SeatStatusId != availableStatusId)
             throw new InvalidOperationException("El asiento seleccionado ya no está disponible.");
@@ -80,6 +74,11 @@ public sealed class CreateReservationDetailUseCase
             throw new InvalidOperationException("Ese pasajero ya tiene un asiento asignado dentro de la reserva.");
 
         var now = DateTime.UtcNow;
+
+        
+        seat.SeatStatusId = reservedStatusId;
+        seat.UpdatedAt    = now;
+
         var entity = new ReservationDetailEntity
         {
             ReservationId = reservationId,
@@ -90,8 +89,17 @@ public sealed class CreateReservationDetailUseCase
             UpdatedAt = null
         };
 
-        await _context.ReservationDetails.AddAsync(entity, cancellationToken);
-        await _unitOfWork.CommitAsync(cancellationToken);
+        
+        var strategy = _context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            await _context.ReservationDetails.AddAsync(entity, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+
+            await tx.CommitAsync(cancellationToken);
+        });
 
         return new ReservationDetailAggregate(
             new ReservationDetailId(entity.Id),
@@ -101,5 +109,19 @@ public sealed class CreateReservationDetailUseCase
             entity.FareTypeId,
             entity.CreatedAt,
             entity.UpdatedAt);
+    }
+
+    private async Task<int> GetSeatStatusIdAsync(string name, CancellationToken cancellationToken)
+    {
+        var id = await _context.SeatStatuses
+            .AsNoTracking()
+            .Where(x => x.Name == name)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (id <= 0)
+            throw new InvalidOperationException($"No existe el estado de asiento '{name}'.");
+
+        return id;
     }
 }

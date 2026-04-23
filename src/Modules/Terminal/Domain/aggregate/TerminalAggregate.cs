@@ -2,10 +2,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Domain.Aggregat
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Domain.ValueObject;
 
-/// <summary>
-/// Agregado raíz del módulo Terminal.
-/// Una terminal pertenece a un aeropuerto y puede ser internacional o doméstica.
-/// </summary>
+
+
+
+
 public sealed class TerminalAggregate
 {
     public TerminalId Id              { get; private set; }

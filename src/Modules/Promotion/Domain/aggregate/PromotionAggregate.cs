@@ -2,20 +2,20 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Promotion.Domain.Aggrega
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Promotion.Domain.ValueObject;
 
-/// <summary>
-/// Promoción de aerolínea con descuento por porcentaje y vigencia.
-/// SQL: promotion.
-///
-/// valid_from y valid_until usan DateOnly (.NET 8) — columnas DATE en MySQL.
-/// Pomelo 8.x mapea DATE ↔ DateOnly de forma nativa.
-///
-/// CHECKs del DDL espejados:
-///   - discount_pct IN [0, 100]       [chk_promo_pct]
-///   - valid_until >= valid_from       [chk_promo_dates]
-///
-/// airline_id es la clave de contexto — inmutable.
-/// Update(): modifica nombre, porcentaje y rango de fechas.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class PromotionAggregate
 {
     public PromotionId Id          { get; private set; }
@@ -55,10 +55,10 @@ public sealed class PromotionAggregate
         ValidUntil  = validUntil;
     }
 
-    /// <summary>
-    /// Actualiza nombre, porcentaje y rango de vigencia.
-    /// AirlineId es la clave de contexto — inmutable.
-    /// </summary>
+    
+    
+    
+    
     public void Update(string name, decimal discountPct, DateOnly validFrom, DateOnly validUntil)
     {
         ValidateName(name);
@@ -71,7 +71,7 @@ public sealed class PromotionAggregate
         ValidUntil  = validUntil;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateName(string name)
     {

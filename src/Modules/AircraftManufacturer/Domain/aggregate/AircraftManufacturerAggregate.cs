@@ -2,10 +2,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftManufacturer.Dom
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftManufacturer.Domain.ValueObject;
 
-/// <summary>
-/// Fabricante de aeronaves. Pertenece a un país (country_id).
-/// Tabla SQL: aircraft_manufacturer. PK: manufacturer_id.
-/// </summary>
+
+
+
+
 public sealed class AircraftManufacturerAggregate
 {
     public AircraftManufacturerId Id        { get; private set; }

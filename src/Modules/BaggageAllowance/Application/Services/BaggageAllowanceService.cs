@@ -79,7 +79,7 @@ public sealed class BaggageAllowanceService : IBaggageAllowanceService
         return agg is null ? null : ToDto(agg);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static BaggageAllowanceDto ToDto(BaggageAllowanceAggregate agg)
         => new(

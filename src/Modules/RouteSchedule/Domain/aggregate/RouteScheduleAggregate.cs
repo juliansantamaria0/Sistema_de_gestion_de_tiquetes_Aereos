@@ -2,15 +2,15 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.RouteSchedule.Domain.Agg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RouteSchedule.Domain.ValueObject;
 
-/// <summary>
-/// Horario recurrente de operación de un vuelo base [TN-4].
-/// Representa en qué día(s) de la semana y a qué hora sale ese vuelo.
-/// 
-/// Invariantes:
-///   - day_of_week: 1 (Lunes) … 7 (Domingo) — ISO 8601 (CHECK SQL).
-///   - departure_time: hora válida — representada con TimeOnly (.NET 8).
-///   - UNIQUE (base_flight_id, day_of_week, departure_time).
-/// </summary>
+
+
+
+
+
+
+
+
+
 public sealed class RouteScheduleAggregate
 {
     public RouteScheduleId Id            { get; private set; }
@@ -43,11 +43,11 @@ public sealed class RouteScheduleAggregate
         DepartureTime = departureTime;
     }
 
-    /// <summary>
-    /// Actualiza el horario recurrente.
-    /// base_flight_id no se permite cambiar (cambiaría la identidad del vuelo);
-    /// solo se actualizan día y hora.
-    /// </summary>
+    
+    
+    
+    
+    
     public void Update(byte dayOfWeek, TimeOnly departureTime)
     {
         if (dayOfWeek < 1 || dayOfWeek > 7)
@@ -59,7 +59,7 @@ public sealed class RouteScheduleAggregate
         DepartureTime = departureTime;
     }
 
-    /// <summary>Nombre legible del día según ISO 8601.</summary>
+    
     public string DayOfWeekName => DayOfWeek switch
     {
         1 => "Monday",

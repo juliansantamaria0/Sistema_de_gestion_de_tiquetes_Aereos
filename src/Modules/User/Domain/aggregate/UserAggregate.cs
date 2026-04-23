@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Domain.ValueObject;
 
-/// <summary>
-/// Usuario del sistema. Extiende Person con credenciales de acceso.
-/// Invariante: passwordHash NUNCA se almacena en texto plano.
-/// La capa de aplicación es responsable de hashear antes de llamar Create/Update.
-/// </summary>
+
+
+
+
+
 public sealed class UserAggregate
 {
     public UserId    Id           { get; private set; }

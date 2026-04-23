@@ -7,7 +7,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 
-/// <summary>Repositorio EF Core para Gate.</summary>
+
 public sealed class GateRepository : IGateRepository
 {
     private readonly AppDbContext _context;

@@ -2,17 +2,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageType.Domain.Aggre
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageType.Domain.ValueObject;
 
-/// <summary>
-/// Tipo de equipaje adicional cobrable (por encima de la franquicia incluida).
-/// SQL: baggage_type.
-///
-/// Invariantes:
-///   - name: máximo 80 caracteres, UNIQUE, normalizado a mayúsculas.
-///   - max_weight_kg: peso máximo para este tipo de equipaje.
-///   - extra_fee >= 0 (espejo del chk_bt_fee).
-///
-/// Update(): modifica nombre, peso máximo y tarifa.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class BaggageTypeAggregate
 {
     public BaggageTypeId Id           { get; private set; }
@@ -53,7 +53,7 @@ public sealed class BaggageTypeAggregate
         ExtraFee    = extraFee;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateName(string name)
     {

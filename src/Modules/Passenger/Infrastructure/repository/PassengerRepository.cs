@@ -51,7 +51,7 @@ public sealed class PassengerRepository : IPassengerRepository
         int               personId,
         CancellationToken cancellationToken = default)
     {
-        // person_id es UNIQUE — FirstOrDefault correcto.
+        
         var entity = await _context.Passengers
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.PersonId == personId, cancellationToken);
@@ -83,7 +83,7 @@ public sealed class PassengerRepository : IPassengerRepository
             ?? throw new KeyNotFoundException(
                 $"PassengerEntity with id {passenger.Id.Value} not found.");
 
-        // PersonId es inmutable.
+        
         entity.FrequentFlyerNumber = passenger.FrequentFlyerNumber;
         entity.NationalityId       = passenger.NationalityId;
         entity.UpdatedAt           = passenger.UpdatedAt;

@@ -61,7 +61,7 @@ public sealed class CustomerService : ICustomerService
         CancellationToken cancellationToken = default)
         => await _update.ExecuteAsync(id, phone, email, cancellationToken);
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static CustomerDto ToDto(CustomerAggregate agg)
         => new(agg.Id.Value, agg.PersonId, agg.Phone, agg.Email, agg.CreatedAt, agg.UpdatedAt);

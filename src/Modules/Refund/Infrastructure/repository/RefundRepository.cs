@@ -16,7 +16,7 @@ public sealed class RefundRepository : IRefundRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static RefundAggregate ToDomain(RefundEntity entity)
         => new(
@@ -28,7 +28,7 @@ public sealed class RefundRepository : IRefundRepository
             entity.ProcessedAt,
             entity.Reason);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<RefundAggregate?> GetByIdAsync(
         RefundId          id,
@@ -90,8 +90,8 @@ public sealed class RefundRepository : IRefundRepository
             ?? throw new KeyNotFoundException(
                 $"RefundEntity with id {refund.Id.Value} not found.");
 
-        // Solo RefundStatusId, ProcessedAt y Reason son mutables.
-        // PaymentId, Amount y RequestedAt son inmutables.
+        
+        
         entity.RefundStatusId = refund.RefundStatusId;
         entity.ProcessedAt    = refund.ProcessedAt;
         entity.Reason         = refund.Reason;

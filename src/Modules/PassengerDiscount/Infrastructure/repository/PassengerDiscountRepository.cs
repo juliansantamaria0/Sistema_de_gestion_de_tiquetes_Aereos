@@ -16,7 +16,7 @@ public sealed class PassengerDiscountRepository : IPassengerDiscountRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static PassengerDiscountAggregate ToDomain(PassengerDiscountEntity entity)
         => new(
@@ -25,7 +25,7 @@ public sealed class PassengerDiscountRepository : IPassengerDiscountRepository
             entity.DiscountTypeId,
             entity.AmountApplied);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<PassengerDiscountAggregate?> GetByIdAsync(
         PassengerDiscountId id,
@@ -85,8 +85,8 @@ public sealed class PassengerDiscountRepository : IPassengerDiscountRepository
             ?? throw new KeyNotFoundException(
                 $"PassengerDiscountEntity with id {passengerDiscount.Id.Value} not found.");
 
-        // Solo AmountApplied es mutable.
-        // ReservationDetailId y DiscountTypeId forman la clave de negocio.
+        
+        
         entity.AmountApplied = passengerDiscount.AmountApplied;
 
         _context.PassengerDiscounts.Update(entity);

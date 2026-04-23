@@ -3,11 +3,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Application.UseC
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Domain.Repositories;
 
-/// <summary>
-/// Obtiene todos los asientos del mapa de un tipo de aeronave.
-/// Caso de uso clave para consultar la capacidad y distribución antes
-/// de generar instancias de flight_seat para un vuelo concreto.
-/// </summary>
+
+
+
+
+
 public sealed class GetSeatMapsByAircraftTypeUseCase
 {
     private readonly ISeatMapRepository _repository;

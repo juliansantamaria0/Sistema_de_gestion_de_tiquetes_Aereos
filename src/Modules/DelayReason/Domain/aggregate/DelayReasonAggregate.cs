@@ -2,14 +2,14 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.DelayReason.Domain.Aggre
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DelayReason.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de razones de retraso de vuelos.
-/// SQL: delay_reason.
-///
-/// name: identificador único del motivo (WEATHER, TECHNICAL, ATC, CREW, COMMERCIAL).
-/// category: agrupación del motivo (ej.: METEOROLOGICAL, MECHANICAL, OPERATIONAL).
-/// Ambos campos se normalizan a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
+
+
+
 public sealed class DelayReasonAggregate
 {
     public DelayReasonId Id       { get; private set; }
@@ -42,7 +42,7 @@ public sealed class DelayReasonAggregate
         Category = category.Trim().ToUpperInvariant();
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateName(string name)
     {

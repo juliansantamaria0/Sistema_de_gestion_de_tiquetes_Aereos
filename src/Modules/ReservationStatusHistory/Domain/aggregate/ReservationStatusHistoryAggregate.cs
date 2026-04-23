@@ -2,14 +2,14 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatusHistory
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationStatusHistory.Domain.ValueObject;
 
-/// <summary>
-/// Registro de cambio de estado de una reserva (RF-14).
-/// SQL: reservation_status_history. [NC-8] id renombrado.
-///
-/// Tabla de auditoría — INMUTABLE tras inserción.
-/// UNIQUE: (reservation_id, reservation_status_id, changed_at).
-/// notes: VARCHAR(250) NULL — contexto opcional del cambio.
-/// </summary>
+
+
+
+
+
+
+
+
 public sealed class ReservationStatusHistoryAggregate
 {
     public ReservationStatusHistoryId Id                  { get; private set; }

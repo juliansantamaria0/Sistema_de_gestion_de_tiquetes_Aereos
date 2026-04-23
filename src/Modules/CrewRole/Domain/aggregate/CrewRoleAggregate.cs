@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.CrewRole.Domain.Aggregat
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CrewRole.Domain.ValueObject;
 
-/// <summary>
-/// Rol operativo de un tripulante en un vuelo concreto.
-/// Distinto de job_position (cargo laboral estructural).
-/// Catálogo: CAPTAIN, FIRST_OFFICER, FLIGHT_ATTENDANT, PURSER.
-/// </summary>
+
+
+
+
+
 public sealed class CrewRoleAggregate
 {
     public CrewRoleId Id   { get; private set; }

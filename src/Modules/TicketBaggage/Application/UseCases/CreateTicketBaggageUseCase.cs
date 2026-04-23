@@ -23,19 +23,13 @@ public sealed class CreateTicketBaggageUseCase
         decimal           feeCharged,
         CancellationToken cancellationToken = default)
     {
-        // TicketBaggageId(1) es placeholder; EF Core asigna el Id real al insertar.
+        
         var ticketBaggage = new TicketBaggageAggregate(
-            new TicketBaggageId(await GetNextIdAsync(cancellationToken)),
+            new TicketBaggageId(0),
             ticketId, baggageTypeId, quantity, feeCharged);
 
         await _repository.AddAsync(ticketBaggage, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return ticketBaggage;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

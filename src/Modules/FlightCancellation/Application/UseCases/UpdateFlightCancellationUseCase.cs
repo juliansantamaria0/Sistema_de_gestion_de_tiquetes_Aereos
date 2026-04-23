@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Domain.Re
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCancellation.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Actualiza las notas adicionales de una cancelación de vuelo.
-/// ScheduledFlightId, CancellationReasonId y CancelledAt son inmutables.
-/// </summary>
+
+
+
+
 public sealed class UpdateFlightCancellationUseCase
 {
     private readonly IFlightCancellationRepository _repository;

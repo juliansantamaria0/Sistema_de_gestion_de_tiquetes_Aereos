@@ -2,10 +2,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.ValueObject;
 
-/// <summary>
-/// Agregado raíz del módulo Gate.
-/// Una puerta pertenece a una terminal y tiene un código único dentro de ella.
-/// </summary>
+
+
+
+
 public sealed class GateAggregate
 {
     public GateId  Id         { get; private set; }

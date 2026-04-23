@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Application.Use
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Application.Interfaces;
 
-/// <summary>Caso de uso: Actualizar terminal.</summary>
+
 public sealed class UpdateTerminalUseCase
 {
     private readonly ITerminalService _service;

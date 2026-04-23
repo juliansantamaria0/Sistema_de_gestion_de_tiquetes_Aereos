@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Domain.Reposit
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Ajusta la cantidad de piezas y la tarifa cobrada.
-/// ticket_id y baggage_type_id son la clave de negocio — inmutables.
-/// </summary>
+
+
+
+
 public sealed class UpdateTicketBaggageUseCase
 {
     private readonly ITicketBaggageRepository _repository;

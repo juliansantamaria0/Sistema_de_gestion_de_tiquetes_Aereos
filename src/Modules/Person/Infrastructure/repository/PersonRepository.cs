@@ -93,7 +93,7 @@ public sealed class PersonRepository : IPersonRepository
             ?? throw new KeyNotFoundException(
                 $"PersonEntity with id {person.Id.Value} not found.");
 
-        // DocumentTypeId y DocumentNumber son inmutables.
+        
         entity.FirstName  = person.FirstName;
         entity.LastName   = person.LastName;
         entity.BirthDate  = person.BirthDate;

@@ -21,16 +21,10 @@ public sealed class CreateDiscountTypeUseCase
         CancellationToken cancellationToken = default)
     {
         var discountType = new DiscountTypeAggregate(
-            new DiscountTypeId(await GetNextIdAsync(cancellationToken)), name, percentage, ageMin, ageMax);
+            new DiscountTypeId(0), name, percentage, ageMin, ageMax);
 
         await _repository.AddAsync(discountType, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return discountType;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

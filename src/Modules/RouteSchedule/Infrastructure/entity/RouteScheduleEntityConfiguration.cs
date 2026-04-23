@@ -23,12 +23,12 @@ public sealed class RouteScheduleEntityConfiguration : IEntityTypeConfiguration<
                .HasColumnName("day_of_week")
                .IsRequired();
 
-        // Pomelo 8.x mapea TimeOnly ↔ TIME de MySQL de forma nativa.
+        
         builder.Property(e => e.DepartureTime)
                .HasColumnName("departure_time")
                .IsRequired();
 
-        // UNIQUE (base_flight_id, day_of_week, departure_time) — espejo de uq_rs
+        
         builder.HasIndex(e => new { e.BaseFlightId, e.DayOfWeek, e.DepartureTime })
                .IsUnique()
                .HasDatabaseName("uq_rs");builder.HasOne<BaseFlightEntity>()

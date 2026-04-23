@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Applicat
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.Repositories;
 
-/// <summary>Obtiene todas las promociones asignadas a un vuelo.</summary>
+
 public sealed class GetFlightPromotionsByFlightUseCase
 {
     private readonly IFlightPromotionRepository _repository;

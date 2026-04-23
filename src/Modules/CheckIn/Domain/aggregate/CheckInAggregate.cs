@@ -2,17 +2,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Domain.Aggregate
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Domain.ValueObject;
 
-/// <summary>
-/// Registro del proceso de check-in de un pasajero.
-/// SQL: check_in.
-///
-/// UNIQUE: ticket_id — un tiquete solo puede hacer check-in una vez.
-/// check_in_time es inmutable tras la creación (registra el momento exacto).
-///
-/// ChangeStatus(): única mutación válida.
-///   - Actualiza el estado del check-in (PENDING → CHECKED_IN → BOARDED).
-///   - Opcionalmente actualiza el número de mostrador.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class CheckInAggregate
 {
     public CheckInId Id               { get; private set; }
@@ -50,10 +50,10 @@ public sealed class CheckInAggregate
         CounterNumber   = counterNumber?.Trim();
     }
 
-    /// <summary>
-    /// Actualiza el estado del check-in y opcionalmente el número de mostrador.
-    /// ticket_id y check_in_time son inmutables.
-    /// </summary>
+    
+    
+    
+    
     public void ChangeStatus(int checkInStatusId, string? counterNumber = null)
     {
         if (checkInStatusId <= 0)
@@ -66,7 +66,7 @@ public sealed class CheckInAggregate
         CounterNumber   = counterNumber?.Trim() ?? CounterNumber;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateCounterNumber(string? counterNumber)
     {

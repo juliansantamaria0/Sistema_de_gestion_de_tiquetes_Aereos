@@ -27,7 +27,7 @@ public sealed class FlightCabinPriceEntityConfiguration
                .HasColumnName("fare_type_id")
                .IsRequired();
 
-        // UNIQUE (scheduled_flight_id, cabin_class_id, fare_type_id) — espejo de uq_fcp
+        
         builder.HasIndex(e => new { e.ScheduledFlightId, e.CabinClassId, e.FareTypeId })
                .IsUnique()
                .HasDatabaseName("uq_fcp");

@@ -4,7 +4,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.Repos
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightPromotion.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>Elimina la asignación de una promoción a un vuelo.</summary>
+
 public sealed class RemoveFlightPromotionUseCase
 {
     private readonly IFlightPromotionRepository _repository;

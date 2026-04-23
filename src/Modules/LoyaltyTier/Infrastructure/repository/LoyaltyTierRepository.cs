@@ -83,7 +83,7 @@ public sealed class LoyaltyTierRepository : ILoyaltyTierRepository
             ?? throw new KeyNotFoundException(
                 $"LoyaltyTierEntity with id {loyaltyTier.Id.Value} not found.");
 
-        // LoyaltyProgramId es la clave de contexto — inmutable.
+        
         entity.Name     = loyaltyTier.Name;
         entity.MinMiles = loyaltyTier.MinMiles;
         entity.Benefits = loyaltyTier.Benefits;

@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Domain.Repo
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Actualiza el precio de una combinación (vuelo + clase + tarifa).
-/// scheduled_flight_id, cabin_class_id y fare_type_id son inmutables.
-/// </summary>
+
+
+
+
 public sealed class UpdateFlightCabinPriceUseCase
 {
     private readonly IFlightCabinPriceRepository _repository;

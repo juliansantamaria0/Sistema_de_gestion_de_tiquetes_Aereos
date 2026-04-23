@@ -6,17 +6,19 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Extensions;
 
 public sealed class TicketRepository : ITicketRepository
 {
     private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TicketRepository(AppDbContext context)
+    public TicketRepository(AppDbContext context, IUnitOfWork unitOfWork)
     {
         _context = context;
+        _unitOfWork = unitOfWork;
     }
-
-    // ── Mapeos privados ───────────────────────────────────────────────────────
 
     private static TicketAggregate ToDomain(TicketEntity entity)
         => new(
@@ -28,10 +30,8 @@ public sealed class TicketRepository : ITicketRepository
             entity.CreatedAt,
             entity.UpdatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
-
     public async Task<TicketAggregate?> GetByIdAsync(
-        TicketId          id,
+        TicketId id,
         CancellationToken cancellationToken = default)
     {
         var entity = await _context.Tickets
@@ -53,10 +53,9 @@ public sealed class TicketRepository : ITicketRepository
     }
 
     public async Task<TicketAggregate?> GetByReservationDetailAsync(
-        int               reservationDetailId,
+        int reservationDetailId,
         CancellationToken cancellationToken = default)
     {
-        // reservation_detail_id es UNIQUE — FirstOrDefault es correcto.
         var entity = await _context.Tickets
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.ReservationDetailId == reservationDetailId, cancellationToken);
@@ -64,24 +63,33 @@ public sealed class TicketRepository : ITicketRepository
         return entity is null ? null : ToDomain(entity);
     }
 
+    public async Task<bool> TicketStatusExistsAsync(int ticketStatusId, CancellationToken cancellationToken) =>
+        await _context.TicketStatuses.AsNoTracking().AnyAsync(x => x.Id == ticketStatusId, cancellationToken);
+
+    public async Task<bool> TicketCodeExistsAsync(string normalizedCode, CancellationToken cancellationToken) =>
+        await _context.Tickets.AsNoTracking().AnyAsync(x => x.TicketCode == normalizedCode, cancellationToken);
+
+    public async Task<bool> TicketExistsForReservationDetailAsync(int reservationDetailId, CancellationToken cancellationToken) =>
+        await _context.Tickets.AsNoTracking().AnyAsync(x => x.ReservationDetailId == reservationDetailId, cancellationToken);
+
     public async Task AddAsync(
-        TicketAggregate   ticket,
+        TicketAggregate ticket,
         CancellationToken cancellationToken = default)
     {
         var entity = new TicketEntity
         {
-            TicketCode          = ticket.TicketCode,
+            TicketCode = ticket.TicketCode,
             ReservationDetailId = ticket.ReservationDetailId,
-            IssueDate           = ticket.IssueDate,
-            TicketStatusId      = ticket.TicketStatusId,
-            CreatedAt           = ticket.CreatedAt,
-            UpdatedAt           = ticket.UpdatedAt
+            IssueDate = ticket.IssueDate,
+            TicketStatusId = ticket.TicketStatusId,
+            CreatedAt = ticket.CreatedAt,
+            UpdatedAt = ticket.UpdatedAt
         };
         await _context.Tickets.AddAsync(entity, cancellationToken);
     }
 
     public async Task UpdateAsync(
-        TicketAggregate   ticket,
+        TicketAggregate ticket,
         CancellationToken cancellationToken = default)
     {
         var entity = await _context.Tickets
@@ -89,16 +97,14 @@ public sealed class TicketRepository : ITicketRepository
             ?? throw new KeyNotFoundException(
                 $"TicketEntity with id {ticket.Id.Value} not found.");
 
-        // Solo TicketStatusId y UpdatedAt son mutables.
-        // TicketCode, ReservationDetailId e IssueDate son inmutables.
         entity.TicketStatusId = ticket.TicketStatusId;
-        entity.UpdatedAt      = ticket.UpdatedAt;
+        entity.UpdatedAt = ticket.UpdatedAt;
 
         _context.Tickets.Update(entity);
     }
 
     public async Task DeleteAsync(
-        TicketId          id,
+        TicketId id,
         CancellationToken cancellationToken = default)
     {
         var entity = await _context.Tickets
@@ -107,5 +113,45 @@ public sealed class TicketRepository : ITicketRepository
                 $"TicketEntity with id {id.Value} not found.");
 
         _context.Tickets.Remove(entity);
+    }
+
+    public async Task<TicketAggregate> IssueTicketWithHistoryAsync(
+        string ticketCodeNormalized,
+        int reservationDetailId,
+        int ticketStatusId,
+        CancellationToken cancellationToken = default)
+    {
+        var now = DateTime.UtcNow;
+
+        var ticketEntity = new TicketEntity
+        {
+            TicketCode = ticketCodeNormalized,
+            ReservationDetailId = reservationDetailId,
+            IssueDate = now,
+            TicketStatusId = ticketStatusId,
+            CreatedAt = now,
+            UpdatedAt = null
+        };
+
+        var strategy = _context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+            await _context.Tickets.AddAsync(ticketEntity, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+
+            await _context.AddTicketStatusHistoryAsync(
+                ticketEntity.Id,
+                ticketStatusId,
+                "Tiquete emitido",
+                now,
+                cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+
+            await transaction.CommitAsync(cancellationToken);
+        });
+
+        return ToDomain(ticketEntity);
     }
 }

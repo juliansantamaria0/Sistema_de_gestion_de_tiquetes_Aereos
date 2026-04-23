@@ -20,15 +20,9 @@ public sealed class CreateCountryUseCase
         string            name,
         CancellationToken cancellationToken = default)
     {
-        var country = new CountryAggregate(new CountryId(await GetNextIdAsync(cancellationToken)), name);
+        var country = new CountryAggregate(new CountryId(0), name);
         await _repository.AddAsync(country, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return country;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

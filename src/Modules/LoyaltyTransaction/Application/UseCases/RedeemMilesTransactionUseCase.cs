@@ -5,10 +5,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Domain.Re
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Registra una transacción de tipo REDEEM (redención de millas).
-/// El saldo de la cuenta debe actualizarse por separado vía LoyaltyAccount.RedeemMiles().
-/// </summary>
+
+
+
+
 public sealed class RedeemMilesTransactionUseCase
 {
     private readonly ILoyaltyTransactionRepository _repository;
@@ -27,7 +27,7 @@ public sealed class RedeemMilesTransactionUseCase
         CancellationToken cancellationToken = default)
     {
         var transaction = new LoyaltyTransactionAggregate(
-            new LoyaltyTransactionId(await GetNextIdAsync(cancellationToken)),
+            new LoyaltyTransactionId(0),
             loyaltyAccountId,
             ticketId,
             LoyaltyTransactionAggregate.TypeRedeem,
@@ -37,11 +37,5 @@ public sealed class RedeemMilesTransactionUseCase
         await _repository.AddAsync(transaction, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return transaction;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

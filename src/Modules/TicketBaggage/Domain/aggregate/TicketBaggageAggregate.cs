@@ -2,22 +2,22 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Domain.Agg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketBaggage.Domain.ValueObject;
 
-/// <summary>
-/// Equipaje adicional asociado a un tiquete.
-/// SQL: ticket_baggage. [NC-2] id renombrado a ticket_baggage_id.
-///
-/// 4NF: (ticket_id, baggage_type_id) → quantity, fee_charged.
-/// Sin MVD independientes — no viola 4NF.
-/// UNIQUE: (ticket_id, baggage_type_id).
-///
-/// Invariantes:
-///   - quantity > 0 (espejo de chk_tb_qty).
-///   - fee_charged >= 0 (tarifa cobrada, no puede ser negativa).
-///   - ticket_id y baggage_type_id son la clave de negocio — inmutables.
-///
-/// UpdateQuantity(): ajusta la cantidad de piezas de este tipo de equipaje.
-/// fee_charged también puede actualizarse si el precio cambia al modificar la cantidad.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class TicketBaggageAggregate
 {
     public TicketBaggageId Id            { get; private set; }
@@ -56,10 +56,10 @@ public sealed class TicketBaggageAggregate
         FeeCharged    = feeCharged;
     }
 
-    /// <summary>
-    /// Actualiza la cantidad y tarifa cobrada para este tipo de equipaje.
-    /// ticket_id y baggage_type_id son la clave de negocio — inmutables.
-    /// </summary>
+    
+    
+    
+    
     public void UpdateQuantityAndFee(int quantity, decimal feeCharged)
     {
         ValidateQuantity(quantity);
@@ -69,7 +69,7 @@ public sealed class TicketBaggageAggregate
         FeeCharged = feeCharged;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateQuantity(int quantity)
     {

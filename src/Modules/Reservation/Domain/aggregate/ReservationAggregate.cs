@@ -2,21 +2,21 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Domain.Aggre
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Domain.ValueObject;
 
-/// <summary>
-/// Reserva de un cliente para un vuelo concreto.
-/// SQL: reservation.
-///
-/// Invariantes (espejo de los CHECKs del DDL):
-///   1. confirmed_at >= reservation_date  (si no es null)
-///   2. cancelled_at >= reservation_date  (si no es null)
-///   3. confirmed_at y cancelled_at son mutuamente excluyentes (CHECK chk_mutual_excl)
-///
-/// Ciclo de vida: PENDING → CONFIRMED o PENDING → CANCELLED.
-/// Una reserva confirmada no puede cancelarse y viceversa
-/// (exclusión mutua garantizada en dominio y en BD).
-///
-/// reservation_code: código único de negocio, normalizado a mayúsculas.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class ReservationAggregate
 {
     public ReservationId Id                  { get; private set; }
@@ -73,11 +73,11 @@ public sealed class ReservationAggregate
         UpdatedAt           = updatedAt;
     }
 
-    /// <summary>
-    /// Confirma la reserva.
-    /// Precondición: no debe estar ya cancelada (exclusión mutua).
-    /// Establece confirmed_at = now y actualiza el status al ID proporcionado.
-    /// </summary>
+    
+    
+    
+    
+    
     public void Confirm(int confirmedStatusId)
     {
         if (CancelledAt.HasValue)
@@ -103,11 +103,11 @@ public sealed class ReservationAggregate
         UpdatedAt           = now;
     }
 
-    /// <summary>
-    /// Cancela la reserva.
-    /// Precondición: no debe estar ya confirmada (exclusión mutua).
-    /// Establece cancelled_at = now y actualiza el status al ID proporcionado.
-    /// </summary>
+    
+    
+    
+    
+    
     public void Cancel(int cancelledStatusId)
     {
         if (ConfirmedAt.HasValue)
@@ -133,12 +133,20 @@ public sealed class ReservationAggregate
         UpdatedAt           = now;
     }
 
-    /// <summary>
-    /// Cambia el estado de la reserva sin afectar confirmed_at ni cancelled_at.
-    /// Usado para transiciones intermedias de estado (ej: PENDING → ON_HOLD).
-    /// </summary>
+    
+    
+    
+    
     public void ChangeStatus(int reservationStatusId)
     {
+        if (ConfirmedAt.HasValue)
+            throw new InvalidOperationException(
+                "Cannot change status of a confirmed reservation. Use dedicated flows instead.");
+
+        if (CancelledAt.HasValue)
+            throw new InvalidOperationException(
+                "Cannot change status of a cancelled reservation.");
+
         if (reservationStatusId <= 0)
             throw new ArgumentException(
                 "ReservationStatusId must be a positive integer.", nameof(reservationStatusId));
@@ -147,7 +155,7 @@ public sealed class ReservationAggregate
         UpdatedAt           = DateTime.UtcNow;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateCode(string code)
     {
@@ -163,17 +171,17 @@ public sealed class ReservationAggregate
         DateTime? confirmedAt,
         DateTime? cancelledAt)
     {
-        // CHECK chk_confirmed_at
+        
         if (confirmedAt.HasValue && confirmedAt.Value < reservationDate)
             throw new ArgumentException(
                 "confirmed_at must be >= reservation_date.", nameof(confirmedAt));
 
-        // CHECK chk_cancelled_at
+        
         if (cancelledAt.HasValue && cancelledAt.Value < reservationDate)
             throw new ArgumentException(
                 "cancelled_at must be >= reservation_date.", nameof(cancelledAt));
 
-        // CHECK chk_mutual_excl
+        
         if (confirmedAt.HasValue && cancelledAt.HasValue)
             throw new ArgumentException(
                 "confirmed_at and cancelled_at are mutually exclusive.");

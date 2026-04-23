@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Domain.ValueObject;
 
-/// <summary>Value Object que representa el identificador único de una terminal.</summary>
+
 public readonly record struct TerminalId(int Value)
 {
     public static TerminalId New(int value)

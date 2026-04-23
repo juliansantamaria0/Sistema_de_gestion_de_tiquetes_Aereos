@@ -11,5 +11,5 @@ public interface IFlightPromotionRepository
     Task<IEnumerable<FlightPromotionAggregate>> GetByPromotionAsync(int promotionId,             CancellationToken cancellationToken = default);
     Task                                        AddAsync(FlightPromotionAggregate flightPromotion, CancellationToken cancellationToken = default);
     Task                                        DeleteAsync(FlightPromotionId id,                CancellationToken cancellationToken = default);
-    // UpdateAsync omitido — relación M:N inmutable.
+    
 }

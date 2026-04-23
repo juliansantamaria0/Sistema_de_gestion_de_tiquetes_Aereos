@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.RefundStatus.Domain.Aggr
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RefundStatus.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de estados de reembolso.
-/// Valores esperados: PENDING, APPROVED, REJECTED, PROCESSED.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class RefundStatusAggregate
 {
     public RefundStatusId Id   { get; private set; }

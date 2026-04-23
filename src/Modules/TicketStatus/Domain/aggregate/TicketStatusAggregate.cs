@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatus.Domain.Aggr
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.TicketStatus.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de estados de tiquete.
-/// Valores esperados: ISSUED, USED, CANCELLED, REFUNDED.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class TicketStatusAggregate
 {
     public TicketStatusId Id   { get; private set; }

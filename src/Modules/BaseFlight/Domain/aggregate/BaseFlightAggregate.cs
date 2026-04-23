@@ -2,12 +2,12 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Domain.Aggreg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Domain.ValueObject;
 
-/// <summary>
-/// Vuelo base: código IATA de vuelo + aerolínea + ruta.
-/// Representa la plantilla recurrente sin instancia concreta de fecha/hora.
-/// Invariante: flight_code debe tener al menos 2 caracteres (CHECK SQL).
-/// UNIQUE: (flight_code, airline_id).
-/// </summary>
+
+
+
+
+
+
 public sealed class BaseFlightAggregate
 {
     public BaseFlightId Id         { get; private set; }
@@ -54,10 +54,10 @@ public sealed class BaseFlightAggregate
         UpdatedAt  = updatedAt;
     }
 
-    /// <summary>
-    /// Actualiza los datos modificables del vuelo base.
-    /// Registra la fecha de modificación.
-    /// </summary>
+    
+    
+    
+    
     public void Update(string flightCode, int airlineId, int routeId)
     {
         if (string.IsNullOrWhiteSpace(flightCode))

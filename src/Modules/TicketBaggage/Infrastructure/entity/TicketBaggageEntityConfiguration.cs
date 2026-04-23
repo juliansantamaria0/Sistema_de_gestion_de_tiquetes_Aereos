@@ -23,7 +23,7 @@ public sealed class TicketBaggageEntityConfiguration : IEntityTypeConfiguration<
                .HasColumnName("baggage_type_id")
                .IsRequired();
 
-        // UNIQUE (ticket_id, baggage_type_id) — espejo de uq_tb
+        
         builder.HasIndex(e => new { e.TicketId, e.BaggageTypeId })
                .IsUnique()
                .HasDatabaseName("uq_tb");

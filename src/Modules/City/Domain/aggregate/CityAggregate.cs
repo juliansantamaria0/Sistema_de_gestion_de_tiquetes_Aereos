@@ -2,10 +2,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Domain.ValueObject;
 
-/// <summary>
-/// Agregado raíz del módulo City.
-/// Encapsula las reglas de negocio de una ciudad.
-/// </summary>
+
+
+
+
 public sealed class CityAggregate
 {
     public CityId Id { get; private set; }
@@ -15,7 +15,7 @@ public sealed class CityAggregate
 
     private CityAggregate() { }
 
-    /// <summary>Crea una nueva instancia de ciudad (sin persistir).</summary>
+    
     public static CityAggregate Create(string name, int countryId)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -33,7 +33,7 @@ public sealed class CityAggregate
         };
     }
 
-    /// <summary>Reconstituye el agregado desde persistencia.</summary>
+    
     public static CityAggregate Reconstitute(int id, string name, int countryId, DateTime createdAt)
     {
         return new CityAggregate
@@ -45,7 +45,7 @@ public sealed class CityAggregate
         };
     }
 
-    /// <summary>Actualiza los datos modificables de la ciudad.</summary>
+    
     public void Update(string name, int countryId)
     {
         if (string.IsNullOrWhiteSpace(name))

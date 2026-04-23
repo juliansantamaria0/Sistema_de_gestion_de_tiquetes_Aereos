@@ -3,9 +3,9 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Application.U
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Domain.Repositories;
 
-/// <summary>
-/// Obtiene todos los asientos (con su estado actual) de un vuelo programado.
-/// </summary>
+
+
+
 public sealed class GetFlightSeatsByFlightUseCase
 {
     private readonly IFlightSeatRepository _repository;

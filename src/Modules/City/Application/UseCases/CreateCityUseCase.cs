@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Application.UseCase
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Application.Interfaces;
 
-/// <summary>Caso de uso: Crear ciudad.</summary>
+
 public sealed class CreateCityUseCase
 {
     private readonly ICityService _service;

@@ -74,7 +74,7 @@ public sealed class TicketBaggageService : ITicketBaggageService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static TicketBaggageDto ToDto(TicketBaggageAggregate agg)
         => new(agg.Id.Value, agg.TicketId, agg.BaggageTypeId, agg.Quantity, agg.FeeCharged);

@@ -16,12 +16,12 @@ public sealed class BaggageTypeRepository : IBaggageTypeRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static BaggageTypeAggregate ToDomain(BaggageTypeEntity entity)
         => new(new BaggageTypeId(entity.Id), entity.Name, entity.MaxWeightKg, entity.ExtraFee);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<BaggageTypeAggregate?> GetByIdAsync(
         BaggageTypeId     id,

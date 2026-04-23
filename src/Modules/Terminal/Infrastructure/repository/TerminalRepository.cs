@@ -7,7 +7,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 
-/// <summary>Repositorio EF Core para Terminal.</summary>
+
 public sealed class TerminalRepository : ITerminalRepository
 {
     private readonly AppDbContext _context;

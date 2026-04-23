@@ -6,7 +6,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Domain.Repositories
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>Servicio de aplicación para el módulo Terminal.</summary>
+
 public sealed class TerminalService : ITerminalService
 {
     private readonly ITerminalRepository _repository;

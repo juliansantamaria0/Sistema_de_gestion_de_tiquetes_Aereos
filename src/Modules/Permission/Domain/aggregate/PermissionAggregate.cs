@@ -2,10 +2,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Permission.Domain.Aggreg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Permission.Domain.ValueObject;
 
-/// <summary>
-/// Permiso de sistema (acción granular).
-/// Ejemplos: flights.read, reservations.write, users.admin.
-/// </summary>
+
+
+
+
 public sealed class PermissionAggregate
 {
     public PermissionId Id          { get; private set; }

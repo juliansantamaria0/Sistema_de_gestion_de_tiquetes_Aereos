@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Enti
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-/// <summary>Configuración EF Core para <see cref="GateEntity"/>.</summary>
+
 public sealed class GateConfiguration : IEntityTypeConfiguration<GateEntity>
 {
     public void Configure(EntityTypeBuilder<GateEntity> builder)
@@ -20,7 +20,7 @@ public sealed class GateConfiguration : IEntityTypeConfiguration<GateEntity>
                .IsRequired()
                .HasDefaultValue(true);
 
-        // Índice único compuesto (terminal_id, code)
+        
         builder.HasIndex(e => new { e.TerminalId, e.Code })
                .IsUnique()
                .HasDatabaseName("uq_gate");builder.HasOne<TerminalEntity>()

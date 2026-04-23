@@ -58,7 +58,7 @@ public sealed class BaseFlightService : IBaseFlightService
         CancellationToken cancellationToken = default)
         => await _update.ExecuteAsync(id, flightCode, airlineId, routeId, cancellationToken);
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static BaseFlightDto ToDto(
         Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Domain.Aggregate.BaseFlightAggregate agg)

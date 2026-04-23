@@ -6,7 +6,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>Servicio de aplicación para el módulo Gate.</summary>
+
 public sealed class GateService : IGateService
 {
     private readonly IGateRepository _repository;

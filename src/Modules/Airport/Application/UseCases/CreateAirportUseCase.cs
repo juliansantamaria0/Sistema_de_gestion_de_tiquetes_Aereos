@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Application.UseC
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Application.Interfaces;
 
-/// <summary>Caso de uso: Crear aeropuerto.</summary>
+
 public sealed class CreateAirportUseCase
 {
     private readonly IAirportService _service;

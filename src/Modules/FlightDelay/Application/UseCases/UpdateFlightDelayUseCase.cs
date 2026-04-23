@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightDelay.Domain.Repositor
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightDelay.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Corrige los minutos de retraso de un registro existente.
-/// scheduled_flight_id, delay_reason_id y reported_at son inmutables.
-/// </summary>
+
+
+
+
 public sealed class UpdateFlightDelayUseCase
 {
     private readonly IFlightDelayRepository _repository;

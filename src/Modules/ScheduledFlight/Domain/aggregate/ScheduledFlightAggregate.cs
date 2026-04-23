@@ -2,20 +2,20 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Domain.A
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Domain.ValueObject;
 
-/// <summary>
-/// Instancia concreta de un vuelo programado para una fecha específica.
-/// SQL: scheduled_flight.
-///
-/// Tipos .NET 8:
-///   - departure_date  → DateOnly  (DATE SQL)
-///   - departure_time  → TimeOnly  (TIME SQL)
-///   - estimated_arrival_datetime → DateTime (DATETIME SQL — soporta vuelos nocturnos)
-///
-/// Invariantes:
-///   - estimated_arrival_datetime debe ser posterior al momento de salida combinado.
-///   - gate_id es nullable (puede asignarse después de crear el vuelo).
-///   - UNIQUE (base_flight_id, departure_date, departure_time).
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class ScheduledFlightAggregate
 {
     public ScheduledFlightId Id                       { get; private set; }
@@ -58,6 +58,10 @@ public sealed class ScheduledFlightAggregate
         if (flightStatusId <= 0)
             throw new ArgumentException("FlightStatusId must be a positive integer.", nameof(flightStatusId));
 
+        var todayUtc = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (departureDate < todayUtc)
+            throw new Exception("La fecha de salida programada no puede ser anterior al día actual (UTC).");
+
         ValidateArrivalAfterDeparture(departureDate, departureTime, estimatedArrivalDatetime);
 
         Id                       = id;
@@ -72,10 +76,10 @@ public sealed class ScheduledFlightAggregate
         UpdatedAt                = updatedAt;
     }
 
-    /// <summary>
-    /// Actualiza los datos operativos del vuelo programado.
-    /// base_flight_id no se permite cambiar (cambiaría la identidad del vuelo).
-    /// </summary>
+    
+    
+    
+    
     public void Update(
         int      aircraftId,
         int?     gateId,
@@ -104,7 +108,7 @@ public sealed class ScheduledFlightAggregate
         UpdatedAt                = DateTime.UtcNow;
     }
 
-    /// <summary>Asigna o cambia la puerta de embarque sin tocar otros campos.</summary>
+    
     public void AssignGate(int? gateId)
     {
         if (gateId.HasValue && gateId.Value <= 0)
@@ -114,7 +118,7 @@ public sealed class ScheduledFlightAggregate
         UpdatedAt = DateTime.UtcNow;
     }
 
-    /// <summary>Cambia el estado del vuelo (SCHEDULED → ACTIVE → COMPLETED, etc.).</summary>
+    
     public void ChangeStatus(int flightStatusId)
     {
         if (flightStatusId <= 0)
@@ -124,14 +128,14 @@ public sealed class ScheduledFlightAggregate
         UpdatedAt      = DateTime.UtcNow;
     }
 
-    // ── Helpers privados ──────────────────────────────────────────────────────
+    
 
     private static void ValidateArrivalAfterDeparture(
         DateOnly departureDate,
         TimeOnly departureTime,
         DateTime estimatedArrival)
     {
-        // Combina DateOnly + TimeOnly para construir el DateTime de salida (UTC).
+        
         var departureDateTime = departureDate.ToDateTime(departureTime, DateTimeKind.Utc);
 
         if (estimatedArrival <= departureDateTime)

@@ -16,7 +16,7 @@ public sealed class RouteScheduleRepository : IRouteScheduleRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static RouteScheduleAggregate ToDomain(RouteScheduleEntity entity)
         => new(
@@ -25,7 +25,7 @@ public sealed class RouteScheduleRepository : IRouteScheduleRepository
             entity.DayOfWeek,
             entity.DepartureTime);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<RouteScheduleAggregate?> GetByIdAsync(
         RouteScheduleId   id,

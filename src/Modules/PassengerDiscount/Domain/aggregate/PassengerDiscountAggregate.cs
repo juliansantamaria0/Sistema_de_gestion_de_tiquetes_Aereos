@@ -2,18 +2,18 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerDiscount.Domain
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerDiscount.Domain.ValueObject;
 
-/// <summary>
-/// Descuento aplicado a un pasajero en una línea de reserva concreta.
-/// SQL: passenger_discount. [NC-3] id renombrado a passenger_discount_id.
-///
-/// Invariantes:
-///   - amount_applied >= 0 [IR-5] — espejo del CHECK SQL.
-///   - UNIQUE (reservation_detail_id, discount_type_id): un tipo de descuento
-///     solo puede aplicarse una vez por línea de reserva.
-///
-/// La única modificación válida es actualizar el monto aplicado (AdjustAmount).
-/// reservation_detail_id y discount_type_id forman la clave de negocio — inmutables.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class PassengerDiscountAggregate
 {
     public PassengerDiscountId Id                  { get; private set; }
@@ -48,17 +48,17 @@ public sealed class PassengerDiscountAggregate
         AmountApplied       = amountApplied;
     }
 
-    /// <summary>
-    /// Ajusta el monto del descuento aplicado.
-    /// reservation_detail_id y discount_type_id son la clave de negocio — inmutables.
-    /// </summary>
+    
+    
+    
+    
     public void AdjustAmount(decimal newAmount)
     {
         ValidateAmount(newAmount);
         AmountApplied = newAmount;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateAmount(decimal amount)
     {

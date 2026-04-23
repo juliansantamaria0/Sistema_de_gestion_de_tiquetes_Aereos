@@ -22,18 +22,12 @@ public sealed class CreateLoyaltyProgramUseCase
         decimal           milesPerDollar,
         CancellationToken cancellationToken = default)
     {
-        // LoyaltyProgramId(1) es placeholder; EF Core asigna el Id real al insertar.
+        
         var program = new LoyaltyProgramAggregate(
-            new LoyaltyProgramId(await GetNextIdAsync(cancellationToken)), airlineId, name, milesPerDollar);
+            new LoyaltyProgramId(0), airlineId, name, milesPerDollar);
 
         await _repository.AddAsync(program, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return program;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

@@ -21,17 +21,11 @@ public sealed class CreateDelayReasonUseCase
         string            category,
         CancellationToken cancellationToken = default)
     {
-        // DelayReasonId(1) es placeholder; EF Core asigna el Id real al insertar.
-        var delayReason = new DelayReasonAggregate(new DelayReasonId(await GetNextIdAsync(cancellationToken)), name, category);
+        
+        var delayReason = new DelayReasonAggregate(new DelayReasonId(0), name, category);
 
         await _repository.AddAsync(delayReason, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return delayReason;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

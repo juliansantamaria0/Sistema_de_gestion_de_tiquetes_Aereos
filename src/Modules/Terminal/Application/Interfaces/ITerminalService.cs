@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Application.Interfaces;
 
-/// <summary>Puerto de entrada: contrato del servicio de aplicación para Terminal.</summary>
+
 public interface ITerminalService
 {
     Task<TerminalDto> CreateAsync(CreateTerminalRequest request, CancellationToken cancellationToken = default);

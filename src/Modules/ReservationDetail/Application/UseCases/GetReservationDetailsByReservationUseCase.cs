@@ -3,10 +3,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Applic
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.Repositories;
 
-/// <summary>
-/// Obtiene todas las líneas (pasajero + asiento + tarifa) de una reserva.
-/// Caso de uso clave para mostrar el detalle completo de una reserva.
-/// </summary>
+
+
+
+
 public sealed class GetReservationDetailsByReservationUseCase
 {
     private readonly IReservationDetailRepository _repository;

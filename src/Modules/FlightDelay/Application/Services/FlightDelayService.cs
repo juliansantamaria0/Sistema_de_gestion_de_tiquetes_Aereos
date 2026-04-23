@@ -72,7 +72,7 @@ public sealed class FlightDelayService : IFlightDelayService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static FlightDelayDto ToDto(FlightDelayAggregate agg)
         => new(

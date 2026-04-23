@@ -16,12 +16,12 @@ public sealed class CancellationReasonRepository : ICancellationReasonRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static CancellationReasonAggregate ToDomain(CancellationReasonEntity entity)
         => new(new CancellationReasonId(entity.Id), entity.Name);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<CancellationReasonAggregate?> GetByIdAsync(
         CancellationReasonId id,

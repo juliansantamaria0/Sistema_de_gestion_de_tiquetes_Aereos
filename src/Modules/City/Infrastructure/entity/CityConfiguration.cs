@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Enti
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity; // ← FIX
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Country.Infrastructure.Entity; 
 
-/// <summary>
-/// Configuración EF Core para <see cref="CityEntity"/>.
-/// </summary>
+
+
+
 public sealed class CityConfiguration : IEntityTypeConfiguration<CityEntity>
 {
        public void Configure(EntityTypeBuilder<CityEntity> builder)

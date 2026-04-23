@@ -11,5 +11,5 @@ public interface IRouteRepository
     Task<IEnumerable<RouteAggregate>> GetByOriginAsync(int originAirportId,                           CancellationToken cancellationToken = default);
     Task                              AddAsync(RouteAggregate route,                                   CancellationToken cancellationToken = default);
     Task                              DeleteAsync(RouteId id,                                          CancellationToken cancellationToken = default);
-    // UpdateAsync omitido — Route es inmutable.
+    
 }

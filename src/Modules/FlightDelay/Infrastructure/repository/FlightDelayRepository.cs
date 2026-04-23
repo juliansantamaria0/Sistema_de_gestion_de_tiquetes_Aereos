@@ -16,7 +16,7 @@ public sealed class FlightDelayRepository : IFlightDelayRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static FlightDelayAggregate ToDomain(FlightDelayEntity entity)
         => new(
@@ -26,7 +26,7 @@ public sealed class FlightDelayRepository : IFlightDelayRepository
             entity.DelayMinutes,
             entity.ReportedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<FlightDelayAggregate?> GetByIdAsync(
         FlightDelayId     id,
@@ -86,8 +86,8 @@ public sealed class FlightDelayRepository : IFlightDelayRepository
             ?? throw new KeyNotFoundException(
                 $"FlightDelayEntity with id {flightDelay.Id.Value} not found.");
 
-        // Solo DelayMinutes es mutable — corrección de un error de reporte.
-        // ScheduledFlightId, DelayReasonId y ReportedAt son inmutables.
+        
+        
         entity.DelayMinutes = flightDelay.DelayMinutes;
 
         _context.FlightDelays.Update(entity);

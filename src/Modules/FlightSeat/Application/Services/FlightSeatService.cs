@@ -82,7 +82,7 @@ public sealed class FlightSeatService : IFlightSeatService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static FlightSeatDto ToDto(FlightSeatAggregate agg)
         => new(agg.Id.Value, agg.ScheduledFlightId, agg.SeatMapId,

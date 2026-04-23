@@ -10,7 +10,7 @@ public sealed class RolePermissionConfiguration : IEntityTypeConfiguration<RoleP
         builder.ToTable("role_permission");
         builder.HasKey(e => e.RolePermissionId);
 
-        // UNIQUE compuesto (role_id, permission_id)
+        
         builder.HasIndex(e => new { e.RoleId, e.PermissionId })
                .IsUnique()
                .HasDatabaseName("uq_rp");

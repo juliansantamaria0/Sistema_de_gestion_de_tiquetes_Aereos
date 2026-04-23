@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Domain.Aggreg
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de clases de cabina.
-/// Valores esperados: ECONOMY, BUSINESS, FIRST.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class CabinClassAggregate
 {
     public CabinClassId Id   { get; private set; }

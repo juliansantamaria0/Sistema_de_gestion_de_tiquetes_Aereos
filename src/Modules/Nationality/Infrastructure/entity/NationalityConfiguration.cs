@@ -14,7 +14,7 @@ public sealed class NationalityConfiguration : IEntityTypeConfiguration<National
                .IsRequired()
                .HasMaxLength(80);
 
-        // country_id UNIQUE: un país → una sola nacionalidad
+        
         builder.HasIndex(e => e.CountryId)
                .IsUnique()
                .HasDatabaseName("uq_nationality_country");builder.HasOne<CountryEntity>()

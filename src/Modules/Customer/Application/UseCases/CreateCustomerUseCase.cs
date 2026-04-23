@@ -1,19 +1,23 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Application.UseCases;
 
+using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.ValueObject;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
 public sealed class CreateCustomerUseCase
 {
     private readonly ICustomerRepository _repository;
     private readonly IUnitOfWork         _unitOfWork;
+    private readonly AppDbContext        _context;
 
-    public CreateCustomerUseCase(ICustomerRepository repository, IUnitOfWork unitOfWork)
+    public CreateCustomerUseCase(ICustomerRepository repository, IUnitOfWork unitOfWork, AppDbContext context)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _context    = context;
     }
 
     public async Task<CustomerAggregate> ExecuteAsync(
@@ -22,9 +26,23 @@ public sealed class CreateCustomerUseCase
         string?           email,
         CancellationToken cancellationToken = default)
     {
-        // CustomerId(1) es placeholder; EF Core asigna el Id real al insertar.
+        var normalizedEmail = string.IsNullOrWhiteSpace(email)
+            ? null
+            : email.Trim().ToLowerInvariant();
+
+        if (!await _context.Persons.AsNoTracking().AnyAsync(x => x.Id == personId, cancellationToken))
+            throw new InvalidOperationException($"No existe la persona con id {personId}.");
+
+        if (await _context.Customers.AsNoTracking().AnyAsync(x => x.PersonId == personId, cancellationToken))
+            throw new InvalidOperationException("Ya existe un cliente asociado a esta persona.");
+
+        if (normalizedEmail is not null &&
+            await _context.Customers.AsNoTracking().AnyAsync(x => x.Email != null && x.Email.ToLower() == normalizedEmail, cancellationToken))
+            throw new InvalidOperationException("Ya existe un cliente con ese email.");
+
+        
         var customer = new CustomerAggregate(
-            new CustomerId(await GetNextIdAsync(cancellationToken)),
+            new CustomerId(0),
             personId,
             phone,
             email,
@@ -33,11 +51,5 @@ public sealed class CreateCustomerUseCase
         await _repository.AddAsync(customer, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return customer;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

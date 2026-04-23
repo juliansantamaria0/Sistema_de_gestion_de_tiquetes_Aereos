@@ -16,7 +16,7 @@ public sealed class PaymentRepository : IPaymentRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static PaymentAggregate ToDomain(PaymentEntity entity)
         => new(
@@ -33,7 +33,7 @@ public sealed class PaymentRepository : IPaymentRepository
             entity.CreatedAt,
             entity.UpdatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<PaymentAggregate?> GetByIdAsync(
         PaymentId         id,
@@ -113,8 +113,8 @@ public sealed class PaymentRepository : IPaymentRepository
             ?? throw new KeyNotFoundException(
                 $"PaymentEntity with id {payment.Id.Value} not found.");
 
-        // Solo PaymentStatusId, TransactionReference, RejectionReason y UpdatedAt son mutables.
-        // ReservationId, TicketId, Amount, CurrencyId, PaymentDate y PaymentMethodId son inmutables.
+        
+        
         entity.PaymentStatusId      = payment.PaymentStatusId;
         entity.TransactionReference = payment.TransactionReference;
         entity.RejectionReason      = payment.RejectionReason;
@@ -133,5 +133,19 @@ public sealed class PaymentRepository : IPaymentRepository
                 $"PaymentEntity with id {id.Value} not found.");
 
         _context.Payments.Remove(entity);
+    }
+
+    public async Task<decimal> SumApprovedPaymentsForReservationAsync(
+        int reservationId,
+        CancellationToken cancellationToken = default)
+    {
+        return await (
+                from p in _context.Payments.AsNoTracking()
+                where p.ReservationId == reservationId
+                join s in _context.PaymentStatuses.AsNoTracking() on p.PaymentStatusId equals s.Id
+                where s.Name.Equals("PAID", StringComparison.OrdinalIgnoreCase)
+                      || s.Name.Equals("Aprobado", StringComparison.OrdinalIgnoreCase)
+                select (decimal?)p.Amount)
+            .SumAsync(cancellationToken) ?? 0m;
     }
 }

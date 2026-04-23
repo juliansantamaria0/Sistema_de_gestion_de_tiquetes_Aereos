@@ -28,7 +28,7 @@ public sealed class PassengerDiscountEntityConfiguration : IEntityTypeConfigurat
                .IsRequired()
                .HasColumnType("decimal(12,2)");
 
-        // UNIQUE (reservation_detail_id, discount_type_id) — espejo de uq_pd
+        
         builder.HasIndex(e => new { e.ReservationDetailId, e.DiscountTypeId })
                .IsUnique()
                .HasDatabaseName("uq_pd");builder.HasOne<ReservationDetailEntity>()

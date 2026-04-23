@@ -22,9 +22,9 @@ public sealed class CreatePassengerDiscountUseCase
         decimal           amountApplied,
         CancellationToken cancellationToken = default)
     {
-        // PassengerDiscountId(1) es placeholder; EF Core asigna el Id real al insertar.
+        
         var discount = new PassengerDiscountAggregate(
-            new PassengerDiscountId(await GetNextIdAsync(cancellationToken)),
+            new PassengerDiscountId(0),
             reservationDetailId,
             discountTypeId,
             amountApplied);
@@ -32,11 +32,5 @@ public sealed class CreatePassengerDiscountUseCase
         await _repository.AddAsync(discount, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return discount;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

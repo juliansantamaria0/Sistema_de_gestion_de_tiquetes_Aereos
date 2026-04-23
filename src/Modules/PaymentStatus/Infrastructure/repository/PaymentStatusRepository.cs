@@ -16,12 +16,12 @@ public sealed class PaymentStatusRepository : IPaymentStatusRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static PaymentStatusAggregate ToDomain(PaymentStatusEntity entity)
         => new(new PaymentStatusId(entity.Id), entity.Name);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<PaymentStatusAggregate?> GetByIdAsync(
         PaymentStatusId   id,

@@ -2,17 +2,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Domain.
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageAllowance.Domain.ValueObject;
 
-/// <summary>
-/// Franquicia de equipaje incluida según la combinación clase de cabina + tipo de tarifa.
-/// SQL: baggage_allowance. [NC-9] id renombrado a baggage_allowance_id.
-///
-/// 4NF: (cabin_class_id, fare_type_id) → carry_on_pieces, carry_on_kg,
-///      checked_pieces, checked_kg. Sin MVD independientes.
-/// UNIQUE: (cabin_class_id, fare_type_id).
-///
-/// Update(): modifica los límites de equipaje cuando cambia la política.
-/// cabin_class_id y fare_type_id son la clave de negocio — inmutables.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class BaggageAllowanceAggregate
 {
     public BaggageAllowanceId Id             { get; private set; }
@@ -54,10 +54,10 @@ public sealed class BaggageAllowanceAggregate
         CheckedKg     = checkedKg;
     }
 
-    /// <summary>
-    /// Actualiza los límites de la franquicia de equipaje.
-    /// cabin_class_id y fare_type_id son la clave de negocio — inmutables.
-    /// </summary>
+    
+    
+    
+    
     public void Update(int carryOnPieces, decimal carryOnKg, int checkedPieces, decimal checkedKg)
     {
         ValidateLimits(carryOnPieces, carryOnKg, checkedPieces, checkedKg);
@@ -68,7 +68,7 @@ public sealed class BaggageAllowanceAggregate
         CheckedKg     = checkedKg;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateLimits(
         int     carryOnPieces,

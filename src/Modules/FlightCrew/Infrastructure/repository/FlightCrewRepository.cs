@@ -16,7 +16,7 @@ public sealed class FlightCrewRepository : IFlightCrewRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static FlightCrewAggregate ToDomain(FlightCrewEntity entity)
         => new(
@@ -26,7 +26,7 @@ public sealed class FlightCrewRepository : IFlightCrewRepository
             entity.CrewRoleId,
             entity.CreatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<FlightCrewAggregate?> GetByIdAsync(
         FlightCrewId      id,
@@ -87,8 +87,8 @@ public sealed class FlightCrewRepository : IFlightCrewRepository
             ?? throw new KeyNotFoundException(
                 $"FlightCrewEntity with id {flightCrew.Id.Value} not found.");
 
-        // Solo crew_role_id es modificable.
-        // scheduled_flight_id y employee_id forman la clave de negocio.
+        
+        
         entity.CrewRoleId = flightCrew.CrewRoleId;
 
         _context.FlightCrews.Update(entity);

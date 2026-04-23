@@ -16,7 +16,7 @@ public sealed class ScheduledFlightRepository : IScheduledFlightRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static ScheduledFlightAggregate ToDomain(ScheduledFlightEntity entity)
         => new(
@@ -31,7 +31,7 @@ public sealed class ScheduledFlightRepository : IScheduledFlightRepository
             entity.CreatedAt,
             entity.UpdatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<ScheduledFlightAggregate?> GetByIdAsync(
         ScheduledFlightId id,

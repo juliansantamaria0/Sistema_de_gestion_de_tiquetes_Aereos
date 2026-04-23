@@ -22,11 +22,11 @@ public sealed class CreateFlightCancellationUseCase
         string?           notes,
         CancellationToken cancellationToken = default)
     {
-        // FlightCancellationId(1) es placeholder; EF Core asigna el Id real al insertar.
-        // La UNIQUE constraint sobre scheduled_flight_id garantiza que no se
-        // pueda cancelar el mismo vuelo dos veces a nivel de BD.
+        
+        
+        
         var flightCancellation = new FlightCancellationAggregate(
-            new FlightCancellationId(await GetNextIdAsync(cancellationToken)),
+            new FlightCancellationId(0),
             scheduledFlightId,
             cancellationReasonId,
             DateTime.UtcNow,
@@ -35,11 +35,5 @@ public sealed class CreateFlightCancellationUseCase
         await _repository.AddAsync(flightCancellation, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return flightCancellation;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

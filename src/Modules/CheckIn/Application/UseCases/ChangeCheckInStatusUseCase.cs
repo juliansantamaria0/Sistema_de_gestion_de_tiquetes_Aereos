@@ -4,11 +4,11 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Cambia el estado del check-in (PENDING → CHECKED_IN → BOARDED, etc.)
-/// y opcionalmente actualiza el número de mostrador.
-/// ticket_id y check_in_time son inmutables.
-/// </summary>
+
+
+
+
+
 public sealed class ChangeCheckInStatusUseCase
 {
     private readonly ICheckInRepository _repository;

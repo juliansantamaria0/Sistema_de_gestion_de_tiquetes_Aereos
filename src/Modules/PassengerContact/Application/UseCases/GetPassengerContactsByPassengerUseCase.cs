@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Applica
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Domain.Repositories;
 
-/// <summary>Obtiene todos los contactos de emergencia de un pasajero.</summary>
+
 public sealed class GetPassengerContactsByPassengerUseCase
 {
     private readonly IPassengerContactRepository _repository;

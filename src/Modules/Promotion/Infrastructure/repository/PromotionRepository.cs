@@ -47,7 +47,7 @@ public sealed class PromotionRepository : IPromotionRepository
     public async Task<IEnumerable<PromotionAggregate>> GetActiveAsync(
         DateOnly referenceDate, CancellationToken ct = default)
     {
-        // Espejo de: valid_from <= referenceDate <= valid_until
+        
         var entities = await _context.Promotions.AsNoTracking()
             .Where(x => x.ValidFrom <= referenceDate && x.ValidUntil >= referenceDate)
             .OrderBy(x => x.AirlineId).ThenBy(x => x.Name)
@@ -74,7 +74,7 @@ public sealed class PromotionRepository : IPromotionRepository
             ?? throw new KeyNotFoundException(
                 $"PromotionEntity with id {promotion.Id.Value} not found.");
 
-        // AirlineId es la clave de contexto — inmutable.
+        
         e.Name        = promotion.Name;
         e.DiscountPct = promotion.DiscountPct;
         e.ValidFrom   = promotion.ValidFrom;

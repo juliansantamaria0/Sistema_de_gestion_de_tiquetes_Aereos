@@ -21,9 +21,9 @@ public sealed class CreateScheduledFlightUseCase
         CreateScheduledFlightRequest request,
         CancellationToken            cancellationToken = default)
     {
-        // ScheduledFlightId(1) es placeholder; EF Core asigna el Id real al insertar.
+        
         var scheduledFlight = new ScheduledFlightAggregate(
-            new ScheduledFlightId(await GetNextIdAsync(cancellationToken)),
+            new ScheduledFlightId(0),
             request.BaseFlightId,
             request.AircraftId,
             request.GateId,
@@ -36,11 +36,5 @@ public sealed class CreateScheduledFlightUseCase
         await _repository.AddAsync(scheduledFlight, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return scheduledFlight;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

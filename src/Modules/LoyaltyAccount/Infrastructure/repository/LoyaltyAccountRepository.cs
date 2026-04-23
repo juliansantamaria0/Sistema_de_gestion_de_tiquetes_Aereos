@@ -101,7 +101,7 @@ public sealed class LoyaltyAccountRepository : ILoyaltyAccountRepository
             ?? throw new KeyNotFoundException(
                 $"LoyaltyAccountEntity with id {loyaltyAccount.Id.Value} not found.");
 
-        // PassengerId, LoyaltyProgramId y JoinedAt son inmutables.
+        
         entity.LoyaltyTierId  = loyaltyAccount.LoyaltyTierId;
         entity.TotalMiles     = loyaltyAccount.TotalMiles;
         entity.AvailableMiles = loyaltyAccount.AvailableMiles;

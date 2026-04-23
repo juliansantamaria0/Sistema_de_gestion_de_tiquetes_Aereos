@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.Repositories
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Domain.ValueObject;
 
-/// <summary>Puerto de salida: contrato de persistencia para el módulo Gate.</summary>
+
 public interface IGateRepository
 {
     Task<GateAggregate?> GetByIdAsync(GateId id, CancellationToken cancellationToken = default);

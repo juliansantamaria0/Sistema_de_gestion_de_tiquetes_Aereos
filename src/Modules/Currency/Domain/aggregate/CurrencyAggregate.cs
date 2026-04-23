@@ -2,15 +2,15 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Domain.Aggregat
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Domain.ValueObject;
 
-/// <summary>
-/// Moneda ISO 4217 para pagos multi-moneda. [TN-1]
-/// SQL: currency.
-///
-/// Invariantes:
-///   - iso_code: exactamente 3 caracteres, normalizado a MAYÚSCULAS (ISO 4217).
-///   - name: máximo 80 caracteres, único.
-///   - symbol: máximo 5 caracteres.
-/// </summary>
+
+
+
+
+
+
+
+
+
 public sealed class CurrencyAggregate
 {
     public CurrencyId Id      { get; private set; }
@@ -49,7 +49,7 @@ public sealed class CurrencyAggregate
         Symbol  = symbol.Trim();
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateIsoCode(string isoCode)
     {

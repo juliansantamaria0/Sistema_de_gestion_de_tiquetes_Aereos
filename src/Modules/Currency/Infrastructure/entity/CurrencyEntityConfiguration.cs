@@ -15,7 +15,7 @@ public sealed class CurrencyEntityConfiguration : IEntityTypeConfiguration<Curre
                .HasColumnName("currency_id")
                .ValueGeneratedOnAdd();
 
-        // CHAR(3) — código ISO 4217
+        
         builder.Property(e => e.IsoCode)
                .HasColumnName("iso_code")
                .IsRequired()

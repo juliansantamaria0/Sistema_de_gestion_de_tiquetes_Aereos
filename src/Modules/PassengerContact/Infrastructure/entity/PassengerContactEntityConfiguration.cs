@@ -23,7 +23,7 @@ public sealed class PassengerContactEntityConfiguration
                .HasColumnName("contact_type_id")
                .IsRequired();
 
-        // UNIQUE (passenger_id, contact_type_id) — espejo de uq_pc
+        
         builder.HasIndex(e => new { e.PassengerId, e.ContactTypeId })
                .IsUnique()
                .HasDatabaseName("uq_pc");

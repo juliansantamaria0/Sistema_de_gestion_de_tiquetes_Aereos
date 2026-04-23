@@ -2,13 +2,13 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.DiscountType.Domain.Aggr
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DiscountType.Domain.ValueObject;
 
-/// <summary>
-/// Tipo de descuento aplicable a pasajeros.
-/// SQL: discount_type.
-///
-/// CHECK espejado: percentage IN [0, 100].
-/// Cuando age_min y age_max están presentes: age_min &lt;= age_max.
-/// </summary>
+
+
+
+
+
+
+
 public sealed class DiscountTypeAggregate
 {
     public DiscountTypeId Id         { get; private set; }
@@ -53,7 +53,7 @@ public sealed class DiscountTypeAggregate
         AgeMax     = ageMax;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateName(string name)
     {

@@ -71,7 +71,12 @@ internal static class BootstrapDataSeeder
             [new FlightStatusEntity { Name = "SCHEDULED" }, new FlightStatusEntity { Name = "DELAYED" }, new FlightStatusEntity { Name = "CANCELLED" }], ct);
 
         await SeedSimpleAsync(db, db.SeatStatuses, x => x.Name,
-            [new SeatStatusEntity { Name = "AVAILABLE" }, new SeatStatusEntity { Name = "OCCUPIED" }, new SeatStatusEntity { Name = "BLOCKED" }], ct);
+            [
+                new SeatStatusEntity { Name = "AVAILABLE" },
+                new SeatStatusEntity { Name = "RESERVED" },
+                new SeatStatusEntity { Name = "OCCUPIED" },
+                new SeatStatusEntity { Name = "BLOCKED" }
+            ], ct);
 
         await SeedSimpleAsync(db, db.CheckInStatuses, x => x.Name,
             [new CheckInStatusEntity { Name = "PENDING" }, new CheckInStatusEntity { Name = "CHECKED_IN" }, new CheckInStatusEntity { Name = "BOARDED" }], ct);

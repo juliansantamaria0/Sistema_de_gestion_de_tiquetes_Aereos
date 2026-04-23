@@ -16,7 +16,7 @@ public sealed class FlightCancellationRepository : IFlightCancellationRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static FlightCancellationAggregate ToDomain(FlightCancellationEntity entity)
         => new(
@@ -26,7 +26,7 @@ public sealed class FlightCancellationRepository : IFlightCancellationRepository
             entity.CancelledAt,
             entity.Notes);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<FlightCancellationAggregate?> GetByIdAsync(
         FlightCancellationId id,
@@ -43,7 +43,7 @@ public sealed class FlightCancellationRepository : IFlightCancellationRepository
         int               scheduledFlightId,
         CancellationToken cancellationToken = default)
     {
-        // scheduled_flight_id es UNIQUE — FirstOrDefault es correcto.
+        
         var entity = await _context.FlightCancellations
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.ScheduledFlightId == scheduledFlightId, cancellationToken);
@@ -85,8 +85,8 @@ public sealed class FlightCancellationRepository : IFlightCancellationRepository
             ?? throw new KeyNotFoundException(
                 $"FlightCancellationEntity with id {flightCancellation.Id.Value} not found.");
 
-        // Solo Notes es mutable.
-        // ScheduledFlightId, CancellationReasonId y CancelledAt son inmutables.
+        
+        
         entity.Notes = flightCancellation.Notes;
 
         _context.FlightCancellations.Update(entity);

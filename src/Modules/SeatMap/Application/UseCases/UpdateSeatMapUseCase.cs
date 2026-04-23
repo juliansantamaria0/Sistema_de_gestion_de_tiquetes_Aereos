@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Actualiza la clase de cabina y/o las características de un asiento.
-/// AircraftTypeId y SeatNumber son inmutables (forman la clave de negocio).
-/// </summary>
+
+
+
+
 public sealed class UpdateSeatMapUseCase
 {
     private readonly ISeatMapRepository _repository;

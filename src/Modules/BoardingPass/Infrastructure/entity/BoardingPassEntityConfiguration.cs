@@ -11,7 +11,7 @@ public sealed class BoardingPassEntityConfiguration : IEntityTypeConfiguration<B
 
         builder.HasKey(e => e.Id);
 
-        // PK en SQL es boarding_pass_id [NC-1]
+        
         builder.Property(e => e.Id)
                .HasColumnName("boarding_pass_id")
                .ValueGeneratedOnAdd();
@@ -20,7 +20,7 @@ public sealed class BoardingPassEntityConfiguration : IEntityTypeConfiguration<B
                .HasColumnName("check_in_id")
                .IsRequired();
 
-        // UNIQUE (check_in_id) — un boarding pass por check-in
+        
         builder.HasIndex(e => e.CheckInId)
                .IsUnique()
                .HasDatabaseName("uq_boarding_pass_check_in");
@@ -34,7 +34,7 @@ public sealed class BoardingPassEntityConfiguration : IEntityTypeConfiguration<B
                .IsRequired(false)
                .HasMaxLength(10);
 
-        // [IR-4] FK → flight_seat (reemplazó seat_confirmed VARCHAR)
+        
         builder.Property(e => e.FlightSeatId)
                .HasColumnName("flight_seat_id")
                .IsRequired();builder.HasOne<CheckInEntity>()

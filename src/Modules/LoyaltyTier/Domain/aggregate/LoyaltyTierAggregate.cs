@@ -2,21 +2,21 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Domain.Aggre
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Domain.ValueObject;
 
-/// <summary>
-/// Nivel del programa de fidelización (Classic, Silver, Gold, Diamond).
-/// SQL: loyalty_tier. [NC-5] id renombrado a loyalty_tier_id.
-///
-/// UNIQUE: (loyalty_program_id, name) — nivel único por nombre dentro del programa.
-/// UNIQUE: (loyalty_program_id, loyalty_tier_id) — [IR-3] soporte FK compuesta
-///         en loyalty_account para garantizar que el tier pertenece al mismo programa.
-///
-/// Invariantes:
-///   - min_miles >= 0.
-///   - loyalty_program_id es la clave de contexto — inmutable.
-///   - benefits es nullable (TEXT en SQL).
-///
-/// Update(): modifica nombre, millas mínimas y beneficios.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class LoyaltyTierAggregate
 {
     public LoyaltyTierId Id               { get; private set; }
@@ -52,10 +52,10 @@ public sealed class LoyaltyTierAggregate
         Benefits         = benefits?.Trim();
     }
 
-    /// <summary>
-    /// Actualiza el nombre, las millas mínimas y los beneficios del tier.
-    /// loyalty_program_id es la clave de contexto — inmutable.
-    /// </summary>
+    
+    
+    
+    
     public void Update(string name, int minMiles, string? benefits)
     {
         ValidateName(name);
@@ -66,7 +66,7 @@ public sealed class LoyaltyTierAggregate
         Benefits = benefits?.Trim();
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateName(string name)
     {

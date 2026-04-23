@@ -9,7 +9,7 @@ public sealed class AircraftManufacturerConfiguration : IEntityTypeConfiguration
     {
         builder.ToTable("aircraft_manufacturer");
 
-        // La PK en SQL es manufacturer_id — snake_case lo resuelve automáticamente
+        
         builder.HasKey(e => e.ManufacturerId);
 
         builder.Property(e => e.Name).IsRequired().HasMaxLength(100);

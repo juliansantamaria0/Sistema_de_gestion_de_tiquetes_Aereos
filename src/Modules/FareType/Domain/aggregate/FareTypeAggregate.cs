@@ -2,16 +2,16 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Domain.Aggregat
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Domain.ValueObject;
 
-/// <summary>
-/// Tipo de tarifa con sus reglas de uso.
-/// SQL: fare_type.
-///
-/// 4NF: todos los atributos dependen de fare_type_id; sin MVD independientes.
-///
-/// Invariante: advance_purchase_days >= 0.
-/// Update(): todos los campos son mutables salvo el name único (que también puede cambiar
-///           siempre que la nueva clave no colisione con otra existente).
-/// </summary>
+
+
+
+
+
+
+
+
+
+
 public sealed class FareTypeAggregate
 {
     public FareTypeId Id                  { get; private set; }
@@ -46,7 +46,7 @@ public sealed class FareTypeAggregate
         BaggageIncluded     = baggageIncluded;
     }
 
-    /// <summary>Actualiza todas las propiedades del tipo de tarifa.</summary>
+    
     public void Update(
         string name,
         bool   isRefundable,
@@ -64,7 +64,7 @@ public sealed class FareTypeAggregate
         BaggageIncluded     = baggageIncluded;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateName(string name)
     {

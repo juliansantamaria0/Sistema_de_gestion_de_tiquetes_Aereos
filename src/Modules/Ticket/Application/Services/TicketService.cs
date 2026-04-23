@@ -71,7 +71,7 @@ public sealed class TicketService : ITicketService
         return agg is null ? null : ToDto(agg);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static TicketDto ToDto(TicketAggregate agg)
         => new(

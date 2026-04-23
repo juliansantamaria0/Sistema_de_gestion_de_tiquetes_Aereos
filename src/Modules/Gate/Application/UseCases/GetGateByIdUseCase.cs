@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Application.UseCase
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Application.Interfaces;
 
-/// <summary>Caso de uso: Obtener puerta por ID.</summary>
+
 public sealed class GetGateByIdUseCase
 {
     private readonly IGateService _service;

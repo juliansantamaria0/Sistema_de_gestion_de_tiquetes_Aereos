@@ -1,6 +1,6 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Application.Interfaces;
 
-/// <summary>Puerto de entrada: contrato del servicio de aplicación para Airport.</summary>
+
 public interface IAirportService
 {
     Task<AirportDto> CreateAsync(CreateAirportRequest request, CancellationToken cancellationToken = default);

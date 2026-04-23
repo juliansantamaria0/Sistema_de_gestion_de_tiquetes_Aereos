@@ -2,6 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.
 
 using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Constants;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Extensions;
 
@@ -27,6 +28,8 @@ public sealed class CancelReservationUseCase
 
         if (reservation.CancelledAt.HasValue)
             throw new InvalidOperationException("Reservation is already cancelled.");
+        if (reservation.ConfirmedAt.HasValue)
+            throw new InvalidOperationException("Cannot cancel a reservation that has already been confirmed.");
         if (!await _context.ReservationStatuses.AsNoTracking().AnyAsync(x => x.Id == cancelledStatusId, cancellationToken))
             throw new InvalidOperationException($"No existe el estado de reserva con id {cancelledStatusId}.");
 
@@ -55,7 +58,7 @@ public sealed class CancelReservationUseCase
 
         if (detailSeatIds.Count > 0)
         {
-            var availableStatusId = await GetSeatStatusIdAsync("AVAILABLE", cancellationToken);
+            var availableStatusId = await GetSeatStatusIdAsync(SeatStatusNames.Available, cancellationToken);
             var seats = await _context.FlightSeats
                 .Where(x => detailSeatIds.Contains(x.Id))
                 .ToListAsync(cancellationToken);

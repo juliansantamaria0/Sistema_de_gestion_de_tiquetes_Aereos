@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.Rep
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Cambia la tarifa seleccionada por el pasajero en esta línea de reserva.
-/// ReservationId, PassengerId y FlightSeatId son la clave de negocio — inmutables.
-/// </summary>
+
+
+
+
 public sealed class UpdateReservationDetailUseCase
 {
     private readonly IReservationDetailRepository _repository;

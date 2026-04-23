@@ -72,7 +72,7 @@ public sealed class RouteScheduleService : IRouteScheduleService
         return list.Select(ToDto);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static RouteScheduleDto ToDto(RouteScheduleAggregate agg)
         => new(agg.Id.Value, agg.BaseFlightId, agg.DayOfWeek, agg.DayOfWeekName, agg.DepartureTime);

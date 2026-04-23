@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Domain.Aggregat
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Domain.ValueObject;
 
-/// <summary>
-/// Aeronave física con matrícula única.
-/// SQL: aircraft. Regla: manufacture_year plausible.
-/// NOTA: manufacture_year en SQL es tipo YEAR (int en C#).
-/// </summary>
+
+
+
+
+
 public sealed class AircraftAggregate
 {
     public AircraftId  Id                   { get; private set; }

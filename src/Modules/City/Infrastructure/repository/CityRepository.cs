@@ -7,9 +7,9 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 
-/// <summary>
-/// Implementación del repositorio de Ciudad usando EF Core + AppDbContext.
-/// </summary>
+
+
+
 public sealed class CityRepository : ICityRepository
 {
     private readonly AppDbContext _context;
@@ -53,7 +53,7 @@ public sealed class CityRepository : ICityRepository
         _context.Cities.Remove(entity);
     }
 
-    // ── Mappers ──────────────────────────────────────────────────────────────
+    
 
     private static CityAggregate MapToAggregate(CityEntity e) =>
         CityAggregate.Reconstitute(e.CityId, e.Name, e.CountryId, e.CreatedAt);

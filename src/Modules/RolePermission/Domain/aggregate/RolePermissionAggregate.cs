@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.RolePermission.Domain.Ag
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.RolePermission.Domain.ValueObject;
 
-/// <summary>
-/// Asignación de un permiso a un rol (tabla de unión M:N).
-/// Invariante: (RoleId, PermissionId) deben ser únicos y positivos.
-/// Update no tiene sentido semántico en esta tabla: se elimina y recrea.
-/// </summary>
+
+
+
+
+
 public sealed class RolePermissionAggregate
 {
     public RolePermissionId Id           { get; private set; }

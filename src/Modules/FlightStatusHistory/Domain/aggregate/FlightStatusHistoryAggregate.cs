@@ -2,13 +2,13 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatusHistory.Doma
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatusHistory.Domain.ValueObject;
 
-/// <summary>
-/// Registro de cambio de estado de un vuelo programado [TN-2] (RF-14 extendido).
-/// SQL: flight_status_history.
-/// Trazabilidad: SCHEDULED → DELAYED → ACTIVE → COMPLETED (o CANCELLED).
-/// Tabla de auditoría — INMUTABLE tras inserción.
-/// UNIQUE: (scheduled_flight_id, flight_status_id, changed_at).
-/// </summary>
+
+
+
+
+
+
+
 public sealed class FlightStatusHistoryAggregate
 {
     public FlightStatusHistoryId Id                { get; private set; }

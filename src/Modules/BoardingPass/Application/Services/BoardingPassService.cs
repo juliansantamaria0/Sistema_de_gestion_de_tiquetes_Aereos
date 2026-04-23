@@ -74,7 +74,7 @@ public sealed class BoardingPassService : IBoardingPassService
         return agg is null ? null : ToDto(agg);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static BoardingPassDto ToDto(BoardingPassAggregate agg)
         => new(agg.Id.Value, agg.CheckInId, agg.GateId, agg.BoardingGroup, agg.FlightSeatId);

@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Application.Use
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Application.Interfaces;
 
-/// <summary>Caso de uso: Obtener todas las terminales.</summary>
+
 public sealed class GetAllTerminalsUseCase
 {
     private readonly ITerminalService _service;

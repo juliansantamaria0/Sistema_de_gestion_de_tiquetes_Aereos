@@ -2,7 +2,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Application.UseCase
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Application.Interfaces;
 
-/// <summary>Caso de uso: Crear puerta de embarque.</summary>
+
 public sealed class CreateGateUseCase
 {
     private readonly IGateService _service;

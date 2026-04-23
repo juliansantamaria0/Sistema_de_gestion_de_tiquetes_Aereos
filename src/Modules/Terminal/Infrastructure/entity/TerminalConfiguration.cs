@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Terminal.Infrastructure.
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity; using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-/// <summary>Configuración EF Core para <see cref="TerminalEntity"/>.</summary>
+
 public sealed class TerminalConfiguration : IEntityTypeConfiguration<TerminalEntity>
 {
     public void Configure(EntityTypeBuilder<TerminalEntity> builder)

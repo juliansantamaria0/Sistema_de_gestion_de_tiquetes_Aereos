@@ -38,7 +38,7 @@ builder.Property(e => e.CreatedAt)
                .HasColumnName("updated_at")
                .IsRequired(false);
 
-        // UNIQUE (flight_code, airline_id) — espejo de uq_base_flight
+        
         builder.HasIndex(e => new { e.FlightCode, e.AirlineId })
                .IsUnique()
                .HasDatabaseName("uq_base_flight");builder.HasOne<AirlineEntity>()

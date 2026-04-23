@@ -2,18 +2,18 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Domain.Aggregate
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Payment.Domain.ValueObject;
 
-/// <summary>
-/// Pago vinculado a una reserva O a un tiquete (XOR exclusivo).
-/// SQL: payment. [TN-1] currency_id añadido para soporte multi-moneda.
-///
-/// Invariantes (espejo de los CHECKs del DDL):
-///   1. amount >= 0 (chk_pay_amount).
-///   2. XOR exclusivo (chk_pay_xor): reservation_id XOR ticket_id.
-///      Un pago no puede estar vinculado a ambos ni a ninguno.
-///
-/// UpdateStatus(): única mutación válida — actualiza estado del pago,
-/// transaction_reference y rejection_reason según el flujo de pago.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
+
 public sealed class PaymentAggregate
 {
     public PaymentId Id                   { get; private set; }
@@ -48,7 +48,7 @@ public sealed class PaymentAggregate
         DateTime  createdAt,
         DateTime? updatedAt = null)
     {
-        // XOR exclusivo: reservation_id XOR ticket_id
+        
         ValidateXor(reservationId, ticketId);
         ValidateAmount(amount);
         ValidateForeignKeys(currencyId, paymentStatusId, paymentMethodId);
@@ -69,11 +69,11 @@ public sealed class PaymentAggregate
         UpdatedAt            = updatedAt;
     }
 
-    /// <summary>
-    /// Actualiza el estado del pago junto con referencia y motivo de rechazo.
-    /// ReservationId, TicketId, Amount, CurrencyId, PaymentDate y PaymentMethodId
-    /// son inmutables tras la creación.
-    /// </summary>
+    
+    
+    
+    
+    
     public void UpdateStatus(
         int     paymentStatusId,
         string? transactionReference = null,
@@ -92,7 +92,7 @@ public sealed class PaymentAggregate
         UpdatedAt            = DateTime.UtcNow;
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateXor(int? reservationId, int? ticketId)
     {

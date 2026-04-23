@@ -10,5 +10,5 @@ public interface IReservationStatusHistoryRepository
     Task<IEnumerable<ReservationStatusHistoryAggregate>> GetByReservationAsync(int reservationId,              CancellationToken cancellationToken = default);
     Task                                                 AddAsync(ReservationStatusHistoryAggregate entry,    CancellationToken cancellationToken = default);
     Task                                                 DeleteAsync(ReservationStatusHistoryId id,            CancellationToken cancellationToken = default);
-    // UpdateAsync omitido — tabla de auditoría inmutable.
+    
 }

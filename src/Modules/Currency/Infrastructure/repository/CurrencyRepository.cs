@@ -16,12 +16,12 @@ public sealed class CurrencyRepository : ICurrencyRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static CurrencyAggregate ToDomain(CurrencyEntity entity)
         => new(new CurrencyId(entity.Id), entity.IsoCode, entity.Name, entity.Symbol);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<CurrencyAggregate?> GetByIdAsync(
         CurrencyId        id,

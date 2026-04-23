@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ContactType.Domain.Aggre
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ContactType.Domain.ValueObject;
 
-/// <summary>
-/// Catálogo de tipos de contacto de emergencia.
-/// Valores esperados: EMERGENCY, SECONDARY.
-/// Nombre normalizado a mayúsculas para consistencia con el catálogo SQL.
-/// </summary>
+
+
+
+
+
 public sealed class ContactTypeAggregate
 {
     public ContactTypeId Id   { get; private set; }

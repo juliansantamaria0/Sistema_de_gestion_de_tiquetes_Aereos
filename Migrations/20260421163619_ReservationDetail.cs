@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class ReservationDetail : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -44,7 +44,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Migrations
                 unique: true);
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

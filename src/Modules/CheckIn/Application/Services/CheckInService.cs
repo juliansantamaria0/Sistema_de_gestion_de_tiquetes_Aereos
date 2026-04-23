@@ -73,7 +73,7 @@ public sealed class CheckInService : ICheckInService
         return agg is null ? null : ToDto(agg);
     }
 
-    // ── Mapper privado ────────────────────────────────────────────────────────
+    
 
     private static CheckInDto ToDto(CheckInAggregate agg)
         => new(

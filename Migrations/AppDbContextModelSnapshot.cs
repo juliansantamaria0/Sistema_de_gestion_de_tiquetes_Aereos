@@ -1119,6 +1119,13 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("updated_at");
 
+                    b.Property<byte[]>("Version")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("longblob")
+                        .HasColumnName("version");
+
                     b.HasKey("Id")
                         .HasName("pk_flight_seat");
 

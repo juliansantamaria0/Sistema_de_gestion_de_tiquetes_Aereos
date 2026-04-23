@@ -14,7 +14,7 @@ public sealed class AircraftTypeConfiguration : IEntityTypeConfiguration<Aircraf
         builder.Property(e => e.TotalSeats).IsRequired();
         builder.Property(e => e.CargoCapacityKg).HasColumnType("decimal(10,2)").HasDefaultValue(0m);
 
-        // Índice único compuesto (manufacturer_id, model)
+        
         builder.HasIndex(e => new { e.ManufacturerId, e.Model })
                .IsUnique()
                .HasDatabaseName("uq_aircraft_type");builder.HasOne<AircraftManufacturerEntity>()

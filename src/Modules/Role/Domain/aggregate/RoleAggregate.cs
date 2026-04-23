@@ -2,11 +2,11 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Role.Domain.Aggregate;
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Role.Domain.ValueObject;
 
-/// <summary>
-/// Rol de sistema para control de acceso.
-/// Ejemplos: ADMIN, OPERATOR, VIEWER, AGENT.
-/// Invariante: name normalizado a UPPER_SNAKE_CASE.
-/// </summary>
+
+
+
+
+
 public sealed class RoleAggregate
 {
     public RoleId Id       { get; private set; }

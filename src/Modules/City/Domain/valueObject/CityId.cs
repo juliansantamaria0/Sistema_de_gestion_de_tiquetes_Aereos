@@ -1,8 +1,8 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Domain.ValueObject;
 
-/// <summary>
-/// Value Object que representa el identificador único de una ciudad.
-/// </summary>
+
+
+
 public readonly record struct CityId(int Value)
 {
     public static CityId New(int value)

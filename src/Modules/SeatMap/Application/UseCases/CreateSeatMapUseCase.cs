@@ -23,9 +23,9 @@ public sealed class CreateSeatMapUseCase
         string?           seatFeatures,
         CancellationToken cancellationToken = default)
     {
-        // SeatMapId(1) es placeholder; EF Core asigna el Id real al insertar.
+        
         var seatMap = new SeatMapAggregate(
-            new SeatMapId(await GetNextIdAsync(cancellationToken)),
+            new SeatMapId(0),
             aircraftTypeId,
             seatNumber,
             cabinClassId,
@@ -34,11 +34,5 @@ public sealed class CreateSeatMapUseCase
         await _repository.AddAsync(seatMap, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);
         return seatMap;
-    }
-
-    private async Task<int> GetNextIdAsync(CancellationToken cancellationToken)
-    {
-        var items = await _repository.GetAllAsync(cancellationToken);
-        return items.Select(x => x.Id.Value).DefaultIfEmpty(0).Max() + 1;
     }
 }

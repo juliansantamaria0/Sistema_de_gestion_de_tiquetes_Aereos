@@ -3,10 +3,10 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Appli
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Domain.Repositories;
 
-/// <summary>
-/// Historial de todas las transacciones (EARN y REDEEM) de una cuenta.
-/// Caso de uso clave para mostrar el estado del saldo de millas.
-/// </summary>
+
+
+
+
 public sealed class GetLoyaltyTransactionsByAccountUseCase
 {
     private readonly ILoyaltyTransactionRepository _repository;

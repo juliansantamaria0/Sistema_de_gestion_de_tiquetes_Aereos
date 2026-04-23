@@ -2,17 +2,17 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Domain.
 
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerContact.Domain.ValueObject;
 
-/// <summary>
-/// Contacto de emergencia de un pasajero. [NC-10] id renombrado.
-/// SQL: passenger_contact.
-///
-/// 4NF: (passenger_id, contact_type_id) → full_name, phone, relationship.
-///      Cada contacto tiene UN tipo — sin MVD independientes.
-/// UNIQUE: (passenger_id, contact_type_id).
-///
-/// passenger_id y contact_type_id son la clave de negocio — inmutables.
-/// Update(): modifica full_name, phone y relationship.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public sealed class PassengerContactAggregate
 {
     public PassengerContactId Id            { get; private set; }
@@ -57,10 +57,10 @@ public sealed class PassengerContactAggregate
         Relationship  = relationship?.Trim();
     }
 
-    /// <summary>
-    /// Actualiza los datos de contacto.
-    /// PassengerId y ContactTypeId son la clave de negocio — inmutables.
-    /// </summary>
+    
+    
+    
+    
     public void Update(string fullName, string phone, string? relationship)
     {
         ValidateFullName(fullName);
@@ -72,7 +72,7 @@ public sealed class PassengerContactAggregate
         Relationship = relationship?.Trim();
     }
 
-    // ── Validaciones privadas ─────────────────────────────────────────────────
+    
 
     private static void ValidateFullName(string fullName)
     {

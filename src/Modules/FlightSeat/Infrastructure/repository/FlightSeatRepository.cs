@@ -11,9 +11,9 @@ public sealed class FlightSeatRepository : IFlightSeatRepository
 {
     private readonly AppDbContext _context;
 
-    // seat_status_id correspondiente a AVAILABLE.
-    // Se filtra por nombre en GetAvailableByFlightAsync usando una subconsulta
-    // para no acoplar el repositorio a un valor numérico hardcodeado.
+    
+    
+    
     private const string AvailableStatusName = "AVAILABLE";
 
     public FlightSeatRepository(AppDbContext context)
@@ -21,7 +21,7 @@ public sealed class FlightSeatRepository : IFlightSeatRepository
         _context = context;
     }
 
-    // ── Mapeos privados ───────────────────────────────────────────────────────
+    
 
     private static FlightSeatAggregate ToDomain(FlightSeatEntity entity)
         => new(
@@ -32,7 +32,7 @@ public sealed class FlightSeatRepository : IFlightSeatRepository
             entity.CreatedAt,
             entity.UpdatedAt);
 
-    // ── Operaciones ───────────────────────────────────────────────────────────
+    
 
     public async Task<FlightSeatAggregate?> GetByIdAsync(
         FlightSeatId      id,
@@ -74,7 +74,7 @@ public sealed class FlightSeatRepository : IFlightSeatRepository
         int               scheduledFlightId,
         CancellationToken cancellationToken = default)
     {
-        // Filtra por el nombre del estado para evitar hardcodear un ID numérico.
+        
         var availableStatusId = await _context.SeatStatuses
             .AsNoTracking()
             .Where(ss => ss.Name == AvailableStatusName)
@@ -115,8 +115,8 @@ public sealed class FlightSeatRepository : IFlightSeatRepository
             ?? throw new KeyNotFoundException(
                 $"FlightSeatEntity with id {flightSeat.Id.Value} not found.");
 
-        // Solo seat_status_id y updated_at son mutables.
-        // scheduled_flight_id y seat_map_id forman la clave de negocio.
+        
+        
         entity.SeatStatusId = flightSeat.SeatStatusId;
         entity.UpdatedAt    = flightSeat.UpdatedAt;
 

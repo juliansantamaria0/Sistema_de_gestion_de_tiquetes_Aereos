@@ -74,7 +74,7 @@ public sealed class LoyaltyProgramRepository : ILoyaltyProgramRepository
             ?? throw new KeyNotFoundException(
                 $"LoyaltyProgramEntity with id {loyaltyProgram.Id.Value} not found.");
 
-        // AirlineId es inmutable.
+        
         entity.Name           = loyaltyProgram.Name;
         entity.MilesPerDollar = loyaltyProgram.MilesPerDollar;
 

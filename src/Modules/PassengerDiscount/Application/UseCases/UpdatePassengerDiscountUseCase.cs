@@ -4,10 +4,10 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerDiscount.Domain.Rep
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PassengerDiscount.Domain.ValueObject;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
-/// <summary>
-/// Ajusta el monto del descuento aplicado a un pasajero en una línea de reserva.
-/// reservation_detail_id y discount_type_id son la clave de negocio — inmutables.
-/// </summary>
+
+
+
+
 public sealed class UpdatePassengerDiscountUseCase
 {
     private readonly IPassengerDiscountRepository _repository;

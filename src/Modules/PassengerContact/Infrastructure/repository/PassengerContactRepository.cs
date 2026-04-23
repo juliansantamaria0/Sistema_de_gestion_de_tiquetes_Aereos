@@ -60,7 +60,7 @@ public sealed class PassengerContactRepository : IPassengerContactRepository
             ?? throw new KeyNotFoundException(
                 $"PassengerContactEntity with id {contact.Id.Value} not found.");
 
-        // PassengerId y ContactTypeId son la clave de negocio — inmutables.
+        
         e.FullName     = contact.FullName;
         e.Phone        = contact.Phone;
         e.Relationship = contact.Relationship;

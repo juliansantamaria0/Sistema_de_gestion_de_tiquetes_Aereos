@@ -3,7 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Domain.Repositor
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Domain.ValueObject;
 
-/// <summary>Puerto de salida: contrato de persistencia para el módulo Airport.</summary>
+
 public interface IAirportRepository
 {
     Task<AirportAggregate?> GetByIdAsync(AirportId id, CancellationToken cancellationToken = default);
