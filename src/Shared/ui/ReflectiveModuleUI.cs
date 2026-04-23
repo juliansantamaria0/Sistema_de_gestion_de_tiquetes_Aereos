@@ -1,24 +1,40 @@
+using Microsoft.Extensions.DependencyInjection;
+using Spectre.Console;
 using System.Collections;
 using System.Globalization;
 using System.Reflection;
-using Spectre.Console;
+using System.Text.RegularExpressions;
 
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
 
 public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : class
 {
-    private readonly TService _service;
-    private readonly IServiceProvider _serviceProvider;
-
     public string Key { get; }
     public string Title { get; }
+
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     protected ReflectiveModuleUI(string key, string title, TService service, IServiceProvider serviceProvider)
     {
         Key = key;
         Title = GetFriendlyTitle(key, title);
-        _service = service;
         _serviceProvider = serviceProvider;
+        _scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+    }
+
+    private IModuleUI? ResolveModuleUI(string relatedServiceName)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var modules = scope.ServiceProvider.GetServices<IModuleUI>();
+
+        return modules.FirstOrDefault(m =>
+            string.Equals(m.Key, relatedServiceName, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(m.Title, relatedServiceName, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(
+                m.Title.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase),
+                relatedServiceName.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase),
+                StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task RunAsync(CancellationToken cancellationToken = default)
@@ -135,6 +151,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         object? selectedItem = null;
         var parameters = method.GetParameters().Where(p => p.ParameterType != typeof(CancellationToken)).ToList();
+
         if (parameters.Count > 0 && IsIdentityParameter(parameters[0]))
         {
             selectedItem = await SelectExistingItemAsync(ct, allowNone: true);
@@ -158,7 +175,10 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         if (method.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken)))
             args.Add(ct);
 
-        var result = await InvokeAsync(method, args.ToArray());
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetRequiredService<TService>();
+        var result = await InvokeAsync(method, args.ToArray(), service);
+
         AnsiConsole.MarkupLine("[green]Operación completada.[/]");
         if (result is not null)
             RenderSingleObject(result);
@@ -184,7 +204,10 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         if (method.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken)))
             args.Add(ct);
 
-        await InvokeAsync(method, args.ToArray());
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetRequiredService<TService>();
+        await InvokeAsync(method, args.ToArray(), service);
+
         AnsiConsole.MarkupLine("[green]Registro eliminado.[/]");
     }
 
@@ -194,10 +217,16 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         if (method is null)
             return Array.Empty<object>();
 
-        var args = method.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken)) ? new object?[] { ct } : Array.Empty<object?>();
-        var result = await InvokeAsync(method, args);
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetRequiredService<TService>();
+        var args = method.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken))
+            ? new object?[] { ct }
+            : Array.Empty<object?>();
+
+        var result = await InvokeAsync(method, args, service);
         if (result is IEnumerable enumerable)
             return enumerable.Cast<object>().ToList();
+
         return Array.Empty<object>();
     }
 
@@ -229,18 +258,24 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         var originalType = parameter.ParameterType;
         var type = Nullable.GetUnderlyingType(originalType) ?? originalType;
 
-        if (!IsIdentityParameter(parameter) && parameter.Name?.EndsWith("Id", StringComparison.OrdinalIgnoreCase) == true && type == typeof(int))
+        if (!IsIdentityParameter(parameter) &&
+            parameter.Name?.EndsWith("Id", StringComparison.OrdinalIgnoreCase) == true &&
+            type == typeof(int))
         {
             var related = await TryPromptRelatedSelectionAsync(parameter.Name, Nullable.GetUnderlyingType(parameter.ParameterType) is not null, ct);
             if (!related.Resolved)
-                throw new InvalidOperationException($"No se puede continuar porque la relación '{HumanizeParameter(parameter.Name)}' no pudo resolverse por lista. Verifica el servicio relacionado, el método GetAllAsync y que existan datos cargados.");
+                throw new InvalidOperationException(
+                    $"No se puede continuar porque la relación '{HumanizeParameter(parameter.Name!)}' no pudo resolverse por lista. Verifica el servicio relacionado, el método GetAllAsync y que existan datos cargados.");
+
             return related.Value;
         }
 
         if (type == typeof(string))
         {
             var raw = AnsiConsole.Ask<string>($"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)}");
-            return string.IsNullOrWhiteSpace(raw) && defaultValue is string s ? s : raw?.Trim() ?? string.Empty;
+            return string.IsNullOrWhiteSpace(raw) && defaultValue is string s
+                ? s
+                : raw?.Trim() ?? string.Empty;
         }
 
         if (type == typeof(int))
@@ -268,30 +303,40 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             return await BuildComplexObjectAsync(type, defaultValue, ct);
 
         var text = AnsiConsole.Ask<string>($"{HumanizeParameter(parameter.Name!)}{RenderDefault(defaultValue)}").Trim();
-        return string.IsNullOrWhiteSpace(text) ? defaultValue : Convert.ChangeType(text, type, CultureInfo.InvariantCulture);
+        return string.IsNullOrWhiteSpace(text)
+            ? defaultValue
+            : Convert.ChangeType(text, type, CultureInfo.InvariantCulture);
     }
 
     private async Task<object> BuildComplexObjectAsync(Type type, object? defaults, CancellationToken ct)
     {
         var ctor = type.GetConstructors().OrderByDescending(c => c.GetParameters().Length).First();
         var values = new List<object?>();
+
         foreach (var parameter in ctor.GetParameters())
         {
             var defaultValue = defaults is null ? null : FindDefaultValue(defaults, parameter.Name!, parameter.ParameterType);
             values.Add(await PromptForParameterAsync(parameter, defaultValue, ct));
         }
+
         return ctor.Invoke(values.ToArray());
     }
 
     private async Task<(bool Resolved, int? Value)> TryPromptRelatedSelectionAsync(string parameterName, bool nullable, CancellationToken ct)
     {
-        var moduleName = parameterName[..^2];
+        var relatedServiceName = ResolveRelatedServiceName(parameterName);
+        if (string.IsNullOrWhiteSpace(relatedServiceName))
+            return (false, null);
+
         var assembly = typeof(TService).Assembly;
-        var serviceType = assembly.GetTypes().FirstOrDefault(t => t.IsInterface && t.Name.Equals($"I{moduleName}Service", StringComparison.OrdinalIgnoreCase));
+        var serviceType = assembly.GetTypes()
+            .FirstOrDefault(t => t.IsInterface && t.Name.Equals($"I{relatedServiceName}Service", StringComparison.OrdinalIgnoreCase));
+
         if (serviceType is null)
             return (false, null);
 
-        var service = _serviceProvider.GetService(serviceType);
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var service = scope.ServiceProvider.GetService(serviceType);
         if (service is null)
             return (false, null);
 
@@ -299,21 +344,58 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         if (getAll is null)
             return (false, null);
 
-        var args = getAll.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken)) ? new object?[] { ct } : Array.Empty<object?>();
+        var args = getAll.GetParameters().Any(p => p.ParameterType == typeof(CancellationToken))
+            ? new object?[] { ct }
+            : Array.Empty<object?>();
+
         var result = await InvokeAsync(getAll, args, service);
         if (result is not IEnumerable enumerable)
             return (false, null);
 
         var items = enumerable.Cast<object>().ToList();
+
         if (items.Count == 0)
         {
-            AnsiConsole.MarkupLine($"[yellow]No hay datos relacionados para {Markup.Escape(HumanizeParameter(parameterName))}.[/]");
-            return (false, null);
+            var friendlyName = HumanizeParameter(parameterName);
+            var moduleTitle = GetFriendlyTitle(relatedServiceName, relatedServiceName);
+
+            AnsiConsole.MarkupLine($"[yellow]No hay datos para {Markup.Escape(friendlyName)}.[/]");
+            var createNow = AnsiConsole.Confirm($"¿Deseas crear un registro en [green]{Markup.Escape(moduleTitle)}[/] ahora?");
+
+            if (!createNow)
+                return (false, null);
+
+            var module = ResolveModuleUI(relatedServiceName);
+            if (module is null)
+            {
+                AnsiConsole.MarkupLine($"[red]No se encontró el módulo UI para {Markup.Escape(moduleTitle)}.[/]");
+                return (false, null);
+            }
+
+            await module.RunAsync(ct);
+
+            await using var retryScope = _scopeFactory.CreateAsyncScope();
+            var retryService = retryScope.ServiceProvider.GetService(serviceType);
+            if (retryService is null)
+                return (false, null);
+
+            var retryResult = await InvokeAsync(getAll, args, retryService);
+            if (retryResult is not IEnumerable retryEnumerable)
+                return (false, null);
+
+            items = retryEnumerable.Cast<object>().ToList();
+
+            if (items.Count == 0)
+            {
+                AnsiConsole.MarkupLine($"[yellow]Aún no hay datos para {Markup.Escape(friendlyName)}.[/]");
+                return (false, null);
+            }
         }
 
         var choices = new List<ChoiceItem>();
         if (nullable)
             choices.Add(new ChoiceItem("Ninguno", null));
+
         choices.AddRange(items.Select(i => new ChoiceItem(GetChoiceLabel(i), GetIdentityValue(i))));
 
         var selected = AnsiConsole.Prompt(
@@ -326,9 +408,13 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         return (true, selected.Value is null ? null : Convert.ToInt32(selected.Value, CultureInfo.InvariantCulture));
     }
 
-    private async Task<object?> InvokeAsync(MethodInfo method, object?[] args, object? target = null)
+    private static string ResolveRelatedServiceName(string parameterName)
     {
-        target ??= _service;
+        return GetRelationEntityName(parameterName);
+    }
+
+    private async Task<object?> InvokeAsync(MethodInfo method, object?[] args, object? target)
+    {
         var invocation = method.Invoke(target, args);
         if (invocation is Task task)
         {
@@ -336,20 +422,27 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             var resultProperty = task.GetType().GetProperty("Result");
             return resultProperty?.GetValue(task);
         }
+
         return invocation;
     }
 
-    private static PropertyInfo[] GetDisplayProperties(Type type) => type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+    private static PropertyInfo[] GetDisplayProperties(Type type) =>
+        type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => p.Name is not "CreatedAt" and not "UpdatedAt" and not "CancelledAt" and not "ConfirmedAt")
+            .ToArray();
 
-    private static bool IsIdentityParameter(ParameterInfo parameter)
-        => string.Equals(parameter.Name, "id", StringComparison.OrdinalIgnoreCase)
-           && (Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType) == typeof(int);
+    private static bool IsIdentityParameter(ParameterInfo parameter) =>
+        string.Equals(parameter.Name, "id", StringComparison.OrdinalIgnoreCase) &&
+        (Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType) == typeof(int);
 
     private static int GetIdentityValue(object item)
     {
-        var prop = item.GetType().GetProperties().FirstOrDefault(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) || p.Name.EndsWith("Id", StringComparison.Ordinal));
+        var prop = item.GetType().GetProperties()
+            .FirstOrDefault(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) || p.Name.EndsWith("Id", StringComparison.Ordinal));
+
         if (prop is null)
             throw new InvalidOperationException($"No se encontró una propiedad ID en {item.GetType().Name}.");
+
         return Convert.ToInt32(prop.GetValue(item), CultureInfo.InvariantCulture);
     }
 
@@ -358,7 +451,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         if (source is DefaultValueBag bag)
             return bag.Get(parameterName);
 
-        var prop = source.GetType().GetProperties().FirstOrDefault(p => p.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase));
+        var prop = source.GetType().GetProperties()
+            .FirstOrDefault(p => p.Name.Equals(parameterName, StringComparison.OrdinalIgnoreCase));
+
         if (prop is not null)
             return prop.GetValue(source);
 
@@ -372,7 +467,9 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         var values = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
         foreach (var targetProp in targetProps)
         {
-            var sourceProp = source.GetType().GetProperties().FirstOrDefault(p => p.Name.Equals(targetProp.Name, StringComparison.OrdinalIgnoreCase));
+            var sourceProp = source.GetType().GetProperties()
+                .FirstOrDefault(p => p.Name.Equals(targetProp.Name, StringComparison.OrdinalIgnoreCase));
+
             values[targetProp.Name] = sourceProp?.GetValue(source);
         }
 
@@ -383,15 +480,19 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     {
         var props = item.GetType().GetProperties();
         var idProp = props.FirstOrDefault(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) || p.Name.EndsWith("Id", StringComparison.Ordinal));
-        var nameProps = props.Where(p => p.Name is "Name" or "Model" or "IataCode" or "FlightCode" or "Code" or "DocumentNumber" or "Email" or "Username").Take(2).ToList();
+        var nameProps = props.Where(p => p.Name is "Name" or "Model" or "IataCode" or "FlightCode" or "Code" or "DocumentNumber" or "Email" or "Username")
+            .Take(2)
+            .ToList();
+
         var parts = new List<string>();
         if (idProp is not null) parts.Add($"{idProp.GetValue(item)}");
         foreach (var prop in nameProps) parts.Add(FormatValue(prop.GetValue(item)));
+
         return string.Join(" | ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
     }
 
-    private static string GetFriendlyTitle(string key, string fallback)
-        => key.ToLowerInvariant() switch
+    private static string GetFriendlyTitle(string key, string fallback) =>
+        key.ToLowerInvariant() switch
         {
             "airline" => "Aerolíneas",
             "country" => "Países",
@@ -447,38 +548,118 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         };
     }
 
+    private static readonly Dictionary<string, string> FriendlyLabels = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["gateId"] = "Puerta de embarque",
+        ["originAirportId"] = "Aeropuerto de origen",
+        ["destinationAirportId"] = "Aeropuerto de destino",
+        ["documentTypeId"] = "Tipo de documento",
+        ["personId"] = "Persona",
+        ["customerId"] = "Cliente",
+        ["passengerId"] = "Pasajero",
+        ["reservationId"] = "Reserva",
+        ["reservationDetailId"] = "Detalle de reserva",
+        ["reservationStatusId"] = "Estado de reserva",
+        ["ticketId"] = "Tiquete",
+        ["ticketStatusId"] = "Estado de tiquete",
+        ["paymentId"] = "Pago",
+        ["paymentMethodId"] = "Método de pago",
+        ["paymentStatusId"] = "Estado de pago",
+        ["refundId"] = "Reembolso",
+        ["refundStatusId"] = "Estado de reembolso",
+        ["currencyId"] = "Moneda",
+        ["countryId"] = "País",
+        ["cityId"] = "Ciudad",
+        ["nationalityId"] = "Nacionalidad",
+        ["genderId"] = "Género",
+        ["airlineId"] = "Aerolínea",
+        ["airportId"] = "Aeropuerto",
+        ["terminalId"] = "Terminal",
+        ["routeId"] = "Ruta",
+        ["routeScheduleId"] = "Horario de ruta",
+        ["scheduledFlightId"] = "Vuelo programado",
+        ["flightStatusId"] = "Estado de vuelo",
+        ["flightSeatId"] = "Asiento de vuelo",
+        ["seatStatusId"] = "Estado del asiento",
+        ["aircraftId"] = "Aeronave",
+        ["aircraftTypeId"] = "Tipo de aeronave",
+        ["manufacturerId"] = "Fabricante",
+        ["employeeId"] = "Empleado",
+        ["checkInStatusId"] = "Estado de check-in",
+    };
+
+    private static readonly Dictionary<string, string> RelationAliases = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["originAirportId"] = "Airport",
+        ["destinationAirportId"] = "Airport",
+        ["departureGateId"] = "Gate",
+        ["arrivalGateId"] = "Gate",
+        ["documentTypeId"] = "DocumentType",
+        ["reservationStatusId"] = "ReservationStatus",
+        ["ticketStatusId"] = "TicketStatus",
+        ["paymentStatusId"] = "PaymentStatus",
+        ["paymentMethodId"] = "PaymentMethod",
+        ["refundStatusId"] = "RefundStatus",
+        ["seatStatusId"] = "SeatStatus",
+        ["flightStatusId"] = "FlightStatus",
+        ["checkInStatusId"] = "CheckInStatus",
+    };
+
     private static string HumanizeParameter(string parameterName)
-        => parameterName switch
+    {
+        if (string.IsNullOrWhiteSpace(parameterName))
+            return string.Empty;
+
+        if (FriendlyLabels.TryGetValue(parameterName, out var exactLabel))
+            return exactLabel;
+
+        if (parameterName.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
         {
-            "customerId" => "Cliente",
-            "scheduledFlightId" => "Vuelo programado",
-            "reservationStatusId" => "Estado de reserva",
-            "ticketStatusId" => "Estado de tiquete",
-            "paymentStatusId" => "Estado de pago",
-            "paymentMethodId" => "Método de pago",
-            "currencyId" => "Moneda",
-            "reservationId" => "Reserva",
-            "reservationDetailId" => "Detalle de reserva",
-            "ticketId" => "Tiquete",
-            "countryId" => "País",
-            "cityId" => "Ciudad",
-            "airlineId" => "Aerolínea",
-            "routeId" => "Ruta",
-            "baseFlightId" => "Vuelo base",
-            "flightStatusId" => "Estado de vuelo",
-            "aircraftId" => "Aeronave",
-            "gateId" => "Puerta de embarque",
-            _ => SplitPascal(parameterName.Replace("Id", " ID", StringComparison.Ordinal))
-        };
+            var withoutId = parameterName[..^2];
+            return ToHumanReadable(withoutId);
+        }
 
-    private static string SplitPascal(string value)
-        => string.Concat(value.Select((ch, i) => i > 0 && char.IsUpper(ch) && value[i - 1] != ' ' ? " " + ch : ch.ToString()));
+        return ToHumanReadable(parameterName);
+    }
 
-    private static string RenderDefault(object? defaultValue)
-        => defaultValue is null ? string.Empty : $" [grey](actual: {Markup.Escape(FormatValue(defaultValue))})[/]";
+    private static string GetRelationEntityName(string parameterName)
+    {
+        if (string.IsNullOrWhiteSpace(parameterName))
+            return string.Empty;
 
-    private static string FormatValue(object? value)
-        => value switch
+        if (RelationAliases.TryGetValue(parameterName, out var alias))
+            return alias;
+
+        if (parameterName.EndsWith("Id", StringComparison.OrdinalIgnoreCase))
+            return parameterName[..^2];
+
+        return parameterName;
+    }
+
+    private static string ToHumanReadable(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return string.Empty;
+
+        var withSpaces = Regex.Replace(text, "([a-z])([A-Z])", "$1 $2");
+        withSpaces = withSpaces.Replace("_", " ").Trim();
+
+        return withSpaces.Length == 0
+            ? text
+            : char.ToUpperInvariant(withSpaces[0]) + withSpaces[1..];
+    }
+
+    private static string SplitPascal(string value) =>
+        string.Concat(value.Select((ch, i) =>
+            i > 0 && char.IsUpper(ch) && value[i - 1] != ' '
+                ? " " + ch
+                : ch.ToString()));
+
+    private static string RenderDefault(object? defaultValue) =>
+        defaultValue is null ? string.Empty : $" [grey](actual: {Markup.Escape(FormatValue(defaultValue))})[/]";
+
+    private static string FormatValue(object? value) =>
+        value switch
         {
             null => string.Empty,
             DateTime dt => dt.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture),
@@ -591,8 +772,10 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         var grid = new Grid();
         grid.AddColumn();
         grid.AddColumn();
+
         foreach (var prop in GetDisplayProperties(result.GetType()))
             grid.AddRow($"[aqua]{prop.Name}[/]", Markup.Escape(FormatValue(prop.GetValue(result))));
+
         AnsiConsole.Write(new Panel(grid).Border(BoxBorder.Rounded));
     }
 
@@ -602,8 +785,14 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
     private sealed class DefaultValueBag
     {
         private readonly Dictionary<string, object?> _values;
-        public DefaultValueBag(Dictionary<string, object?> values) => _values = values;
+
+        public DefaultValueBag(Dictionary<string, object?> values)
+        {
+            _values = values;
+        }
+
         public object? this[string name] => _values.TryGetValue(name, out var value) ? value : null;
+
         public object? Get(string name) => this[name];
     }
 }

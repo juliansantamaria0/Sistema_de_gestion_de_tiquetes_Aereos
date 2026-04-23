@@ -1,12 +1,14 @@
-namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.UI;
-
+using Microsoft.Extensions.DependencyInjection;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
+
+
+namespace Sistema_de_gestion_de_tiquetes_Aereos.src.Modules.Ticket.UI;
 
 public sealed class TicketConsoleUI : ReflectiveModuleUI<ITicketService>
 {
     public TicketConsoleUI(ITicketService service, IServiceProvider serviceProvider)
-        : base("ticket", "Ticket Management", service, serviceProvider)
+        : base("Ticket", "Tiquetes", service, serviceProvider)
     {
     }
 }

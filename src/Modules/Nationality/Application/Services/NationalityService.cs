@@ -1,24 +1,30 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Application.Services;
 
+using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Domain.Aggregate;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Domain.ValueObject;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Contracts;
 
 public sealed class NationalityService : INationalityService
 {
     private readonly INationalityRepository _repository;
     private readonly IUnitOfWork            _unitOfWork;
+    private readonly AppDbContext           _context;
 
-    public NationalityService(INationalityRepository repository, IUnitOfWork unitOfWork)
+    public NationalityService(INationalityRepository repository, IUnitOfWork unitOfWork, AppDbContext context)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _context = context;
     }
 
     public async Task<NationalityDto> CreateAsync(CreateNationalityRequest request, CancellationToken ct = default)
     {
+        await ValidateAsync(request.CountryId, null, ct);
+
         var entity = NationalityAggregate.Create(request.CountryId, request.Demonym);
         await _repository.AddAsync(entity, ct);
         await _unitOfWork.CommitAsync(ct);
@@ -39,6 +45,8 @@ public sealed class NationalityService : INationalityService
 
     public async Task<NationalityDto> UpdateAsync(int id, UpdateNationalityRequest request, CancellationToken ct = default)
     {
+        await ValidateAsync(request.CountryId, id, ct);
+
         var entity = await _repository.GetByIdAsync(NationalityId.New(id), ct)
             ?? throw new KeyNotFoundException($"Nationality with id {id} not found.");
         entity.Update(request.CountryId, request.Demonym);
@@ -53,6 +61,19 @@ public sealed class NationalityService : INationalityService
             ?? throw new KeyNotFoundException($"Nationality with id {id} not found.");
         _repository.Delete(entity);
         await _unitOfWork.CommitAsync(ct);
+    }
+
+    private async Task ValidateAsync(int countryId, int? nationalityIdToIgnore, CancellationToken ct)
+    {
+        if (!await _context.Countries.AsNoTracking().AnyAsync(x => x.Id == countryId, ct))
+            throw new InvalidOperationException($"No existe el país con id {countryId}.");
+
+        var duplicateExists = await _context.Nationalities
+            .AsNoTracking()
+            .AnyAsync(x => x.CountryId == countryId && (!nationalityIdToIgnore.HasValue || x.NationalityId != nationalityIdToIgnore.Value), ct);
+
+        if (duplicateExists)
+            throw new InvalidOperationException("Ya existe una nacionalidad registrada para ese país.");
     }
 
     private static NationalityDto Map(NationalityAggregate a) =>

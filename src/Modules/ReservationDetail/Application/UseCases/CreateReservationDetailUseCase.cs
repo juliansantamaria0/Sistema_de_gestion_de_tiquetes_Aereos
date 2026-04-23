@@ -64,6 +64,18 @@ public sealed class CreateReservationDetailUseCase
         if (await _context.ReservationDetails.AsNoTracking().AnyAsync(x => x.ReservationId == reservationId && x.FlightSeatId == flightSeatId, cancellationToken))
             throw new InvalidOperationException("Ese asiento ya está asociado a esta reserva.");
 
+        var seatAlreadyReserved = await _context.ReservationDetails
+            .AsNoTracking()
+            .Join(
+                _context.Reservations.AsNoTracking(),
+                detail => detail.ReservationId,
+                existingReservation => existingReservation.Id,
+                (detail, existingReservation) => new { detail.FlightSeatId, existingReservation.CancelledAt })
+            .AnyAsync(x => x.FlightSeatId == flightSeatId && x.CancelledAt == null, cancellationToken);
+
+        if (seatAlreadyReserved)
+            throw new InvalidOperationException("Ese asiento ya está reservado en otra reserva activa.");
+
         if (await _context.ReservationDetails.AsNoTracking().AnyAsync(x => x.ReservationId == reservationId && x.PassengerId == passengerId, cancellationToken))
             throw new InvalidOperationException("Ese pasajero ya tiene un asiento asignado dentro de la reserva.");
 
