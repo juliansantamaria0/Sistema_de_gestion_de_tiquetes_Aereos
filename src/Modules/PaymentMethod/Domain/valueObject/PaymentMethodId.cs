@@ -6,8 +6,8 @@ public sealed class PaymentMethodId
 
     public PaymentMethodId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("PaymentMethodId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("PaymentMethodId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

@@ -6,8 +6,8 @@ public sealed class CountryId
 
     public CountryId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("CountryId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("CountryId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

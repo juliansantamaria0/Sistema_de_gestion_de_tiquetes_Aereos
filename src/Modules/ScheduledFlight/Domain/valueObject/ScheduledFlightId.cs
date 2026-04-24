@@ -6,8 +6,8 @@ public sealed class ScheduledFlightId
 
     public ScheduledFlightId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("ScheduledFlightId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("ScheduledFlightId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

@@ -19,7 +19,7 @@ public sealed class ScheduledFlightRepository : IScheduledFlightRepository
     
 
     private static ScheduledFlightAggregate ToDomain(ScheduledFlightEntity entity)
-        => new(
+        => ScheduledFlightAggregate.Reconstitute(
             new ScheduledFlightId(entity.Id),
             entity.BaseFlightId,
             entity.AircraftId,

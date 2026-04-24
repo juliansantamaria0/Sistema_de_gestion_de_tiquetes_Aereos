@@ -6,8 +6,8 @@ public sealed class FareTypeId
 
     public FareTypeId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("FareTypeId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("FareTypeId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

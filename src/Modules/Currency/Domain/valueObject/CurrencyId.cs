@@ -6,8 +6,8 @@ public sealed class CurrencyId
 
     public CurrencyId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("CurrencyId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("CurrencyId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

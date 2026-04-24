@@ -34,7 +34,7 @@ public sealed class ScheduledFlightAggregate
         Id = null!;
     }
 
-    public ScheduledFlightAggregate(
+    private ScheduledFlightAggregate(
         ScheduledFlightId id,
         int               baseFlightId,
         int               aircraftId,
@@ -45,6 +45,27 @@ public sealed class ScheduledFlightAggregate
         int               flightStatusId,
         DateTime          createdAt,
         DateTime?         updatedAt = null)
+    {
+        Id                       = id;
+        BaseFlightId             = baseFlightId;
+        AircraftId               = aircraftId;
+        GateId                   = gateId;
+        DepartureDate            = departureDate;
+        DepartureTime            = departureTime;
+        EstimatedArrivalDatetime = estimatedArrivalDatetime;
+        FlightStatusId           = flightStatusId;
+        CreatedAt                = createdAt;
+        UpdatedAt                = updatedAt;
+    }
+
+    public static ScheduledFlightAggregate Create(
+        int      baseFlightId,
+        int      aircraftId,
+        int?     gateId,
+        DateOnly departureDate,
+        TimeOnly departureTime,
+        DateTime estimatedArrivalDatetime,
+        int      flightStatusId)
     {
         if (baseFlightId <= 0)
             throw new ArgumentException("BaseFlightId must be a positive integer.", nameof(baseFlightId));
@@ -58,23 +79,48 @@ public sealed class ScheduledFlightAggregate
         if (flightStatusId <= 0)
             throw new ArgumentException("FlightStatusId must be a positive integer.", nameof(flightStatusId));
 
-        var todayUtc = DateOnly.FromDateTime(DateTime.UtcNow);
-        if (departureDate < todayUtc)
-            throw new Exception("La fecha de salida programada no puede ser anterior al día actual (UTC).");
+        // DepartureDate/DepartureTime are modeled as calendar date & clock time (no timezone).
+        // Compare using local "today" to avoid false negatives when the machine is behind UTC.
+        var todayLocal = DateOnly.FromDateTime(DateTime.Now);
+        if (departureDate < todayLocal)
+            throw new Exception("La fecha de salida programada no puede ser anterior al día actual.");
 
         ValidateArrivalAfterDeparture(departureDate, departureTime, estimatedArrivalDatetime);
 
-        Id                       = id;
-        BaseFlightId             = baseFlightId;
-        AircraftId               = aircraftId;
-        GateId                   = gateId;
-        DepartureDate            = departureDate;
-        DepartureTime            = departureTime;
-        EstimatedArrivalDatetime = estimatedArrivalDatetime;
-        FlightStatusId           = flightStatusId;
-        CreatedAt                = createdAt;
-        UpdatedAt                = updatedAt;
+        return new ScheduledFlightAggregate(
+            new ScheduledFlightId(0),
+            baseFlightId,
+            aircraftId,
+            gateId,
+            departureDate,
+            departureTime,
+            estimatedArrivalDatetime,
+            flightStatusId,
+            DateTime.UtcNow);
     }
+
+    public static ScheduledFlightAggregate Reconstitute(
+        ScheduledFlightId id,
+        int               baseFlightId,
+        int               aircraftId,
+        int?              gateId,
+        DateOnly          departureDate,
+        TimeOnly          departureTime,
+        DateTime          estimatedArrivalDatetime,
+        int               flightStatusId,
+        DateTime          createdAt,
+        DateTime?         updatedAt = null)
+        => new(
+            id,
+            baseFlightId,
+            aircraftId,
+            gateId,
+            departureDate,
+            departureTime,
+            estimatedArrivalDatetime,
+            flightStatusId,
+            createdAt,
+            updatedAt);
 
     
     
@@ -96,6 +142,10 @@ public sealed class ScheduledFlightAggregate
 
         if (flightStatusId <= 0)
             throw new ArgumentException("FlightStatusId must be a positive integer.", nameof(flightStatusId));
+
+        var todayLocal = DateOnly.FromDateTime(DateTime.Now);
+        if (departureDate < todayLocal)
+            throw new Exception("La fecha de salida programada no puede ser anterior al día actual.");
 
         ValidateArrivalAfterDeparture(departureDate, departureTime, estimatedArrivalDatetime);
 
@@ -136,7 +186,8 @@ public sealed class ScheduledFlightAggregate
         DateTime estimatedArrival)
     {
         
-        var departureDateTime = departureDate.ToDateTime(departureTime, DateTimeKind.Utc);
+        // Keep DateTimeKind.Unspecified to match values coming from the database.
+        var departureDateTime = departureDate.ToDateTime(departureTime);
 
         if (estimatedArrival <= departureDateTime)
             throw new ArgumentException(

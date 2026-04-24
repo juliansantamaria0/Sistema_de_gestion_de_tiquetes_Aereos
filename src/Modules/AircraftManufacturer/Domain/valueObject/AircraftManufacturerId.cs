@@ -4,7 +4,7 @@ public readonly record struct AircraftManufacturerId(int Value)
 {
     public static AircraftManufacturerId New(int value)
     {
-        if (value <= 0) throw new ArgumentException("AircraftManufacturerId must be positive.", nameof(value));
+        if (value < 0) throw new ArgumentException("AircraftManufacturerId must be positive.", nameof(value));
         return new AircraftManufacturerId(value);
     }
     public override string ToString() => Value.ToString();

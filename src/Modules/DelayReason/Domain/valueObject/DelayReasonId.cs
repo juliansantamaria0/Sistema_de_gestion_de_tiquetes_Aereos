@@ -6,8 +6,8 @@ public sealed class DelayReasonId
 
     public DelayReasonId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("DelayReasonId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("DelayReasonId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

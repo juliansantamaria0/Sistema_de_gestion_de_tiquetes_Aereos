@@ -6,8 +6,8 @@ public sealed class ContactTypeId
 
     public ContactTypeId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("ContactTypeId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("ContactTypeId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

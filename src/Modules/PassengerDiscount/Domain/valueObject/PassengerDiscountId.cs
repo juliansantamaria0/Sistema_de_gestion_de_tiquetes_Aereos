@@ -6,8 +6,8 @@ public sealed class PassengerDiscountId
 
     public PassengerDiscountId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("PassengerDiscountId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("PassengerDiscountId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

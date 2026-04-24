@@ -6,8 +6,8 @@ public sealed class TicketBaggageId
 
     public TicketBaggageId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("TicketBaggageId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("TicketBaggageId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

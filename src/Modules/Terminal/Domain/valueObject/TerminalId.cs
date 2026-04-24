@@ -5,8 +5,8 @@ public readonly record struct TerminalId(int Value)
 {
     public static TerminalId New(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("TerminalId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("TerminalId must be zero or a positive integer.", nameof(value));
         return new TerminalId(value);
     }
 

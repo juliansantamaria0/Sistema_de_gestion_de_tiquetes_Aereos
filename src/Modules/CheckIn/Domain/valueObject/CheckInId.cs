@@ -6,8 +6,9 @@ public sealed class CheckInId
 
     public CheckInId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("CheckInId must be a positive integer.", nameof(value));
+        // 0 is used transiently before DB identity assignment on create.
+        if (value < 0)
+            throw new ArgumentException("CheckInId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

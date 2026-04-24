@@ -6,8 +6,8 @@ public sealed class ReservationId
 
     public ReservationId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("ReservationId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("ReservationId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

@@ -40,6 +40,30 @@ public sealed class PaymentService : IPaymentService
         return ToDto(agg);
     }
 
+    public async Task<PaymentDto> CreateForReservationAsync(
+        int               reservationId,
+        int               currencyId,
+        decimal           amount,
+        int               paymentMethodId,
+        string?           transactionReference = null,
+        string?           rejectionReason      = null,
+        CancellationToken cancellationToken    = default)
+    {
+        var agg = await _create.ExecuteAsync(
+            new CreatePaymentRequest(
+                ReservationId: reservationId,
+                TicketId: null,
+                CurrencyId: currencyId,
+                Amount: amount,
+                PaymentStatusId: 0,
+                PaymentMethodId: paymentMethodId,
+                TransactionReference: transactionReference,
+                RejectionReason: rejectionReason),
+            cancellationToken);
+
+        return ToDto(agg);
+    }
+
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         => await _delete.ExecuteAsync(id, cancellationToken);
 

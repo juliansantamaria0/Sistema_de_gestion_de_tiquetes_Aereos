@@ -12,7 +12,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260420192321_city")]
-    partial class city
+    partial class City
     {
         
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -5,7 +5,7 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Migrations
 {
     
-    public partial class relaciones : Migration
+    public partial class Relaciones : Migration
     {
         
         protected override void Up(MigrationBuilder migrationBuilder)

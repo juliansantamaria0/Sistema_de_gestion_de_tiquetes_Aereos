@@ -6,8 +6,8 @@ public sealed class TicketStatusId
 
     public TicketStatusId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("TicketStatusId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("TicketStatusId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

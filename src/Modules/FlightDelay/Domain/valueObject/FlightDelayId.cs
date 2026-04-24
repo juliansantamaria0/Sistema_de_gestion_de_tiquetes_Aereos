@@ -6,8 +6,8 @@ public sealed class FlightDelayId
 
     public FlightDelayId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("FlightDelayId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("FlightDelayId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

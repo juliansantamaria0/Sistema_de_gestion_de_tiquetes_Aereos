@@ -9,7 +9,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.City.Domain.ValueObject;
 public sealed class CityAggregate
 {
     public CityId Id { get; private set; }
-    public string Name { get; private set; }
+    public string Name { get; private set; } = string.Empty;
     public int CountryId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 

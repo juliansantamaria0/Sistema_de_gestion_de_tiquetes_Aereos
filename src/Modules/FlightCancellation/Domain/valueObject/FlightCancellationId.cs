@@ -6,8 +6,8 @@ public sealed class FlightCancellationId
 
     public FlightCancellationId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("FlightCancellationId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("FlightCancellationId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

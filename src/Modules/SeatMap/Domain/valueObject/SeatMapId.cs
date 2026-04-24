@@ -6,8 +6,8 @@ public sealed class SeatMapId
 
     public SeatMapId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("SeatMapId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("SeatMapId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

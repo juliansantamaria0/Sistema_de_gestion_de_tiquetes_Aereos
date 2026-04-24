@@ -6,8 +6,8 @@ public sealed class RouteScheduleId
 
     public RouteScheduleId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("RouteScheduleId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("RouteScheduleId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

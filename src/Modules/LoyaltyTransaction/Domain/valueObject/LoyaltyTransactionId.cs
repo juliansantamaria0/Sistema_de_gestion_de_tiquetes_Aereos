@@ -6,8 +6,8 @@ public sealed class LoyaltyTransactionId
 
     public LoyaltyTransactionId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("LoyaltyTransactionId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("LoyaltyTransactionId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

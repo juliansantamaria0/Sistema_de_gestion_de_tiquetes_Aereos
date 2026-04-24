@@ -6,9 +6,9 @@ public sealed class FlightStatusHistoryId
 
     public FlightStatusHistoryId(int value)
     {
-        if (value <= 0)
+        if (value < 0)
             throw new ArgumentException(
-                "FlightStatusHistoryId must be a positive integer.", nameof(value));
+                "FlightStatusHistoryId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

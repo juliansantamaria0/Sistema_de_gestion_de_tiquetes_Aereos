@@ -6,8 +6,8 @@ public sealed class BoardingPassId
 
     public BoardingPassId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("BoardingPassId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("BoardingPassId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

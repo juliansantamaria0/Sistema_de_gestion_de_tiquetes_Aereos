@@ -6,6 +6,7 @@ public interface IPaymentService
     Task<IEnumerable<PaymentDto>> GetAllAsync(                                                                                 CancellationToken cancellationToken = default);
     Task<IEnumerable<PaymentDto>> GetByReservationAsync(int reservationId,                                                     CancellationToken cancellationToken = default);
     Task<IEnumerable<PaymentDto>> GetByTicketAsync(int ticketId,                                                               CancellationToken cancellationToken = default);
+    Task<PaymentDto>              CreateForReservationAsync(int reservationId, int currencyId, decimal amount, int paymentMethodId, string? transactionReference = null, string? rejectionReason = null, CancellationToken cancellationToken = default);
     Task<PaymentDto>              CreateAsync(CreatePaymentRequest request,                                                    CancellationToken cancellationToken = default);
     Task                          UpdateStatusAsync(int id, int paymentStatusId, string? transactionReference, string? rejectionReason, CancellationToken cancellationToken = default);
     Task                          DeleteAsync(int id,                                                                          CancellationToken cancellationToken = default);

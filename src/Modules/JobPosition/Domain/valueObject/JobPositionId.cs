@@ -4,8 +4,8 @@ public readonly record struct JobPositionId(int Value)
 {
     public static JobPositionId New(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("JobPositionId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("JobPositionId must be zero or a positive integer.", nameof(value));
         return new JobPositionId(value);
     }
     public override string ToString() => Value.ToString();

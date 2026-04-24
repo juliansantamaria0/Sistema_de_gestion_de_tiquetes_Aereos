@@ -6,8 +6,8 @@ public sealed class FlightCrewId
 
     public FlightCrewId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("FlightCrewId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("FlightCrewId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

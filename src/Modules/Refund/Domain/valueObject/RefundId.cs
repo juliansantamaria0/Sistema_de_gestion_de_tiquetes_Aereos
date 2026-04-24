@@ -6,8 +6,8 @@ public sealed class RefundId
 
     public RefundId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("RefundId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("RefundId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

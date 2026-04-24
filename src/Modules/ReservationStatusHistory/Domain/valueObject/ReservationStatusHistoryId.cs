@@ -6,9 +6,9 @@ public sealed class ReservationStatusHistoryId
 
     public ReservationStatusHistoryId(int value)
     {
-        if (value <= 0)
+        if (value < 0)
             throw new ArgumentException(
-                "ReservationStatusHistoryId must be a positive integer.", nameof(value));
+                "ReservationStatusHistoryId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

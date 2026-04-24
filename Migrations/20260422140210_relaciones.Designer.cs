@@ -12,7 +12,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260422140210_relaciones")]
-    partial class relaciones
+    partial class Relaciones
     {
         
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

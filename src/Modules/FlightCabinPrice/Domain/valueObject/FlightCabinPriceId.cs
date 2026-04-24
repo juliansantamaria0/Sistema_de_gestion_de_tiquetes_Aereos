@@ -6,9 +6,9 @@ public sealed class FlightCabinPriceId
 
     public FlightCabinPriceId(int value)
     {
-        if (value <= 0)
+        if (value < 0)
             throw new ArgumentException(
-                "FlightCabinPriceId must be a positive integer.", nameof(value));
+                "FlightCabinPriceId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

@@ -143,8 +143,10 @@ public sealed class PaymentRepository : IPaymentRepository
                 from p in _context.Payments.AsNoTracking()
                 where p.ReservationId == reservationId
                 join s in _context.PaymentStatuses.AsNoTracking() on p.PaymentStatusId equals s.Id
-                where s.Name.Equals("PAID", StringComparison.OrdinalIgnoreCase)
-                      || s.Name.Equals("Aprobado", StringComparison.OrdinalIgnoreCase)
+                // MySQL EF provider can't translate string.Equals(x, StringComparison.*).
+                // Use ToUpper() which is translatable.
+                where s.Name != null
+                      && (s.Name.ToUpper() == "PAID" || s.Name.ToUpper() == "APROBADO")
                 select (decimal?)p.Amount)
             .SumAsync(cancellationToken) ?? 0m;
     }

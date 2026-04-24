@@ -14,6 +14,7 @@ public interface IReservationRepository
     Task                                    DeleteAsync(ReservationId id,                       CancellationToken cancellationToken = default);
 
     Task<decimal> GetQuotedFareTotalForReservationAsync(int reservationId, CancellationToken cancellationToken = default);
+    Task<decimal> GetQuotedFareForReservationDetailAsync(int reservationId, int reservationDetailId, CancellationToken cancellationToken = default);
 
     Task<ReservationAggregate> CreateReservationWithInitialHistoryAsync(
         string reservationCodeNormalized,

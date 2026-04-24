@@ -6,8 +6,8 @@ public sealed class CabinClassId
 
     public CabinClassId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("CabinClassId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("CabinClassId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

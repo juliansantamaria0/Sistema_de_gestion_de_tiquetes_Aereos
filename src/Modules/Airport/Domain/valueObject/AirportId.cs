@@ -7,8 +7,8 @@ public readonly record struct AirportId(int Value)
 {
     public static AirportId New(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("AirportId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("AirportId must be zero or a positive integer.", nameof(value));
         return new AirportId(value);
     }
 

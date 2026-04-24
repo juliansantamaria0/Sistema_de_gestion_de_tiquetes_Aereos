@@ -6,8 +6,8 @@ public sealed class PersonId
 
     public PersonId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("PersonId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("PersonId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

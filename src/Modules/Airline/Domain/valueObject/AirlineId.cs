@@ -4,7 +4,7 @@ public readonly record struct AirlineId(int Value)
 {
     public static AirlineId New(int value)
     {
-        if (value <= 0) throw new ArgumentException("AirlineId must be positive.", nameof(value));
+        if (value < 0) throw new ArgumentException("AirlineId must be positive.", nameof(value));
         return new AirlineId(value);
     }
     public override string ToString() => Value.ToString();

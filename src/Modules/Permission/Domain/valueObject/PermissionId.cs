@@ -4,8 +4,8 @@ public readonly record struct PermissionId(int Value)
 {
     public static PermissionId New(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("PermissionId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("PermissionId must be zero or a positive integer.", nameof(value));
         return new PermissionId(value);
     }
     public override string ToString() => Value.ToString();

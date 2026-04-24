@@ -22,16 +22,14 @@ public sealed class CreateScheduledFlightUseCase
         CancellationToken            cancellationToken = default)
     {
         
-        var scheduledFlight = new ScheduledFlightAggregate(
-            new ScheduledFlightId(0),
+        var scheduledFlight = ScheduledFlightAggregate.Create(
             request.BaseFlightId,
             request.AircraftId,
             request.GateId,
             request.DepartureDate,
             request.DepartureTime,
             request.EstimatedArrivalDatetime,
-            request.FlightStatusId,
-            DateTime.UtcNow);
+            request.FlightStatusId);
 
         await _repository.AddAsync(scheduledFlight, cancellationToken);
         await _unitOfWork.CommitAsync(cancellationToken);

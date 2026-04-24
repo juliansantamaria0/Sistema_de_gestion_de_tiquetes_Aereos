@@ -6,8 +6,8 @@ public sealed class BaseFlightId
 
     public BaseFlightId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("BaseFlightId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("BaseFlightId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

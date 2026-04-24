@@ -4,8 +4,8 @@ public readonly record struct CrewRoleId(int Value)
 {
     public static CrewRoleId New(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("CrewRoleId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("CrewRoleId must be zero or a positive integer.", nameof(value));
         return new CrewRoleId(value);
     }
     public override string ToString() => Value.ToString();

@@ -6,9 +6,9 @@ public sealed class FlightPromotionId
 
     public FlightPromotionId(int value)
     {
-        if (value <= 0)
+        if (value < 0)
             throw new ArgumentException(
-                "FlightPromotionId must be a positive integer.", nameof(value));
+                "FlightPromotionId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

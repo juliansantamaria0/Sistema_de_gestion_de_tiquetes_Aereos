@@ -6,8 +6,9 @@ public sealed class BaggageTypeId
 
     public BaggageTypeId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("BaggageTypeId must be a positive integer.", nameof(value));
+        // 0 is used transiently before persistence assigns DB identity.
+        if (value < 0)
+            throw new ArgumentException("BaggageTypeId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

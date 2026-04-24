@@ -60,15 +60,19 @@ public sealed class CreateTicketUseCase
         if (!await _ticketRepository.TicketStatusExistsAsync(ticketStatusId, cancellationToken))
             throw new InvalidOperationException($"No existe el estado de tiquete con id {ticketStatusId}.");
 
-        var expectedTotal = await _reservationRepository.GetQuotedFareTotalForReservationAsync(
+        var expectedTotal = await _reservationRepository.GetQuotedFareForReservationDetailAsync(
             detail.ReservationId,
+            detail.Id.Value,
             cancellationToken);
         var paidTotal = await _paymentRepository.SumApprovedPaymentsForReservationAsync(
             detail.ReservationId,
             cancellationToken);
 
         if (paidTotal <= 0m || paidTotal < expectedTotal)
-            throw new Exception("No se puede emitir el tiquete: Faltan pagos asociados o fondos insuficientes.");
+            throw new InvalidOperationException(
+                $"No se puede emitir el tiquete: pagos aprobados insuficientes para este detalle. " +
+                $"Pagado={paidTotal:0.00}, Requerido={expectedTotal:0.00}. " +
+                "Registra/actualiza pagos de la reserva con estado PAID.");
 
         return await _ticketRepository.IssueTicketWithHistoryAsync(
             normalizedCode,

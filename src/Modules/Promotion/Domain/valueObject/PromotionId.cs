@@ -6,8 +6,8 @@ public sealed class PromotionId
 
     public PromotionId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("PromotionId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("PromotionId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

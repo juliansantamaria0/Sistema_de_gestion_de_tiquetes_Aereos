@@ -159,6 +159,36 @@ public sealed class ReservationRepository : IReservationRepository
         return await query.SumAsync(cancellationToken) ?? 0m;
     }
 
+    public async Task<decimal> GetQuotedFareForReservationDetailAsync(
+        int reservationId,
+        int reservationDetailId,
+        CancellationToken cancellationToken = default)
+    {
+        var reservation = await _context.Reservations
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == reservationId, cancellationToken);
+        if (reservation is null)
+            return 0m;
+
+        var scheduledFlightId = reservation.ScheduledFlightId;
+
+        var query =
+            from d in _context.ReservationDetails.AsNoTracking()
+            where d.ReservationId == reservationId && d.Id == reservationDetailId
+            join fs in _context.FlightSeats.AsNoTracking() on d.FlightSeatId equals fs.Id
+            join sm in _context.SeatMaps.AsNoTracking() on fs.SeatMapId equals sm.Id
+            join fcp in _context.FlightCabinPrices.AsNoTracking()
+                on new { Sid = scheduledFlightId, sm.CabinClassId, d.FareTypeId } equals new
+                {
+                    Sid = fcp.ScheduledFlightId,
+                    fcp.CabinClassId,
+                    fcp.FareTypeId
+                }
+            select (decimal?)fcp.Price;
+
+        return await query.SumAsync(cancellationToken) ?? 0m;
+    }
+
     public async Task<ReservationAggregate> CreateReservationWithInitialHistoryAsync(
         string reservationCodeNormalized,
         int customerId,

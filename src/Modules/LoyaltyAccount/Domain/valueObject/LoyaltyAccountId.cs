@@ -6,8 +6,8 @@ public sealed class LoyaltyAccountId
 
     public LoyaltyAccountId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("LoyaltyAccountId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("LoyaltyAccountId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

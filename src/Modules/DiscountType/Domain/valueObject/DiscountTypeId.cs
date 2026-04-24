@@ -6,8 +6,8 @@ public sealed class DiscountTypeId
 
     public DiscountTypeId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("DiscountTypeId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("DiscountTypeId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

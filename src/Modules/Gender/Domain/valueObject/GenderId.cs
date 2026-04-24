@@ -6,8 +6,8 @@ public sealed class GenderId
 
     public GenderId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("GenderId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("GenderId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }

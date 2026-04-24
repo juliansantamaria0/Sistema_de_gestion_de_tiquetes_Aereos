@@ -35,10 +35,24 @@ public sealed class CreatePaymentUseCase
 
         if (!await _context.Currencies.AsNoTracking().AnyAsync(x => x.Id == request.CurrencyId, cancellationToken))
             throw new InvalidOperationException($"No existe la moneda con id {request.CurrencyId}.");
-        if (!await _context.PaymentStatuses.AsNoTracking().AnyAsync(x => x.Id == request.PaymentStatusId, cancellationToken))
-            throw new InvalidOperationException($"No existe el estado de pago con id {request.PaymentStatusId}.");
         if (!await _context.PaymentMethods.AsNoTracking().AnyAsync(x => x.Id == request.PaymentMethodId, cancellationToken))
             throw new InvalidOperationException($"No existe el método de pago con id {request.PaymentMethodId}.");
+
+        var paymentStatusId = request.PaymentStatusId;
+        if (request.ReservationId.HasValue && !request.TicketId.HasValue && paymentStatusId <= 0)
+        {
+            paymentStatusId = await _context.PaymentStatuses
+                .AsNoTracking()
+                .Where(x => x.Name != null && x.Name.ToUpper() == "PAID")
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (paymentStatusId <= 0)
+                throw new InvalidOperationException("No existe el estado de pago 'PAID'.");
+        }
+
+        if (!await _context.PaymentStatuses.AsNoTracking().AnyAsync(x => x.Id == paymentStatusId, cancellationToken))
+            throw new InvalidOperationException($"No existe el estado de pago con id {paymentStatusId}.");
 
         if (request.ReservationId.HasValue)
         {
@@ -79,7 +93,7 @@ public sealed class CreatePaymentUseCase
             CurrencyId = request.CurrencyId,
             PaymentDate = now,
             Amount = request.Amount,
-            PaymentStatusId = request.PaymentStatusId,
+            PaymentStatusId = paymentStatusId,
             PaymentMethodId = request.PaymentMethodId,
             TransactionReference = request.TransactionReference?.Trim(),
             RejectionReason = request.RejectionReason?.Trim(),

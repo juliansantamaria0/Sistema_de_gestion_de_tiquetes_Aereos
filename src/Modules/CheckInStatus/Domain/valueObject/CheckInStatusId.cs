@@ -6,8 +6,8 @@ public sealed class CheckInStatusId
 
     public CheckInStatusId(int value)
     {
-        if (value <= 0)
-            throw new ArgumentException("CheckInStatusId must be a positive integer.", nameof(value));
+        if (value < 0)
+            throw new ArgumentException("CheckInStatusId must be zero or a positive integer.", nameof(value));
 
         Value = value;
     }
