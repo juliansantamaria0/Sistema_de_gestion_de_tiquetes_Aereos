@@ -1,8 +1,11 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Application.Services;
 
+using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Application.UseCases;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Domain.Aggregate;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class TicketService : ITicketService
 {
@@ -12,6 +15,7 @@ public sealed class TicketService : ITicketService
     private readonly GetTicketByIdUseCase                 _getById;
     private readonly ChangeTicketStatusUseCase            _changeStatus;
     private readonly GetTicketByReservationDetailUseCase  _getByDetail;
+    private readonly AppDbContext                         _db;
 
     public TicketService(
         CreateTicketUseCase                 create,
@@ -19,7 +23,8 @@ public sealed class TicketService : ITicketService
         GetAllTicketsUseCase                getAll,
         GetTicketByIdUseCase                getById,
         ChangeTicketStatusUseCase           changeStatus,
-        GetTicketByReservationDetailUseCase getByDetail)
+        GetTicketByReservationDetailUseCase getByDetail,
+        AppDbContext                        db)
     {
         _create       = create;
         _delete       = delete;
@@ -27,6 +32,7 @@ public sealed class TicketService : ITicketService
         _getById      = getById;
         _changeStatus = changeStatus;
         _getByDetail  = getByDetail;
+        _db           = db;
     }
 
     public async Task<TicketDto> CreateAsync(
@@ -45,6 +51,23 @@ public sealed class TicketService : ITicketService
     public async Task<IEnumerable<TicketDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
+        if (CurrentUser.IsAuthenticated && CurrentUser.CustomerId.HasValue)
+        {
+            var customerId = CurrentUser.CustomerId.Value;
+            var detailIds = await _db.ReservationDetails
+                .AsNoTracking()
+                .Where(d => _db.Reservations.Any(r => r.CustomerId == customerId && r.Id == d.ReservationId))
+                .Select(d => d.Id)
+                .ToListAsync(cancellationToken);
+
+            var results = new List<TicketDto>();
+            foreach (var did in detailIds)
+            {
+                var ticket = await _getByDetail.ExecuteAsync(did, cancellationToken);
+                if (ticket is not null) results.Add(ToDto(ticket));
+            }
+            return results;
+        }
         var list = await _getAll.ExecuteAsync(cancellationToken);
         return list.Select(ToDto);
     }

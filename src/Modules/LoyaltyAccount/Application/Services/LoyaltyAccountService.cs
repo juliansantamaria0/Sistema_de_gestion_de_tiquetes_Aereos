@@ -1,8 +1,11 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Application.Services;
 
+using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Application.UseCases;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Domain.Aggregate;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class LoyaltyAccountService : ILoyaltyAccountService
 {
@@ -14,6 +17,7 @@ public sealed class LoyaltyAccountService : ILoyaltyAccountService
     private readonly RedeemMilesUseCase                     _redeemMiles;
     private readonly UpgradeTierUseCase                     _upgradeTier;
     private readonly GetLoyaltyAccountsByPassengerUseCase   _getByPassenger;
+    private readonly AppDbContext                           _db;
 
     public LoyaltyAccountService(
         CreateLoyaltyAccountUseCase          create,
@@ -23,7 +27,8 @@ public sealed class LoyaltyAccountService : ILoyaltyAccountService
         AddMilesUseCase                      addMiles,
         RedeemMilesUseCase                   redeemMiles,
         UpgradeTierUseCase                   upgradeTier,
-        GetLoyaltyAccountsByPassengerUseCase getByPassenger)
+        GetLoyaltyAccountsByPassengerUseCase getByPassenger,
+        AppDbContext                         db)
     {
         _create         = create;
         _delete         = delete;
@@ -33,6 +38,7 @@ public sealed class LoyaltyAccountService : ILoyaltyAccountService
         _redeemMiles    = redeemMiles;
         _upgradeTier    = upgradeTier;
         _getByPassenger = getByPassenger;
+        _db             = db;
     }
 
     public async Task<LoyaltyAccountDto> CreateAsync(
@@ -52,6 +58,22 @@ public sealed class LoyaltyAccountService : ILoyaltyAccountService
     public async Task<IEnumerable<LoyaltyAccountDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
+        if (CurrentUser.IsAuthenticated && CurrentUser.PersonId.HasValue)
+        {
+            var passengerIds = await _db.Passengers
+                .AsNoTracking()
+                .Where(p => p.PersonId == CurrentUser.PersonId.Value)
+                .Select(p => p.Id)
+                .ToListAsync(cancellationToken);
+
+            var results = new List<LoyaltyAccountDto>();
+            foreach (var pid in passengerIds)
+            {
+                var accounts = await _getByPassenger.ExecuteAsync(pid, cancellationToken);
+                results.AddRange(accounts.Select(ToDto));
+            }
+            return results;
+        }
         var list = await _getAll.ExecuteAsync(cancellationToken);
         return list.Select(ToDto);
     }

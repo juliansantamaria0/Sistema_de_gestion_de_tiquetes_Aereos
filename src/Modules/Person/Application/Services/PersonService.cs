@@ -3,6 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Application.Servi
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Application.UseCases;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Domain.Aggregate;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class PersonService : IPersonService
 {
@@ -50,6 +51,11 @@ public sealed class PersonService : IPersonService
     public async Task<IEnumerable<PersonDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
+        if (CurrentUser.IsAuthenticated && CurrentUser.PersonId.HasValue)
+        {
+            var single = await _getById.ExecuteAsync(CurrentUser.PersonId.Value, cancellationToken);
+            return single is null ? [] : [ToDto(single)];
+        }
         var list = await _getAll.ExecuteAsync(cancellationToken);
         return list.Select(ToDto);
     }

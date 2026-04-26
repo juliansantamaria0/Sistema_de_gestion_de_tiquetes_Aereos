@@ -3,6 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Application.Ser
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Application.UseCases;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Domain.Aggregate;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class CustomerService : ICustomerService
 {
@@ -42,6 +43,11 @@ public sealed class CustomerService : ICustomerService
     public async Task<IEnumerable<CustomerDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
+        if (CurrentUser.IsAuthenticated && CurrentUser.CustomerId.HasValue)
+        {
+            var single = await _getById.ExecuteAsync(CurrentUser.CustomerId.Value, cancellationToken);
+            return single is null ? [] : [ToDto(single)];
+        }
         var list = await _getAll.ExecuteAsync(cancellationToken);
         return list.Select(ToDto);
     }

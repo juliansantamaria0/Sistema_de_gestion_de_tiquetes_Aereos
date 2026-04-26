@@ -3,6 +3,7 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.UseCases;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Domain.Aggregate;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class ReservationService : IReservationService
 {
@@ -49,14 +50,37 @@ public sealed class ReservationService : IReservationService
         return ToDto(agg);
     }
 
+    /// <summary>
+    /// Crea una reserva para el cliente actual logueado.
+    /// </summary>
+    public async Task<ReservationDto> CreateForCurrentUserAsync(
+        string            code,
+        int               scheduledFlightId,
+        int               reservationStatusId,
+        CancellationToken cancellationToken = default)
+    {
+        if (!CurrentUser.IsAuthenticated || !CurrentUser.CustomerId.HasValue)
+            throw new InvalidOperationException("Debe iniciar sesión para realizar una reserva.");
+
+        var agg = await _create.ExecuteAsync(code, CurrentUser.CustomerId.Value, scheduledFlightId, reservationStatusId, cancellationToken);
+        return ToDto(agg);
+    }
+
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         => await _delete.ExecuteAsync(id, cancellationToken);
 
     public async Task<IEnumerable<ReservationDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        var list = await _getAll.ExecuteAsync(cancellationToken);
-        return list.Select(ToDto);
+        // Si hay un usuario logueado en el portal de clientes, mostrar solo sus reservas
+        if (CurrentUser.IsAuthenticated && CurrentUser.CustomerId.HasValue)
+        {
+            var list = await _getByCustomer.ExecuteAsync(CurrentUser.CustomerId.Value, cancellationToken);
+            return list.Select(ToDto);
+        }
+
+        var listAll = await _getAll.ExecuteAsync(cancellationToken);
+        return listAll.Select(ToDto);
     }
 
     public async Task<ReservationDto?> GetByIdAsync(
@@ -101,7 +125,18 @@ public sealed class ReservationService : IReservationService
         return list.Select(ToDto);
     }
 
-    
+    /// <summary>
+    /// Obtiene las reservas del cliente actual logueado.
+    /// </summary>
+    public async Task<IEnumerable<ReservationDto>> GetMyReservationsAsync(
+        CancellationToken cancellationToken = default)
+    {
+        if (!CurrentUser.IsAuthenticated || !CurrentUser.CustomerId.HasValue)
+            throw new InvalidOperationException("Debe iniciar sesión para ver sus reservas.");
+
+        var list = await _getByCustomer.ExecuteAsync(CurrentUser.CustomerId.Value, cancellationToken);
+        return list.Select(ToDto);
+    }
 
     private static ReservationDto ToDto(ReservationAggregate agg)
         => new(

@@ -1,8 +1,11 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Application.Services;
 
+using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Application.UseCases;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Domain.Aggregate;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class ReservationDetailService : IReservationDetailService
 {
@@ -12,6 +15,7 @@ public sealed class ReservationDetailService : IReservationDetailService
     private readonly GetReservationDetailByIdUseCase             _getById;
     private readonly UpdateReservationDetailUseCase              _update;
     private readonly GetReservationDetailsByReservationUseCase   _getByReservation;
+    private readonly AppDbContext                                _db;
 
     public ReservationDetailService(
         CreateReservationDetailUseCase            create,
@@ -19,7 +23,8 @@ public sealed class ReservationDetailService : IReservationDetailService
         GetAllReservationDetailsUseCase           getAll,
         GetReservationDetailByIdUseCase           getById,
         UpdateReservationDetailUseCase            update,
-        GetReservationDetailsByReservationUseCase getByReservation)
+        GetReservationDetailsByReservationUseCase getByReservation,
+        AppDbContext                              db)
     {
         _create           = create;
         _delete           = delete;
@@ -27,6 +32,7 @@ public sealed class ReservationDetailService : IReservationDetailService
         _getById          = getById;
         _update           = update;
         _getByReservation = getByReservation;
+        _db               = db;
     }
 
     public async Task<ReservationDetailDto> CreateAsync(
@@ -47,6 +53,23 @@ public sealed class ReservationDetailService : IReservationDetailService
     public async Task<IEnumerable<ReservationDetailDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
+        if (CurrentUser.IsAuthenticated && CurrentUser.CustomerId.HasValue)
+        {
+            var customerId = CurrentUser.CustomerId.Value;
+            var reservationIds = await _db.Reservations
+                .AsNoTracking()
+                .Where(r => r.CustomerId == customerId)
+                .Select(r => r.Id)
+                .ToListAsync(cancellationToken);
+
+            var results = new List<ReservationDetailDto>();
+            foreach (var rid in reservationIds)
+            {
+                var details = await _getByReservation.ExecuteAsync(rid, cancellationToken);
+                results.AddRange(details.Select(ToDto));
+            }
+            return results;
+        }
         var list = await _getAll.ExecuteAsync(cancellationToken);
         return list.Select(ToDto);
     }

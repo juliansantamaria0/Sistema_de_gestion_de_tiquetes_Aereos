@@ -1,8 +1,11 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Application.Services;
 
+using Microsoft.EntityFrameworkCore;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Application.UseCases;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.Domain.Aggregate;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 public sealed class CheckInService : ICheckInService
 {
@@ -12,14 +15,16 @@ public sealed class CheckInService : ICheckInService
     private readonly GetCheckInByIdUseCase      _getById;
     private readonly ChangeCheckInStatusUseCase _changeStatus;
     private readonly GetCheckInByTicketUseCase  _getByTicket;
+    private readonly AppDbContext               _db;
 
     public CheckInService(
-        CreateCheckInUseCase      create,
-        DeleteCheckInUseCase      delete,
-        GetAllCheckInsUseCase     getAll,
-        GetCheckInByIdUseCase     getById,
+        CreateCheckInUseCase       create,
+        DeleteCheckInUseCase       delete,
+        GetAllCheckInsUseCase      getAll,
+        GetCheckInByIdUseCase      getById,
         ChangeCheckInStatusUseCase changeStatus,
-        GetCheckInByTicketUseCase getByTicket)
+        GetCheckInByTicketUseCase  getByTicket,
+        AppDbContext               db)
     {
         _create       = create;
         _delete       = delete;
@@ -27,6 +32,7 @@ public sealed class CheckInService : ICheckInService
         _getById      = getById;
         _changeStatus = changeStatus;
         _getByTicket  = getByTicket;
+        _db           = db;
     }
 
     public async Task<CheckInDto> CreateAsync(
@@ -46,6 +52,25 @@ public sealed class CheckInService : ICheckInService
     public async Task<IEnumerable<CheckInDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
+        if (CurrentUser.IsAuthenticated && CurrentUser.CustomerId.HasValue)
+        {
+            var customerId = CurrentUser.CustomerId.Value;
+            var ticketIds = await _db.Tickets
+                .AsNoTracking()
+                .Where(t => _db.ReservationDetails.Any(d =>
+                    d.Id == t.ReservationDetailId &&
+                    _db.Reservations.Any(r => r.CustomerId == customerId && r.Id == d.ReservationId)))
+                .Select(t => t.Id)
+                .ToListAsync(cancellationToken);
+
+            var results = new List<CheckInDto>();
+            foreach (var tid in ticketIds)
+            {
+                var checkIn = await _getByTicket.ExecuteAsync(tid, cancellationToken);
+                if (checkIn is not null) results.Add(ToDto(checkIn));
+            }
+            return results;
+        }
         var list = await _getAll.ExecuteAsync(cancellationToken);
         return list.Select(ToDto);
     }

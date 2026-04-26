@@ -34,11 +34,14 @@ await using (var scope = host.Services.CreateAsyncScope())
 internal sealed class MainMenu(
     IEnumerable<IModuleUI> modules,
     ReportsMenu reportsMenu,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    AppDbContext dbContext)
 {
     private readonly Dictionary<string, IModuleUI> _modules = BuildNormalizedModuleMap(modules);
     private readonly ReportsMenu _reportsMenu = reportsMenu;
     private readonly string _adminPin = configuration["AdminPortal:Pin"] ?? "0000";
+    private readonly AuthService _authService = new(dbContext);
+    private readonly AppDbContext _context = dbContext;
 
     private static Dictionary<string, IModuleUI> BuildNormalizedModuleMap(IEnumerable<IModuleUI> modules)
     {
@@ -169,23 +172,184 @@ internal sealed class MainMenu(
 
     private async Task ShowUserMenuAsync(CancellationToken cancellationToken)
     {
+        // Verificar si ya hay un usuario logueado
+        if (!CurrentUser.IsAuthenticated)
+        {
+            var authenticated = await ShowClientLoginAsync(cancellationToken);
+            if (!authenticated)
+                return;
+        }
+
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            RenderPortalBreadcrumb("Portal de clientes", "Flujos operativos: vuelos, reservas, tiquetes y pagos.");
+            RenderPortalBreadcrumb(
+                $"Portal de clientes — [{CurrentUser.Username}]",
+                "Flujos operativos: vuelos, reservas, tiquetes y pagos.");
 
             var sectionTitle = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
                     .Title("[yellow]Seleccione un área[/]")
                     .PageSize(10)
-                    .AddChoices(PortalAccess.ClientSections.Select(s => s.Title).Append(PortalAccess.BackToAccessMenu)));
+                    .AddChoices(PortalAccess.ClientSections.Select(s => s.Title))
+                    .AddChoices("Cerrar sesión"));
 
-            if (sectionTitle == PortalAccess.BackToAccessMenu)
+            if (sectionTitle == "Cerrar sesión")
+            {
+                AuthService.Logout();
+                AnsiConsole.MarkupLine("[green]Sesión cerrada correctamente.[/]");
+                PauseReturn();
                 return;
+            }
 
             var section = PortalAccess.ClientSections.First(s => s.Title == sectionTitle);
             await RunClientSectionAsync(section, cancellationToken);
         }
+    }
+
+    private async Task<bool> ShowClientLoginAsync(CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            AnsiConsole.Clear();
+            RenderPortalBreadcrumb("Portal de clientes — Autenticación", "Ingrese o cree su cuenta.");
+
+            var option = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("[yellow]¿Qué desea hacer?[/]")
+                    .PageSize(3)
+                    .AddChoices("Iniciar sesión", "Registrarse", PortalAccess.BackToAccessMenu));
+
+            if (option == PortalAccess.BackToAccessMenu)
+                return false;
+
+            if (option == "Iniciar sesión")
+            {
+                var loginResult = await ShowLoginFormAsync(cancellationToken);
+                if (loginResult)
+                    return true;
+            }
+            else if (option == "Registrarse")
+            {
+                var registerResult = await ShowRegisterFormAsync(cancellationToken);
+                if (registerResult)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private async Task<bool> ShowLoginFormAsync(CancellationToken cancellationToken)
+    {
+        AnsiConsole.Clear();
+        RenderPortalBreadcrumb("Portal de clientes — Iniciar sesión", "Ingrese sus credenciales.");
+
+        var username = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Usuario:[/]")
+                .Validate(s => !string.IsNullOrWhiteSpace(s), "El usuario es obligatorio."));
+
+        var password = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Contraseña:[/]")
+                .Secret());
+
+        var result = await _authService.LoginAsync(username, password, cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            AnsiConsole.MarkupLine($"[red]{result.ErrorMessage}[/]");
+            PauseReturn();
+            return false;
+        }
+
+        AnsiConsole.MarkupLine($"[green]Bienvenido, {result.Username}![/]");
+        PauseReturn();
+        return true;
+    }
+
+    private async Task<bool> ShowRegisterFormAsync(CancellationToken cancellationToken)
+    {
+        AnsiConsole.Clear();
+        RenderPortalBreadcrumb("Portal de clientes — Registrarse", "Cree una nueva cuenta.");
+
+        var username = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Usuario:[/]")
+                .Validate(s => !string.IsNullOrWhiteSpace(s), "El usuario es obligatorio."));
+
+        var password = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Contraseña:[/]")
+                .Secret()
+                .Validate(s => s.Length >= 4, "La contraseña debe tener al menos 4 caracteres."));
+
+        var confirmPassword = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Confirmar contraseña:[/]")
+                .Secret());
+
+        if (password != confirmPassword)
+        {
+            AnsiConsole.MarkupLine("[red]Las contraseñas no coinciden.[/]");
+            PauseReturn();
+            return false;
+        }
+
+        var firstName = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Nombre:[/]")
+                .Validate(s => !string.IsNullOrWhiteSpace(s), "El nombre es obligatorio."));
+
+        var lastName = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Apellido:[/]")
+                .Validate(s => !string.IsNullOrWhiteSpace(s), "El apellido es obligatorio."));
+
+        // Obtener tipos de documento disponibles
+        var docTypes = await _context.DocumentTypes.AsNoTracking().ToListAsync(cancellationToken);
+        if (!docTypes.Any())
+        {
+            AnsiConsole.MarkupLine("[red]No hay tipos de documento disponibles.[/]");
+            PauseReturn();
+            return false;
+        }
+
+        var docTypeChoice = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
+                .Title("[yellow]Tipo de documento:[/]")
+                .AddChoices(docTypes.Select(d => $"{d.DocumentTypeId} - {d.Name}")));
+
+        var documentTypeId = int.Parse(docTypeChoice.Split(new[] { " - " }, StringSplitOptions.None)[0]);
+
+        var documentNumber = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Número de documento:[/]")
+                .Validate(s => !string.IsNullOrWhiteSpace(s), "El número de documento es obligatorio."));
+
+        var email = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Email (opcional):[/]")
+                .AllowEmpty()
+                .Validate(s =>
+                {
+                    if (string.IsNullOrWhiteSpace(s)) return ValidationResult.Success();
+                    return s.Contains('@') && s.LastIndexOf('.') > s.IndexOf('@') + 1
+                        ? ValidationResult.Success()
+                        : ValidationResult.Error("[red]Ingresa un email válido (ej: usuario@dominio.com)[/]");
+                }));
+
+        var phone = AnsiConsole.Prompt(
+            new TextPrompt<string>("[yellow]Teléfono (opcional):[/]"));
+
+        var result = await _authService.RegisterAsync(
+            username, password, firstName, lastName,
+            documentTypeId, documentNumber,
+            string.IsNullOrWhiteSpace(email) ? null : email,
+            string.IsNullOrWhiteSpace(phone) ? null : phone,
+            cancellationToken);
+
+        if (!result.IsSuccess)
+        {
+            AnsiConsole.MarkupLine($"[red]{result.ErrorMessage}[/]");
+            PauseReturn();
+            return false;
+        }
+
+        AnsiConsole.MarkupLine($"[green]Cuenta creada exitosamente! Bienvenido, {result.Username}![/]");
+        PauseReturn();
+        return true;
     }
 
     private async Task RunClientSectionAsync(PortalClientSection section, CancellationToken cancellationToken)
