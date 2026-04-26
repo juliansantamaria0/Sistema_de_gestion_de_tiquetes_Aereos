@@ -598,7 +598,8 @@ internal static class BootstrapDataSeeder
                         ScheduledFlightId = flight.Id,
                         SeatMapId         = sm.Id,
                         SeatStatusId      = availableStatusId,
-                        CreatedAt         = DateTime.UtcNow
+                        CreatedAt         = DateTime.UtcNow,
+                        Version           = []
                     }));
                 }
 

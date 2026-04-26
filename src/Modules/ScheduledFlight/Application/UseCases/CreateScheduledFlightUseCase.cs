@@ -87,7 +87,8 @@ public sealed class CreateScheduledFlightUseCase
             ScheduledFlightId = scheduledFlightId,
             SeatMapId         = sm.Id,
             SeatStatusId      = availableStatusId,
-            CreatedAt         = DateTime.UtcNow
+            CreatedAt         = DateTime.UtcNow,
+            Version           = []
         }).ToList();
 
         await _context.FlightSeats.AddRangeAsync(seats, ct);

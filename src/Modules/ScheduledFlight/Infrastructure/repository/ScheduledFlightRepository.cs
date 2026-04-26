@@ -83,6 +83,25 @@ public sealed class ScheduledFlightRepository : IScheduledFlightRepository
         return entities.Select(ToDomain);
     }
 
+    public async Task<IEnumerable<ScheduledFlightAggregate>> GetByRouteAsync(
+        int               routeId,
+        CancellationToken cancellationToken = default)
+    {
+        var entities = await _context.ScheduledFlights
+            .AsNoTracking()
+            .Join(_context.BaseFlights.AsNoTracking(),
+                sf => sf.BaseFlightId,
+                bf => bf.Id,
+                (sf, bf) => new { sf, bf })
+            .Where(x => x.bf.RouteId == routeId)
+            .Select(x => x.sf)
+            .OrderByDescending(e => e.DepartureDate)
+            .ThenBy(e => e.DepartureTime)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(ToDomain);
+    }
+
     public async Task AddAsync(
         ScheduledFlightAggregate scheduledFlight,
         CancellationToken        cancellationToken = default)

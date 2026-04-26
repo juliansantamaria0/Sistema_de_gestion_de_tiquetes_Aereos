@@ -40,21 +40,16 @@ public sealed class ReservationService : IReservationService
     }
 
     public async Task<ReservationDto> CreateAsync(
-        string            code,
         int               customerId,
         int               scheduledFlightId,
         int               reservationStatusId,
         CancellationToken cancellationToken = default)
     {
-        var agg = await _create.ExecuteAsync(code, customerId, scheduledFlightId, reservationStatusId, cancellationToken);
+        var agg = await _create.ExecuteAsync(customerId, scheduledFlightId, reservationStatusId, cancellationToken);
         return ToDto(agg);
     }
 
-    /// <summary>
-    /// Crea una reserva para el cliente actual logueado.
-    /// </summary>
     public async Task<ReservationDto> CreateForCurrentUserAsync(
-        string            code,
         int               scheduledFlightId,
         int               reservationStatusId,
         CancellationToken cancellationToken = default)
@@ -62,7 +57,7 @@ public sealed class ReservationService : IReservationService
         if (!CurrentUser.IsAuthenticated || !CurrentUser.CustomerId.HasValue)
             throw new InvalidOperationException("Debe iniciar sesión para realizar una reserva.");
 
-        var agg = await _create.ExecuteAsync(code, CurrentUser.CustomerId.Value, scheduledFlightId, reservationStatusId, cancellationToken);
+        var agg = await _create.ExecuteAsync(CurrentUser.CustomerId.Value, scheduledFlightId, reservationStatusId, cancellationToken);
         return ToDto(agg);
     }
 

@@ -9,6 +9,7 @@ public interface IScheduledFlightRepository
     Task<IEnumerable<ScheduledFlightAggregate>> GetAllAsync(                                              CancellationToken cancellationToken = default);
     Task<IEnumerable<ScheduledFlightAggregate>> GetByBaseFlightAsync(int baseFlightId,                    CancellationToken cancellationToken = default);
     Task<IEnumerable<ScheduledFlightAggregate>> GetByDateAsync(DateOnly date,                             CancellationToken cancellationToken = default);
+    Task<IEnumerable<ScheduledFlightAggregate>> GetByRouteAsync(int routeId, CancellationToken cancellationToken = default);
     Task                                        AddAsync(ScheduledFlightAggregate scheduledFlight,        CancellationToken cancellationToken = default);
     Task                                        UpdateAsync(ScheduledFlightAggregate scheduledFlight,     CancellationToken cancellationToken = default);
     Task                                        DeleteAsync(ScheduledFlightId id,                        CancellationToken cancellationToken = default);

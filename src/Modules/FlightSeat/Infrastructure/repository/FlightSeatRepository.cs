@@ -101,7 +101,8 @@ public sealed class FlightSeatRepository : IFlightSeatRepository
             SeatMapId         = flightSeat.SeatMapId,
             SeatStatusId      = flightSeat.SeatStatusId,
             CreatedAt         = flightSeat.CreatedAt,
-            UpdatedAt         = flightSeat.UpdatedAt
+            UpdatedAt         = flightSeat.UpdatedAt,
+            Version           = []
         };
         await _context.FlightSeats.AddAsync(entity, cancellationToken);
     }

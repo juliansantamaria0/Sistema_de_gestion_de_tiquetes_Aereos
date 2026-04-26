@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
@@ -35,13 +36,15 @@ internal sealed class MainMenu(
     IEnumerable<IModuleUI> modules,
     ReportsMenu reportsMenu,
     IConfiguration configuration,
-    AppDbContext dbContext)
+    AppDbContext dbContext,
+    IServiceProvider serviceProvider)
 {
     private readonly Dictionary<string, IModuleUI> _modules = BuildNormalizedModuleMap(modules);
     private readonly ReportsMenu _reportsMenu = reportsMenu;
     private readonly string _adminPin = configuration["AdminPortal:Pin"] ?? "0000";
     private readonly AuthService _authService = new(dbContext);
     private readonly AppDbContext _context = dbContext;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     private static Dictionary<string, IModuleUI> BuildNormalizedModuleMap(IEnumerable<IModuleUI> modules)
     {
@@ -66,7 +69,7 @@ internal sealed class MainMenu(
 
             var accessChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]Menú de acceso[/]")
+                    .Title("[yellow]¿A dónde desea ir?[/]")
                     .PageSize(6)
                     .AddChoices(
                     [
@@ -97,9 +100,8 @@ internal sealed class MainMenu(
                 .Color(Color.CornflowerBlue));
 
         AnsiConsole.MarkupLine("[grey]Sistema de gestión de tiquetes aéreos[/]");
-        AnsiConsole.Write(new Rule("[green]Menú de acceso[/]"));
-        AnsiConsole.MarkupLine(
-            "[silver]Elija el portal: administración (catálogos y operación interna) o clientes (reservas, tiquetes y pagos).[/]");
+        AnsiConsole.Write(new Rule("[green]Inicio[/]"));
+        AnsiConsole.MarkupLine("[silver]Seleccione su portal de acceso.[/]");
         AnsiConsole.WriteLine();
     }
 
@@ -111,7 +113,9 @@ internal sealed class MainMenu(
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            RenderPortalBreadcrumb("Portal administrativo", "Catálogos, configuración y operación interna.");
+            AnsiConsole.Write(new Rule("[green] Administración [/]").RuleStyle(Style.Parse("grey")));
+            AnsiConsole.MarkupLine("[grey]Gestión interna: vuelos, flota, tarifas, personal y configuración.[/]");
+            AnsiConsole.WriteLine();
 
             var rootChoices = PortalAccess.AdminSections
                 .Select(s => s.Title)
@@ -121,8 +125,9 @@ internal sealed class MainMenu(
 
             var rootChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]Seleccione un área[/]")
+                    .Title("[yellow]¿A qué área desea acceder?[/]")
                     .PageSize(12)
+                    .MoreChoicesText("[grey](Desplace para ver más)[/]")
                     .AddChoices(rootChoices));
 
             if (rootChoice == PortalAccess.BackToAccessMenu)
@@ -144,7 +149,9 @@ internal sealed class MainMenu(
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            RenderPortalBreadcrumb($"Portal administrativo > {section.Title}", section.Description);
+            AnsiConsole.Write(new Rule($"[green] Administración  ›  {Markup.Escape(section.Title)} [/]").RuleStyle(Style.Parse("grey")));
+            AnsiConsole.MarkupLine($"[grey]{Markup.Escape(section.Description)}[/]");
+            AnsiConsole.WriteLine();
 
             var items = BuildOrderedModuleItems(section.ModuleKeys);
 
@@ -157,22 +164,22 @@ internal sealed class MainMenu(
 
             var selected = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title($"[yellow]{Markup.Escape(section.Title)}[/]")
+                    .Title("[yellow]¿Qué módulo desea gestionar?[/]")
                     .PageSize(18)
+                    .MoreChoicesText("[grey](Desplace para ver todos los módulos)[/]")
                     .AddChoices(items.Select(x => x.Title).Append(PortalAccess.BackToAdminRoot)));
 
             if (selected == PortalAccess.BackToAdminRoot)
                 return;
 
-            var item = items.First(x => x.Title == selected);
+            var item   = items.First(x => x.Title == selected);
             var module = _modules[item.NormalizedKey];
-            await RunModuleUiSafeAsync(module, $"Portal administrativo > {section.Title}", item.Title, cancellationToken);
+            await RunModuleUiSafeAsync(module, $"Administración > {section.Title}", item.Title, cancellationToken);
         }
     }
 
     private async Task ShowUserMenuAsync(CancellationToken cancellationToken)
     {
-        // Verificar si ya hay un usuario logueado
         if (!CurrentUser.IsAuthenticated)
         {
             var authenticated = await ShowClientLoginAsync(cancellationToken);
@@ -183,23 +190,42 @@ internal sealed class MainMenu(
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            RenderPortalBreadcrumb(
-                $"Portal de clientes — [{CurrentUser.Username}]",
-                "Flujos operativos: vuelos, reservas, tiquetes y pagos.");
+            AnsiConsole.Write(new Rule($"[green] Portal de clientes [/]").RuleStyle(Style.Parse("grey")));
+            AnsiConsole.MarkupLine($"[grey]Bienvenido, [bold]{Markup.Escape(CurrentUser.Username ?? "usuario")}[/]. Seleccione qué desea hacer.[/]");
+            AnsiConsole.WriteLine();
+
+            var mainOptions = new List<string> { "Reservar un vuelo" }
+                .Concat(PortalAccess.ClientSections.Select(s => s.Title))
+                .Append("─────────────────")
+                .Append("Cerrar sesión")
+                .ToList();
 
             var sectionTitle = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]Seleccione un área[/]")
-                    .PageSize(10)
-                    .AddChoices(PortalAccess.ClientSections.Select(s => s.Title))
-                    .AddChoices("Cerrar sesión"));
+                    .Title("[yellow]¿Qué desea hacer?[/]")
+                    .PageSize(12)
+                    .AddChoices(mainOptions));
 
             if (sectionTitle == "Cerrar sesión")
             {
                 AuthService.Logout();
-                AnsiConsole.MarkupLine("[green]Sesión cerrada correctamente.[/]");
+                AnsiConsole.Clear();
+                AnsiConsole.MarkupLine("[green]Sesión cerrada. Hasta pronto.[/]");
                 PauseReturn();
                 return;
+            }
+
+            if (sectionTitle == "─────────────────")
+                continue;
+
+            if (sectionTitle == "Reservar un vuelo")
+            {
+                var reservationService = _serviceProvider.GetRequiredService<IReservationService>();
+                var wizard = new Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.UI.ReservationBookingWizardUI(
+                    reservationService,
+                    _context);
+                await ConsoleErrorHandler.RunSafeAsync(ct => wizard.RunAsync(ct), cancellationToken);
+                continue;
             }
 
             var section = PortalAccess.ClientSections.First(s => s.Title == sectionTitle);
@@ -212,13 +238,15 @@ internal sealed class MainMenu(
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            RenderPortalBreadcrumb("Portal de clientes — Autenticación", "Ingrese o cree su cuenta.");
+            AnsiConsole.Write(new Rule("[green] Portal de clientes — Acceso [/]").RuleStyle(Style.Parse("grey")));
+            AnsiConsole.MarkupLine("[grey]Inicie sesión con su cuenta o regístrese si es la primera vez.[/]");
+            AnsiConsole.WriteLine();
 
             var option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]¿Qué desea hacer?[/]")
-                    .PageSize(3)
-                    .AddChoices("Iniciar sesión", "Registrarse", PortalAccess.BackToAccessMenu));
+                    .Title("[yellow]¿Cómo desea continuar?[/]")
+                    .PageSize(4)
+                    .AddChoices("Iniciar sesión", "Crear cuenta nueva", PortalAccess.BackToAccessMenu));
 
             if (option == PortalAccess.BackToAccessMenu)
                 return false;
@@ -226,14 +254,12 @@ internal sealed class MainMenu(
             if (option == "Iniciar sesión")
             {
                 var loginResult = await ShowLoginFormAsync(cancellationToken);
-                if (loginResult)
-                    return true;
+                if (loginResult) return true;
             }
-            else if (option == "Registrarse")
+            else if (option == "Crear cuenta nueva")
             {
                 var registerResult = await ShowRegisterFormAsync(cancellationToken);
-                if (registerResult)
-                    return true;
+                if (registerResult) return true;
             }
         }
         return false;
@@ -242,26 +268,30 @@ internal sealed class MainMenu(
     private async Task<bool> ShowLoginFormAsync(CancellationToken cancellationToken)
     {
         AnsiConsole.Clear();
-        RenderPortalBreadcrumb("Portal de clientes — Iniciar sesión", "Ingrese sus credenciales.");
+        AnsiConsole.Write(new Rule("[green] Iniciar sesión [/]").RuleStyle(Style.Parse("grey")));
+        AnsiConsole.MarkupLine("[grey]Ingrese su usuario y contraseña.[/]");
+        AnsiConsole.WriteLine();
 
         var username = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow]Usuario:[/]")
-                .Validate(s => !string.IsNullOrWhiteSpace(s), "El usuario es obligatorio."));
+                .Validate(s => !string.IsNullOrWhiteSpace(s), "El usuario no puede estar vacío."));
 
         var password = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow]Contraseña:[/]")
                 .Secret());
 
+        AnsiConsole.WriteLine();
+
         var result = await _authService.LoginAsync(username, password, cancellationToken);
 
         if (!result.IsSuccess)
         {
-            AnsiConsole.MarkupLine($"[red]{result.ErrorMessage}[/]");
+            AnsiConsole.MarkupLine($"[red]  {Markup.Escape(result.ErrorMessage ?? "Credenciales incorrectas.")}[/]");
             PauseReturn();
             return false;
         }
 
-        AnsiConsole.MarkupLine($"[green]Bienvenido, {result.Username}![/]");
+        AnsiConsole.MarkupLine($"[green]  Bienvenido, {Markup.Escape(result.Username ?? username)}![/]");
         PauseReturn();
         return true;
     }
@@ -269,11 +299,13 @@ internal sealed class MainMenu(
     private async Task<bool> ShowRegisterFormAsync(CancellationToken cancellationToken)
     {
         AnsiConsole.Clear();
-        RenderPortalBreadcrumb("Portal de clientes — Registrarse", "Cree una nueva cuenta.");
+        AnsiConsole.Write(new Rule("[green] Crear cuenta nueva [/]").RuleStyle(Style.Parse("grey")));
+        AnsiConsole.MarkupLine("[grey]Complete el formulario para registrarse. Todos los campos marcados son obligatorios.[/]");
+        AnsiConsole.WriteLine();
 
         var username = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow]Usuario:[/]")
-                .Validate(s => !string.IsNullOrWhiteSpace(s), "El usuario es obligatorio."));
+                .Validate(s => !string.IsNullOrWhiteSpace(s), "El usuario no puede estar vacío."));
 
         var password = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow]Contraseña:[/]")
@@ -357,64 +389,64 @@ internal sealed class MainMenu(
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            RenderPortalBreadcrumb($"Portal de clientes > {section.Title}", section.Description);
+            AnsiConsole.Write(new Rule($"[green] {Markup.Escape(section.Title)} [/]").RuleStyle(Style.Parse("grey")));
+            AnsiConsole.MarkupLine($"[grey]{Markup.Escape(section.Description)}[/]");
+            AnsiConsole.WriteLine();
 
             var items = BuildOrderedModuleItems(section.ModuleKeys);
 
             if (items.Count == 0)
             {
-                AnsiConsole.MarkupLine("[yellow]No hay módulos registrados en esta área.[/]");
+                AnsiConsole.MarkupLine("[yellow]No hay módulos disponibles en esta sección.[/]");
                 PauseReturn();
                 return;
             }
 
             var selected = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title($"[yellow]{Markup.Escape(section.Title)}[/]")
-                    .PageSize(18)
+                    .Title("[yellow]¿Qué desea consultar o gestionar?[/]")
+                    .PageSize(15)
+                    .MoreChoicesText("[grey](Desplace para ver más)[/]")
                     .AddChoices(items.Select(x => x.Title).Append(PortalAccess.BackToClientAreas)));
 
             if (selected == PortalAccess.BackToClientAreas)
                 return;
 
-            var item = items.First(x => x.Title == selected);
+            var item   = items.First(x => x.Title == selected);
             var module = _modules[item.NormalizedKey];
-            await RunModuleUiSafeAsync(module, $"Portal de clientes > {section.Title}", item.Title, cancellationToken);
+            await RunModuleUiSafeAsync(module, section.Title, item.Title, cancellationToken);
         }
     }
 
     private async Task RunModuleUiSafeAsync(IModuleUI module, string portalContext, string moduleTitle, CancellationToken cancellationToken)
     {
         AnsiConsole.Clear();
-        RenderPortalBreadcrumb($"{portalContext} > {moduleTitle}", "Gestión del módulo");
         await ConsoleErrorHandler.RunSafeAsync(ct => module.RunAsync(ct), cancellationToken);
     }
 
     private bool TryVerifyAdminPin(CancellationToken cancellationToken)
     {
+        AnsiConsole.Clear();
+        AnsiConsole.Write(new Rule("[green] Administración — Autenticación [/]").RuleStyle(Style.Parse("grey")));
+        AnsiConsole.MarkupLine("[grey]Ingrese el PIN de administrador. Deje vacío y presione Enter para volver.[/]");
+        AnsiConsole.WriteLine();
+
         while (!cancellationToken.IsCancellationRequested)
         {
-            AnsiConsole.Clear();
-            RenderPortalBreadcrumb("Portal administrativo — autenticación", "Acceso restringido (demostración con PIN).");
+            var pinRaw = AnsiConsole.Prompt(
+                new TextPrompt<string>("[yellow]PIN de administrador:[/] [grey](Enter vacío = volver)[/]")
+                    .Secret()
+                    .AllowEmpty());
 
-            var step = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[yellow]¿Cómo desea continuar?[/]")
-                    .AddChoices("Ingresar PIN", PortalAccess.BackToAccessMenu));
-
-            if (step == PortalAccess.BackToAccessMenu)
+            if (string.IsNullOrEmpty(pinRaw))
                 return false;
 
-            var pinRaw = AnsiConsole.Prompt(
-                new TextPrompt<string>("[yellow]PIN de acceso administrativo[/]")
-                    .Secret());
             var pin = pinRaw.Length > 60 ? pinRaw[..60] : pinRaw;
 
             if (string.Equals(pin, _adminPin, StringComparison.Ordinal))
                 return true;
 
-            AnsiConsole.MarkupLine("[red]PIN incorrecto.[/]");
-            PauseReturn();
+            AnsiConsole.MarkupLine("[red]PIN incorrecto. Intente de nuevo.[/]");
         }
 
         return false;
@@ -425,15 +457,7 @@ internal sealed class MainMenu(
             .Select(k => ModuleKeyNormalizer.Normalize(k))
             .Where(k => _modules.ContainsKey(k))
             .Select(k => new PortalMenuItem(k, FunctionalNavigation.GetModuleTitle(k)))
-            .OrderBy(x => x.Title, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
-
-    private static void RenderPortalBreadcrumb(string breadcrumb, string description)
-    {
-        AnsiConsole.Write(new Rule($"[green]{Markup.Escape(breadcrumb)}[/]"));
-        AnsiConsole.MarkupLine($"[grey]{Markup.Escape(description)}[/]");
-        AnsiConsole.WriteLine();
-    }
 
     private static void PauseReturn()
     {
@@ -453,13 +477,13 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule("[green]Portal administrativo > Reportes[/]"));
-            AnsiConsole.MarkupLine("[grey]Reportes operativos generados con LINQ y datos persistidos en MySQL.[/]");
+            AnsiConsole.Write(new Rule("[green] Administración  ›  Reportes [/]").RuleStyle(Style.Parse("grey")));
+            AnsiConsole.MarkupLine("[grey]Resúmenes y estadísticas del sistema en tiempo real.[/]");
             AnsiConsole.WriteLine();
 
             var option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]Seleccione un reporte[/]")
+                    .Title("[yellow]¿Qué reporte desea consultar?[/]")
                     .PageSize(12)
                     .AddChoices(
                     [
@@ -469,10 +493,10 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
                         "Tiquetes emitidos por estado",
                         "Ingresos por estado de pago",
                         "Disponibilidad de asientos por vuelo",
-                        "Volver"
+                        "« Volver"
                     ]));
 
-            if (option == "Volver")
+            if (option == "« Volver")
                 return;
 
             var ok = await ConsoleErrorHandler.TryRunSafeAsync(async ct =>
@@ -571,6 +595,7 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
         var data = await db.Reservations
             .AsNoTracking()
             .GroupBy(r => r.CustomerId)
+            
             .Select(g => new { Cliente = g.Key, Reservas = g.Count() })
             .OrderByDescending(x => x.Reservas)
             .Take(10)
@@ -739,34 +764,34 @@ internal static class FunctionalNavigation
 
 internal static class PortalAccess
 {
-    public const string AdminPortalLabel = "[[1]] Portal administrativo";
+    public const string AdminPortalLabel = "[[1]] Administración";
     public const string ClientPortalLabel = "[[2]] Portal de clientes";
-    public const string BackToAccessMenu = "Volver al menú de acceso";
-    public const string BackToAdminRoot = "Volver al menú administrativo";
-    public const string BackToClientAreas = "Volver a áreas del portal de clientes";
-    public const string ReportsEntryLabel = "Reportes operativos";
+    public const string BackToAccessMenu = "« Volver";
+    public const string BackToAdminRoot = "« Volver";
+    public const string BackToClientAreas = "« Volver";
+    public const string ReportsEntryLabel = "Reportes";
 
     public static readonly IReadOnlyList<PortalAdminSection> AdminSections =
     [
         new PortalAdminSection(
-            "Configuración Global",
-            "Países, ciudades, moneda, datos demográficos, documentos, contacto, lealtad y métodos de pago.",
-            ["country", "city", "currency", "gender", "nationality", "documenttype", "contacttype", "loyaltyprogram", "loyaltytier", "paymentmethod"]),
-        new PortalAdminSection(
-            "Gestión de Flota y Rutas",
-            "Aerolínea, aeronaves, aeropuertos, terminales, puertas, rutas, vuelos base, horarios e incidencias.",
-            ["airline", "aircraftmanufacturer", "aircrafttype", "aircraft", "airport", "terminal", "gate", "route", "baseflight", "routeschedule", "flightstatushistory", "delayreason", "flightdelay", "cancellationreason", "flightcancellation"]),
+            "Vuelos y Flota",
+            "Vuelos programados, rutas, aeronaves, aeropuertos, terminales, puertas y tripulación.",
+            ["scheduledflight", "baseflight", "routeschedule", "route", "airline", "aircraft", "aircraftmanufacturer", "aircrafttype", "airport", "terminal", "gate", "flightstatushistory", "delayreason", "flightdelay", "cancellationreason", "flightcancellation"]),
         new PortalAdminSection(
             "Comercial y Tarifas",
-            "Precios por cabina, promociones, clases de cabina, mapas y asientos de vuelo, equipaje y tarifas.",
-            ["flightcabinprice", "promotion", "flightpromotion", "cabinclass", "seatmap", "flightseat", "baggageallowance", "baggagetype", "faretype", "discounttype"]),
+            "Precios, asientos, mapas, promociones, equipaje, tipos de tarifa y descuentos.",
+            ["flightcabinprice", "flightseat", "seatmap", "cabinclass", "promotion", "flightpromotion", "baggageallowance", "baggagetype", "faretype", "discounttype"]),
         new PortalAdminSection(
             "Seguridad y Personal",
-            "Usuarios, roles, permisos, tripulación y empleados.",
-            ["user", "role", "permission", "rolepermission", "crewrole", "jobposition", "employee", "flightcrew"]),
+            "Usuarios, roles, permisos, empleados y tripulación de vuelo.",
+            ["user", "role", "permission", "rolepermission", "employee", "jobposition", "crewrole", "flightcrew"]),
         new PortalAdminSection(
-            "Diccionarios de Estados",
-            "Todos los módulos cuyo título comienza por «Estados de…» (según catálogo de la aplicación).",
+            "Configuración",
+            "Países, ciudades, monedas, documentos, géneros, contactos, programas de lealtad y métodos de pago.",
+            ["currency", "paymentmethod", "documenttype", "contacttype", "gender", "nationality", "loyaltyprogram", "loyaltytier", "country", "city"]),
+        new PortalAdminSection(
+            "Catálogos de estados",
+            "Estados de vuelo, reserva, tiquete, pago, check-in, reembolso y asiento.",
             FunctionalNavigation.GetModuleKeysWithTitlePrefix("Estados de "))
     ];
 
@@ -781,24 +806,24 @@ internal static class PortalAccess
     public static readonly IReadOnlyList<PortalClientSection> ClientSections =
     [
         new PortalClientSection(
-            "Consultar vuelos",
-            "Consulta y gestión de vuelos programados (oferta operativa).",
-            ["scheduledflight"]),
+            "Mis reservas",
+            "Consulta y seguimiento de tus reservas activas.",
+            ["reservation", "reservationstatushistory", "reservationdetail", "passenger", "passengercontact", "passengerdiscount", "customer", "person"]),
         new PortalClientSection(
-            "Reservas y viajeros",
-            "Reservas, pasajeros, clientes y descuentos aplicables.",
-            ["reservation", "reservationdetail", "reservationstatushistory", "customer", "person", "passenger", "passengercontact", "passengerdiscount"]),
+            "Mis tiquetes y check-in",
+            "Tiquetes emitidos, equipaje registrado, check-in y pases de abordar.",
+            ["ticket", "checkin", "boardingpass", "ticketbaggage", "ticketstatushistory"]),
         new PortalClientSection(
-            "Tiquetes, check-in y abordaje",
-            "Emisión, equipaje asociado, check-in y pases de abordar.",
-            ["ticket", "ticketstatushistory", "ticketbaggage", "checkin", "boardingpass"]),
-        new PortalClientSection(
-            "Pagos y reembolsos",
-            "Registro de pagos y gestión de reembolsos.",
+            "Mis pagos y reembolsos",
+            "Historial de pagos y solicitudes de reembolso.",
             ["payment", "refund"]),
         new PortalClientSection(
+            "Vuelos disponibles",
+            "Consulta la oferta de vuelos programados.",
+            ["scheduledflight"]),
+        new PortalClientSection(
             "Programa de lealtad",
-            "Cuentas y movimientos del pasajero frecuente.",
+            "Cuentas y movimientos de tus millas acumuladas.",
             ["loyaltyaccount", "loyaltytransaction"])
     ];
 }
