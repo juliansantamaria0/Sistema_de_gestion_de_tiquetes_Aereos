@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Sistema_de_gestion_de_tiquetes_Aereos": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

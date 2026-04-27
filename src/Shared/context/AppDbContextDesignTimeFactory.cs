@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Helpers;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 
 
@@ -23,10 +24,7 @@ public sealed class AppDbContextDesignTimeFactory : IDesignTimeDbContextFactory<
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? configuration.GetConnectionString("MySqlDB")
-            ?? throw new InvalidOperationException(
-                "Connection string 'DefaultConnection' or 'MySqlDB' not found in appsettings.json.");
+        var connectionString = ConnectionStringResolver.GetRequiredMySqlConnectionString(configuration);
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 

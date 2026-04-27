@@ -194,6 +194,7 @@ public sealed class ReservationRepository : IReservationRepository
         int customerId,
         int scheduledFlightId,
         int reservationStatusId,
+        bool            requireAvailableSeats = true,
         CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
@@ -210,18 +211,57 @@ public sealed class ReservationRepository : IReservationRepository
         if (await _context.Reservations.AsNoTracking().AnyAsync(x => x.ReservationCode == reservationCodeNormalized, cancellationToken))
             throw new InvalidOperationException($"Ya existe una reserva con el código {reservationCodeNormalized}.");
 
-        var availableSeats = await _context.FlightSeats
-            .AsNoTracking()
-            .Join(
-                _context.SeatStatuses.AsNoTracking(),
-                seat => seat.SeatStatusId,
-                status => status.Id,
-                (seat, status) => new { seat.ScheduledFlightId, StatusName = status.Name })
-            .CountAsync(x => x.ScheduledFlightId == scheduledFlightId && x.StatusName == SeatStatusNames.Available, cancellationToken);
+        if (requireAvailableSeats)
+        {
+            var availableSeats = await _context.FlightSeats
+                .AsNoTracking()
+                .Join(
+                    _context.SeatStatuses.AsNoTracking(),
+                    seat => seat.SeatStatusId,
+                    status => status.Id,
+                    (seat, status) => new { seat.ScheduledFlightId, StatusName = status.Name })
+                .CountAsync(x => x.ScheduledFlightId == scheduledFlightId && x.StatusName == SeatStatusNames.Available, cancellationToken);
 
-        if (availableSeats <= 0)
-            throw new InvalidOperationException("El vuelo no tiene asientos disponibles para crear nuevas reservas.");
+            if (availableSeats <= 0)
+                throw new InvalidOperationException("El vuelo no tiene asientos disponibles para crear nuevas reservas.");
+        }
 
+        var historyNote = requireAvailableSeats ? "Reserva creada" : "Solicitud de lista de espera registrada";
+
+        if (_context.Database.CurrentTransaction is not null)
+        {
+            return await CreateReservationInCurrentUnitOfWorkAsync(
+                reservationCodeNormalized, customerId, scheduledFlightId, reservationStatusId, now, historyNote, cancellationToken);
+        }
+
+        var strategy = _context.Database.CreateExecutionStrategy();
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+            try
+            {
+                var agg = await CreateReservationInCurrentUnitOfWorkAsync(
+                    reservationCodeNormalized, customerId, scheduledFlightId, reservationStatusId, now, historyNote, cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+                return agg;
+            }
+            catch
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                throw;
+            }
+        });
+    }
+
+    private async Task<ReservationAggregate> CreateReservationInCurrentUnitOfWorkAsync(
+        string reservationCodeNormalized,
+        int customerId,
+        int scheduledFlightId,
+        int reservationStatusId,
+        DateTime        now,
+        string          historyNote,
+        CancellationToken cancellationToken)
+    {
         var reservationEntity = new ReservationEntity
         {
             ReservationCode = reservationCodeNormalized,
@@ -235,24 +275,16 @@ public sealed class ReservationRepository : IReservationRepository
             UpdatedAt = null
         };
 
-        var strategy = _context.Database.CreateExecutionStrategy();
-        await strategy.ExecuteAsync(async () =>
-        {
-            await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        await _context.Reservations.AddAsync(reservationEntity, cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
 
-            await _context.Reservations.AddAsync(reservationEntity, cancellationToken);
-            await _unitOfWork.CommitAsync(cancellationToken);
-
-            await _context.AddReservationStatusHistoryAsync(
-                reservationEntity.Id,
-                reservationStatusId,
-                "Reserva creada",
-                now,
-                cancellationToken);
-            await _unitOfWork.CommitAsync(cancellationToken);
-
-            await transaction.CommitAsync(cancellationToken);
-        });
+        await _context.AddReservationStatusHistoryAsync(
+            reservationEntity.Id,
+            reservationStatusId,
+            historyNote,
+            now,
+            cancellationToken);
+        await _unitOfWork.CommitAsync(cancellationToken);
 
         return new ReservationAggregate(
             new ReservationId(reservationEntity.Id),

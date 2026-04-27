@@ -25,7 +25,7 @@ public sealed class DeleteReservationDetailUseCase
         var detail = await _context.ReservationDetails
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
-            ?? throw new KeyNotFoundException($"ReservationDetail with id {id} was not found.");
+            ?? throw new KeyNotFoundException($"No se encontró el detalle de reserva con id {id}.");
 
         var reservation = await _context.Reservations
             .AsNoTracking()

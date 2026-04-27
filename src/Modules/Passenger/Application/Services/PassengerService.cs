@@ -49,8 +49,23 @@ public sealed class PassengerService : IPassengerService
     {
         if (CurrentUser.IsAuthenticated && CurrentUser.PersonId.HasValue)
         {
-            var single = await _getByPerson.ExecuteAsync(CurrentUser.PersonId.Value, cancellationToken);
-            return single is null ? [] : [ToDto(single)];
+            var personId = CurrentUser.PersonId.Value;
+            var single   = await _getByPerson.ExecuteAsync(personId, cancellationToken);
+            if (single is not null)
+                return [ToDto(single)];
+
+            // Cuentas antiguas o datos incompletos: un cliente debe tener ficha de pasajero vinculada a su persona.
+            try
+            {
+                var created = await _create.ExecuteAsync(personId, null, null, cancellationToken);
+                return [ToDto(created)];
+            }
+            catch (InvalidOperationException)
+            {
+                // Carrera: otro hilo pudo crear el pasajero.
+                var retry = await _getByPerson.ExecuteAsync(personId, cancellationToken);
+                return retry is null ? [] : [ToDto(retry)];
+            }
         }
         var list = await _getAll.ExecuteAsync(cancellationToken);
         return list.Select(ToDto);

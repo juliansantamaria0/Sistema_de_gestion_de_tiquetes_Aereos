@@ -1,6 +1,8 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using Spectre.Console;
+using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
 
@@ -50,6 +52,13 @@ public static class ConsoleErrorHandler
         catch (DbUpdateException ex)
         {
             WriteFriendlyDbUpdateException(ex);
+            Pause();
+            return false;
+        }
+        catch (MySqlException ex)
+        {
+            var msg = MySqlErrorFormatter.ToUserMessage(ex);
+            AnsiConsole.MarkupLine($"[red]{Markup.Escape(msg)}[/]");
             Pause();
             return false;
         }

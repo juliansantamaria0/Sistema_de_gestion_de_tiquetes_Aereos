@@ -57,14 +57,16 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            RenderModuleHeader(Title, "[grey]Use las flechas para navegar, Enter para seleccionar. En campos de texto escriba [bold]cancelar[/] para anular.[/]");
+            RenderModuleHeader(
+                Title,
+                "[grey]Flechas + Enter. En textos, escriba [bold]cancelar[/] para anular.[/]");
 
             var actions = BuildMenuActions();
             var choice  = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]¿Qué desea hacer?[/]")
+                    .Title("[bold yellow]Menú del módulo — ¿qué desea hacer?[/]")
                     .PageSize(15)
-                    .MoreChoicesText("[grey](Desplace para ver más opciones)[/]")
+                    .MoreChoicesText(ConsoleDashboard.SelectionMoreChoicesNav)
                     .AddChoices(actions.Select(a => a.Label).Append(BackLabel)));
 
             if (choice == BackLabel)
@@ -78,7 +80,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             await selected.Handler(cancellationToken);
 
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[grey]Presiona cualquier tecla para continuar...[/]");
+            ConsoleDashboard.FooterPressKey();
             Console.ReadKey(intercept: true);
         }
     }
@@ -127,15 +129,14 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         var rows = await GetAllItemsAsync(ct);
         if (rows.Count == 0)
         {
-            AnsiConsole.MarkupLine("[yellow]No hay registros para mostrar.[/]");
-            AnsiConsole.MarkupLine("[grey]Use la opción [bold]Crear[/] para agregar el primer registro.[/]");
+            ConsoleDashboard.Warning("No hay registros. Use la opción Crear en el menú para agregar el primero.");
             return;
         }
 
-        AnsiConsole.MarkupLine($"[grey]{rows.Count} registro(s) encontrado(s).[/]");
+        ConsoleDashboard.Info($"{rows.Count} registro(s) encontrado(s).");
         AnsiConsole.WriteLine();
 
-        var table = new Table().Border(TableBorder.Rounded).Expand();
+        var table = ConsoleDashboard.NewDataTable();
         var props = GetDisplayProperties(rows[0].GetType());
         foreach (var prop in props)
             table.AddColumn(new TableColumn($"[bold]{Markup.Escape(GetColumnLabel(prop.Name))}[/]"));
@@ -143,7 +144,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         foreach (var row in rows)
             table.AddRow(props.Select(p => Markup.Escape(FormatValue(p.GetValue(row)))).ToArray());
 
-        AnsiConsole.Write(table);
+        ConsoleDashboard.ShowWorkspaceTablePanel($"Listado: {Title}", table);
     }
 
     private async Task ViewDetailsAsync(CancellationToken ct)
@@ -161,9 +162,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
                 $"[aqua]{Markup.Escape(GetColumnLabel(prop.Name))}[/]",
                 Markup.Escape(FormatValue(prop.GetValue(item))));
 
-        AnsiConsole.Write(new Panel(grid)
-            .Header($"[green]  {Markup.Escape(Title)} — Detalle  [/]")
-            .Border(BoxBorder.Rounded));
+        ConsoleDashboard.ShowWorkspaceDetailPanel($"{Title} — Detalle", grid);
     }
 
     // ── Actions ────────────────────────────────────────────────────────────────
@@ -205,7 +204,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             var result  = await InvokeAsync(method, args.ToArray(), service);
 
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[green]  Operación realizada con éxito.[/]");
+            ConsoleDashboard.Success("Operación realizada correctamente.");
             if (result is not null)
             {
                 AnsiConsole.WriteLine();
@@ -265,11 +264,12 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             await using var scope = _scopeFactory.CreateAsyncScope();
             var service = scope.ServiceProvider.GetRequiredService<TService>();
             await InvokeAsync(method, args.ToArray(), service);
-            AnsiConsole.MarkupLine("[green]  Registro eliminado correctamente.[/]");
+            AnsiConsole.WriteLine();
+            ConsoleDashboard.Success("Registro eliminado correctamente.");
         }
         catch (DbUpdateConcurrencyException)
         {
-            AnsiConsole.MarkupLine("[red]El registro fue modificado por otro proceso. Intente de nuevo.[/]");
+            ConsoleDashboard.Error("El registro fue modificado por otro proceso. Intente de nuevo.");
         }
         catch (DbUpdateException ex)
         {
@@ -277,7 +277,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Error: {Markup.Escape(ex.Message)}[/]");
+            ConsoleDashboard.Error(ex.Message);
         }
     }
 
@@ -516,13 +516,8 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             .Where(p => p.Name is not "CreatedAt" and not "UpdatedAt" and not "CancelledAt" and not "ConfirmedAt")
             .ToArray();
 
-    private static void RenderModuleHeader(string title, string? hint)
-    {
-        AnsiConsole.Write(new Rule($"[green] {Markup.Escape(title)} [/]").RuleStyle(Style.Parse("grey")));
-        if (!string.IsNullOrEmpty(hint))
-            AnsiConsole.MarkupLine(hint);
-        AnsiConsole.WriteLine();
-    }
+    private static void RenderModuleHeader(string title, string? hint) =>
+        ConsoleDashboard.ModuleScreenHeader(title, hint);
 
     private static void RenderSingleObject(object result)
     {
@@ -532,7 +527,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
                 $"[aqua]{Markup.Escape(GetColumnLabel(prop.Name))}[/]",
                 Markup.Escape(FormatValue(prop.GetValue(result))));
 
-        AnsiConsole.Write(new Panel(grid).Border(BoxBorder.Rounded));
+        ConsoleDashboard.ShowWorkspaceDetailPanel("Resultado", grid);
     }
 
     private static string GetColumnLabel(string propName)
@@ -675,6 +670,8 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             "payment"                    => "Pagos",
             "refund"                     => "Reembolsos",
             "faretype"                   => "Tipos de tarifa",
+            "waitlist"                   => "Lista de espera",
+            "reprogramminghistory"       => "Historial de reprogramaciones",
             _                            => fallback
         };
 
@@ -697,6 +694,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
             "Record"                 => "Registrar",
             "Confirm"                => "Confirmar",
             "Cancel"                 => "Cancelar",
+            "ReprogramarReserva"     => "Reprogramar reserva",
             "AddMiles"               => "Agregar millas",
             "RedeemMiles"            => "Redimir millas",
             "UpgradeTier"            => "Subir nivel de lealtad",
@@ -741,6 +739,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["routeId"]                        = "Ruta",
         ["routeScheduleId"]                = "Horario de ruta",
         ["scheduledFlightId"]              = "Vuelo programado",
+        ["nuevoScheduledFlightId"]         = "Nuevo vuelo programado",
         ["flightStatusId"]                 = "Estado de vuelo",
         ["flightSeatId"]                   = "Asiento de vuelo",
         ["seatStatusId"]                   = "Estado del asiento",
@@ -772,6 +771,7 @@ public abstract class ReflectiveModuleUI<TService> : IModuleUI where TService : 
         ["flightStatusId"]         = "FlightStatus",
         ["checkInStatusId"]        = "CheckInStatus",
         ["manufacturerId"]         = "AircraftManufacturer",
+        ["nuevoScheduledFlightId"] = "ScheduledFlight",
     };
 
     private static string HumanizeParameter(string parameterName)

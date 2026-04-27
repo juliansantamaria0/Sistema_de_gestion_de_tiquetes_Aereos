@@ -1,6 +1,7 @@
 namespace Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 
 using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 
 public sealed class AuthService
@@ -62,6 +63,16 @@ public sealed class AuthService
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Customers.Add(customer);
+                await _context.SaveChangesAsync(ct);
+
+                var passenger = new PassengerEntity
+                {
+                    PersonId = person.Id,
+                    FrequentFlyerNumber = null,
+                    NationalityId = null,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.Passengers.Add(passenger);
                 await _context.SaveChangesAsync(ct);
 
                 var user = new Modules.User.Infrastructure.Entity.UserEntity

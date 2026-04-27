@@ -16,6 +16,7 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Currency.Infrastructure.Enti
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DiscountType.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.DocumentType.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FareType.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightCabinPrice.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightStatus.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gate.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Infrastructure.Entity;
@@ -40,6 +41,11 @@ internal static class BootstrapDataSeeder
     public static async Task SeedAsync(AppDbContext db, CancellationToken ct = default)
     {
         await db.Database.MigrateAsync(ct);
+        // Reparación idempotente: datos viejos podían quedar con confirmed_at y cancelled_at a la vez.
+        // Eso rompe invariantes del dominio al cargar reservas.
+        await db.Database.ExecuteSqlRawAsync(
+            "UPDATE reservation SET confirmed_at = NULL WHERE cancelled_at IS NOT NULL AND confirmed_at IS NOT NULL;",
+            ct);
         var now = DateTime.UtcNow;
         await EnsureStatusesAsync(db, ct);
         await EnsureMasterDataAsync(db, now, ct);
@@ -80,6 +86,7 @@ internal static class BootstrapDataSeeder
         [
             new ReservationStatusEntity { Name = "CREATED"   },
             new ReservationStatusEntity { Name = "CONFIRMED" },
+            new ReservationStatusEntity { Name = "WAITLIST"  },
             new ReservationStatusEntity { Name = "CANCELLED" },
         ], ct);
 
@@ -611,6 +618,9 @@ internal static class BootstrapDataSeeder
             }
         }
 
+        // Precios (vuelo + cabina + tarifa). Sin esto fallan asistente y lista de espera.
+        await EnsureFlightCabinPricesForExistingFlightsAsync(db, ct);
+
         // ── PROGRAMAS DE LEALTAD Y NIVELES ──────────────────────────────────
         if (!await db.LoyaltyPrograms.AnyAsync(ct))
         {
@@ -656,6 +666,65 @@ internal static class BootstrapDataSeeder
                 await db.SaveChangesAsync(ct);
             }
         }
+    }
+
+    /// <summary>Precio por vuelo/cabina/tarifa. Idempotente: solo inserta filas faltantes.</summary>
+    private static async Task EnsureFlightCabinPricesForExistingFlightsAsync(AppDbContext db, CancellationToken ct)
+    {
+        var fareByName = await db.FareTypes.AsNoTracking()
+            .ToDictionaryAsync(f => f.Name, f => f.Id, StringComparer.OrdinalIgnoreCase, ct);
+        if (fareByName.Count == 0) return;
+
+        var cabinNameById = await db.CabinClasses.AsNoTracking()
+            .ToDictionaryAsync(c => c.Id, c => c.Name, ct);
+
+        var flightCabinPairs = await (
+            from fs in db.FlightSeats.AsNoTracking()
+            join sm in db.SeatMaps.AsNoTracking() on fs.SeatMapId equals sm.Id
+            select new { fs.ScheduledFlightId, sm.CabinClassId }
+        ).Distinct().ToListAsync(ct);
+        if (flightCabinPairs.Count == 0) return;
+
+        var existing = await db.FlightCabinPrices.AsNoTracking()
+            .Select(f => $"{f.ScheduledFlightId}\u001f{f.CabinClassId}\u001f{f.FareTypeId}")
+            .ToListAsync(ct);
+        var existingSet = new HashSet<string>(existing, StringComparer.Ordinal);
+
+        (string Name, decimal Price)[] TiersFor(string cabinUpper) => cabinUpper switch
+        {
+            "ECONOMY" or "PREMIUM ECONOMY" => [
+                ("PROMO", 149m), ("BASIC", 199m), ("CLASSIC", 259m), ("FLEX", 329m)
+            ],
+            "BUSINESS" or "FIRST" => [
+                ("BASIC", 1200m), ("BUSINESS", 1600m), ("FLEX", 2000m), ("FULL FLEX", 2400m)
+            ],
+            _ => [("BASIC", 300m), ("FLEX", 450m)]
+        };
+
+        var toAdd = new List<FlightCabinPriceEntity>();
+        foreach (var p in flightCabinPairs)
+        {
+            if (!cabinNameById.TryGetValue(p.CabinClassId, out var cname)) continue;
+            var upper = cname.Trim().ToUpperInvariant();
+            foreach (var (fareName, price) in TiersFor(upper))
+            {
+                if (!fareByName.TryGetValue(fareName, out var fareId)) continue;
+                var key = $"{p.ScheduledFlightId}\u001f{p.CabinClassId}\u001f{fareId}";
+                if (existingSet.Contains(key)) continue;
+                toAdd.Add(new FlightCabinPriceEntity
+                {
+                    ScheduledFlightId = p.ScheduledFlightId,
+                    CabinClassId      = p.CabinClassId,
+                    FareTypeId        = fareId,
+                    Price             = price
+                });
+                existingSet.Add(key);
+            }
+        }
+
+        if (toAdd.Count == 0) return;
+        await db.FlightCabinPrices.AddRangeAsync(toAdd, ct);
+        await db.SaveChangesAsync(ct);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

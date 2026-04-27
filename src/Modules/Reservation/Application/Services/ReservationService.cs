@@ -14,6 +14,8 @@ public sealed class ReservationService : IReservationService
     private readonly UpdateReservationUseCase         _update;
     private readonly ConfirmReservationUseCase        _confirm;
     private readonly CancelReservationUseCase         _cancel;
+    private readonly ReprogramarReservaUseCase         _reprogramar;
+    private readonly CrearSolicitudListaEsperaUseCase    _crearListaEspera;
     private readonly GetReservationsByCustomerUseCase _getByCustomer;
     private readonly GetReservationsByFlightUseCase   _getByFlight;
 
@@ -25,40 +27,60 @@ public sealed class ReservationService : IReservationService
         UpdateReservationUseCase         update,
         ConfirmReservationUseCase        confirm,
         CancelReservationUseCase         cancel,
+        ReprogramarReservaUseCase        reprogramar,
+        CrearSolicitudListaEsperaUseCase crearListaEspera,
         GetReservationsByCustomerUseCase getByCustomer,
         GetReservationsByFlightUseCase   getByFlight)
     {
-        _create        = create;
-        _delete        = delete;
-        _getAll        = getAll;
-        _getById       = getById;
-        _update        = update;
-        _confirm       = confirm;
-        _cancel        = cancel;
-        _getByCustomer = getByCustomer;
-        _getByFlight   = getByFlight;
+        _create         = create;
+        _delete         = delete;
+        _getAll         = getAll;
+        _getById        = getById;
+        _update         = update;
+        _confirm        = confirm;
+        _cancel         = cancel;
+        _reprogramar    = reprogramar;
+        _crearListaEspera = crearListaEspera;
+        _getByCustomer  = getByCustomer;
+        _getByFlight    = getByFlight;
     }
 
     public async Task<ReservationDto> CreateAsync(
         int               customerId,
         int               scheduledFlightId,
         int               reservationStatusId,
+        bool              requireAvailableSeats = true,
         CancellationToken cancellationToken = default)
     {
-        var agg = await _create.ExecuteAsync(customerId, scheduledFlightId, reservationStatusId, cancellationToken);
+        var agg = await _create.ExecuteAsync(
+            customerId, scheduledFlightId, reservationStatusId, requireAvailableSeats, cancellationToken);
         return ToDto(agg);
     }
 
     public async Task<ReservationDto> CreateForCurrentUserAsync(
         int               scheduledFlightId,
         int               reservationStatusId,
+        bool              requireAvailableSeats = true,
         CancellationToken cancellationToken = default)
     {
         if (!CurrentUser.IsAuthenticated || !CurrentUser.CustomerId.HasValue)
             throw new InvalidOperationException("Debe iniciar sesión para realizar una reserva.");
 
-        var agg = await _create.ExecuteAsync(CurrentUser.CustomerId.Value, scheduledFlightId, reservationStatusId, cancellationToken);
+        var agg = await _create.ExecuteAsync(
+            CurrentUser.CustomerId.Value, scheduledFlightId, reservationStatusId, requireAvailableSeats, cancellationToken);
         return ToDto(agg);
+    }
+
+    public async Task<IReadOnlyList<ReservationDto>> CrearSolicitudListaEsperaAsync(
+        int scheduledFlightId,
+        IReadOnlyList<(int PassengerId, int FareTypeId)> puestos,
+        CancellationToken cancellationToken = default)
+    {
+        if (!CurrentUser.IsAuthenticated || !CurrentUser.CustomerId.HasValue)
+            throw new InvalidOperationException("Debe iniciar sesión.");
+        var list = await _crearListaEspera.ExecuteAsync(
+            CurrentUser.CustomerId.Value, scheduledFlightId, puestos, cancellationToken);
+        return list;
     }
 
     public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
@@ -103,6 +125,11 @@ public sealed class ReservationService : IReservationService
         int               cancelledReservationStatusId,
         CancellationToken cancellationToken = default)
         => await _cancel.ExecuteAsync(id, cancelledReservationStatusId, cancellationToken);
+
+    public async Task ReprogramarReservaAsync(
+        int               id,
+        CancellationToken cancellationToken = default)
+        => await _reprogramar.ExecuteInteractiveAsync(id, cancellationToken);
 
     public async Task<IEnumerable<ReservationDto>> GetByCustomerAsync(
         int               customerId,

@@ -20,6 +20,7 @@ public sealed class CreateReservationUseCase
         int               customerId,
         int               scheduledFlightId,
         int               reservationStatusId,
+        bool              requireAvailableSeats = true,
         CancellationToken cancellationToken = default)
     {
         var code = await GenerateUniqueCodeAsync(cancellationToken);
@@ -29,6 +30,7 @@ public sealed class CreateReservationUseCase
             customerId,
             scheduledFlightId,
             reservationStatusId,
+            requireAvailableSeats,
             cancellationToken);
     }
 

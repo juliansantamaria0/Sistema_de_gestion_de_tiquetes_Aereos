@@ -30,7 +30,8 @@ public static class PasswordHasher
             if (parts.Length != 4 || parts[0] != "pbkdf2-sha256")
                 return false;
 
-            var iterations = int.Parse(parts[1]);
+            if (!int.TryParse(parts[1], out var iterations) || iterations < 1)
+                return false;
             var salt = Convert.FromBase64String(parts[2]);
             var hash = Convert.FromBase64String(parts[3]);
 

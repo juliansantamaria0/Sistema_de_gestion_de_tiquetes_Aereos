@@ -11,3 +11,8 @@ obj/
 # Archivos temporales
 *.tmp
 *.log
+
+# Configuraciones de entorno
+appsettings.Development.json
+appsettings.*.local.json
+*.Development.local.json

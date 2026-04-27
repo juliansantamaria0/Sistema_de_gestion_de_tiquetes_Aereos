@@ -15,20 +15,17 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString =
-            configuration.GetConnectionString("DefaultConnection") ??
-            configuration.GetConnectionString("MySqlDB") ??
-            configuration["ConnectionStrings__DefaultConnection"] ??
-            throw new InvalidOperationException(
-                "No se encontro la cadena de conexion 'DefaultConnection' o 'MySqlDB'.");
-
-        var configuredServerVersion = configuration["MySqlServerVersion"];
-        var serverVersion = string.IsNullOrWhiteSpace(configuredServerVersion)
-            ? MySqlVersionResolver.Resolve(connectionString)
-            : ServerVersion.Parse(configuredServerVersion);
-
-        services.AddDbContext<AppDbContext>(options =>
+        // La cadena se resuelve al crear el DbContext (IConfiguration ya incluye variables de entorno y JSON).
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {
+            var config = serviceProvider.GetRequiredService<IConfiguration>();
+            var connectionString = ConnectionStringResolver.GetRequiredMySqlConnectionString(config);
+
+            var configuredServerVersion = config["MySqlServerVersion"];
+            var serverVersion = string.IsNullOrWhiteSpace(configuredServerVersion)
+                ? MySqlVersionResolver.Resolve(connectionString)
+                : ServerVersion.Parse(configuredServerVersion);
+
             options
                 .UseMySql(connectionString, serverVersion, mySqlOptions =>
                 {
@@ -55,10 +52,10 @@ public static class DependencyInjection
     {
         var concreteTypes = assembly
             .GetTypes()
-            .Where(t => t is { IsClass: true, IsAbstract: false })
+            .Where(t => t is { IsClass: true, IsAbstract: false, DeclaringType: null })
             .ToList();
 
-        foreach (var type in concreteTypes.Where(t => t.Namespace?.Contains(".UseCases") == true))
+        foreach (var type in concreteTypes.Where(t => t.Namespace?.Contains(".UseCases", StringComparison.Ordinal) == true))
         {
             services.AddScoped(type);
         }

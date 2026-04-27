@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Spectre.Console;
-using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Application.Interfaces;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
@@ -18,8 +17,10 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 builder.Services.AddSharedInfrastructure(builder.Configuration);
-builder.Services.AddSingleton<ReportsMenu>();
-builder.Services.AddSingleton<MainMenu>();
+// Scoped: consumen IModuleUI, UseCases, DbContext, etc. (no pueden ser Singleton).
+builder.Services.AddScoped<ReportsMenu>();
+builder.Services.AddScoped<Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI.Client.ClientPortalApp>();
+builder.Services.AddScoped<MainMenu>();
 
 using var host = builder.Build();
 
@@ -32,19 +33,19 @@ await using (var scope = host.Services.CreateAsyncScope())
     await menu.RunAsync();
 }
 
-internal sealed class MainMenu(
+public sealed class MainMenu(
     IEnumerable<IModuleUI> modules,
     ReportsMenu reportsMenu,
     IConfiguration configuration,
     AppDbContext dbContext,
-    IServiceProvider serviceProvider)
+    Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI.Client.ClientPortalApp clientPortal)
 {
     private readonly Dictionary<string, IModuleUI> _modules = BuildNormalizedModuleMap(modules);
     private readonly ReportsMenu _reportsMenu = reportsMenu;
     private readonly string _adminPin = configuration["AdminPortal:Pin"] ?? "0000";
     private readonly AuthService _authService = new(dbContext);
     private readonly AppDbContext _context = dbContext;
-    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI.Client.ClientPortalApp _clientPortal = clientPortal;
 
     private static Dictionary<string, IModuleUI> BuildNormalizedModuleMap(IEnumerable<IModuleUI> modules)
     {
@@ -69,7 +70,7 @@ internal sealed class MainMenu(
 
             var accessChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]¿A dónde desea ir?[/]")
+                    .Title("[bold yellow]Inicio — ¿a dónde desea ir?[/]")
                     .PageSize(6)
                     .AddChoices(
                     [
@@ -88,22 +89,11 @@ internal sealed class MainMenu(
         }
 
         AnsiConsole.Clear();
-        AnsiConsole.MarkupLine("[green]Hasta luego.[/]");
-    }
-
-    private static void RenderAccessPortal()
-    {
-        AnsiConsole.Clear();
-        AnsiConsole.Write(
-            new FigletText("Air Tickets")
-                .Centered()
-                .Color(Color.CornflowerBlue));
-
-        AnsiConsole.MarkupLine("[grey]Sistema de gestión de tiquetes aéreos[/]");
-        AnsiConsole.Write(new Rule("[green]Inicio[/]"));
-        AnsiConsole.MarkupLine("[silver]Seleccione su portal de acceso.[/]");
         AnsiConsole.WriteLine();
+        ConsoleDashboard.Info("Hasta luego. Gracias por usar el sistema.");
     }
+
+    private static void RenderAccessPortal() => ConsoleDashboard.RenderAccessLanding();
 
     private async Task ShowAdminMenuAsync(CancellationToken cancellationToken)
     {
@@ -112,34 +102,45 @@ internal sealed class MainMenu(
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule("[green] Administración [/]").RuleStyle(Style.Parse("grey")));
-            AnsiConsole.MarkupLine("[grey]Gestión interna: vuelos, flota, tarifas, personal y configuración.[/]");
-            AnsiConsole.WriteLine();
+            ConsoleDashboard.RenderAdminBackOfficeHeader(
+                "Vuelos, flota, tarifas, personal, reportes y configuración.");
+            ConsoleDashboard.NavigationHint();
 
-            var rootChoices = PortalAccess.AdminSections
-                .Select(s => s.Title)
-                .Append(PortalAccess.ReportsEntryLabel)
+            var sectionLabels = PortalAccess.AdminSections
+                .Select((s, i) => new { Section = s, Label = $"{i + 1,2:00} — {s.Title}" })
+                .ToList();
+
+            var rootChoices = sectionLabels
+                .Select(x => x.Label)
+                .Append("99 — " + PortalAccess.ReportsEntryLabel)
                 .Append(PortalAccess.BackToAccessMenu)
                 .ToList();
 
             var rootChoice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]¿A qué área desea acceder?[/]")
+                    .Title("[bold yellow]Área de administración — ¿dónde desea ir?[/]")
                     .PageSize(12)
-                    .MoreChoicesText("[grey](Desplace para ver más)[/]")
+                    .MoreChoicesText(ConsoleDashboard.SelectionMoreChoicesNav)
                     .AddChoices(rootChoices));
 
             if (rootChoice == PortalAccess.BackToAccessMenu)
                 return;
 
-            if (rootChoice == PortalAccess.ReportsEntryLabel)
+            if (rootChoice == "99 — " + PortalAccess.ReportsEntryLabel)
             {
                 await ConsoleErrorHandler.RunSafeAsync(ct => _reportsMenu.RunAsync(ct), cancellationToken);
                 continue;
             }
 
-            var section = PortalAccess.AdminSections.First(s => s.Title == rootChoice);
+            var selectedSection = sectionLabels.FirstOrDefault(s => s.Label == rootChoice);
+            if (selectedSection is null)
+            {
+                ConsoleDashboard.Error("No se pudo abrir el área elegida.");
+                PauseReturn();
+                continue;
+            }
+
+            var section = selectedSection.Section;
             await RunAdminSectionAsync(section, cancellationToken);
         }
     }
@@ -149,30 +150,43 @@ internal sealed class MainMenu(
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule($"[green] Administración  ›  {Markup.Escape(section.Title)} [/]").RuleStyle(Style.Parse("grey")));
-            AnsiConsole.MarkupLine($"[grey]{Markup.Escape(section.Description)}[/]");
-            AnsiConsole.WriteLine();
+            ConsoleDashboard.AdminSubScreenTitle(
+                section.Title,
+                section.Description);
+            ConsoleDashboard.NavigationHint();
 
             var items = BuildOrderedModuleItems(section.ModuleKeys);
 
             if (items.Count == 0)
             {
-                AnsiConsole.MarkupLine("[yellow]No hay módulos registrados en esta área.[/]");
+                ConsoleDashboard.Warning("No hay módulos registrados en esta área.");
                 PauseReturn();
                 return;
             }
 
+            var indexed = items
+                .Select((x, i) => new { Item = x, Label = $"{i + 1,2:00} — {x.Title}" })
+                .ToList();
+
             var selected = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]¿Qué módulo desea gestionar?[/]")
+                    .Title("[bold yellow]¿Qué módulo desea gestionar?[/]")
                     .PageSize(18)
-                    .MoreChoicesText("[grey](Desplace para ver todos los módulos)[/]")
-                    .AddChoices(items.Select(x => x.Title).Append(PortalAccess.BackToAdminRoot)));
+                    .MoreChoicesText(ConsoleDashboard.SelectionMoreChoicesNav)
+                    .AddChoices(indexed.Select(x => x.Label).Append(PortalAccess.BackToAdminRoot)));
 
             if (selected == PortalAccess.BackToAdminRoot)
                 return;
 
-            var item   = items.First(x => x.Title == selected);
+            var picked = indexed.FirstOrDefault(x => x.Label == selected);
+            if (picked is null)
+            {
+                ConsoleDashboard.Error("No se pudo abrir el módulo elegido.");
+                PauseReturn();
+                continue;
+            }
+
+            var item   = picked.Item;
             var module = _modules[item.NormalizedKey];
             await RunModuleUiSafeAsync(module, $"Administración > {section.Title}", item.Title, cancellationToken);
         }
@@ -187,50 +201,9 @@ internal sealed class MainMenu(
                 return;
         }
 
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule($"[green] Portal de clientes [/]").RuleStyle(Style.Parse("grey")));
-            AnsiConsole.MarkupLine($"[grey]Bienvenido, [bold]{Markup.Escape(CurrentUser.Username ?? "usuario")}[/]. Seleccione qué desea hacer.[/]");
-            AnsiConsole.WriteLine();
-
-            var mainOptions = new List<string> { "Reservar un vuelo" }
-                .Concat(PortalAccess.ClientSections.Select(s => s.Title))
-                .Append("─────────────────")
-                .Append("Cerrar sesión")
-                .ToList();
-
-            var sectionTitle = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[yellow]¿Qué desea hacer?[/]")
-                    .PageSize(12)
-                    .AddChoices(mainOptions));
-
-            if (sectionTitle == "Cerrar sesión")
-            {
-                AuthService.Logout();
-                AnsiConsole.Clear();
-                AnsiConsole.MarkupLine("[green]Sesión cerrada. Hasta pronto.[/]");
-                PauseReturn();
-                return;
-            }
-
-            if (sectionTitle == "─────────────────")
-                continue;
-
-            if (sectionTitle == "Reservar un vuelo")
-            {
-                var reservationService = _serviceProvider.GetRequiredService<IReservationService>();
-                var wizard = new Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.UI.ReservationBookingWizardUI(
-                    reservationService,
-                    _context);
-                await ConsoleErrorHandler.RunSafeAsync(ct => wizard.RunAsync(ct), cancellationToken);
-                continue;
-            }
-
-            var section = PortalAccess.ClientSections.First(s => s.Title == sectionTitle);
-            await RunClientSectionAsync(section, cancellationToken);
-        }
+        var loggedOut = await _clientPortal.RunAsync(cancellationToken);
+        if (loggedOut)
+            return;
     }
 
     private async Task<bool> ShowClientLoginAsync(CancellationToken cancellationToken)
@@ -238,13 +211,13 @@ internal sealed class MainMenu(
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule("[green] Portal de clientes — Acceso [/]").RuleStyle(Style.Parse("grey")));
-            AnsiConsole.MarkupLine("[grey]Inicie sesión con su cuenta o regístrese si es la primera vez.[/]");
-            AnsiConsole.WriteLine();
+            ConsoleDashboard.SubScreenTitle(
+                "Portal de clientes — Acceso",
+                "Inicie sesión o cree una cuenta si es la primera vez.");
 
             var option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]¿Cómo desea continuar?[/]")
+                    .Title("[bold yellow]¿Cómo desea continuar?[/]")
                     .PageSize(4)
                     .AddChoices("Iniciar sesión", "Crear cuenta nueva", PortalAccess.BackToAccessMenu));
 
@@ -268,9 +241,7 @@ internal sealed class MainMenu(
     private async Task<bool> ShowLoginFormAsync(CancellationToken cancellationToken)
     {
         AnsiConsole.Clear();
-        AnsiConsole.Write(new Rule("[green] Iniciar sesión [/]").RuleStyle(Style.Parse("grey")));
-        AnsiConsole.MarkupLine("[grey]Ingrese su usuario y contraseña.[/]");
-        AnsiConsole.WriteLine();
+        ConsoleDashboard.SubScreenTitle("Iniciar sesión", "Ingrese usuario y contraseña.");
 
         var username = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow]Usuario:[/]")
@@ -286,12 +257,14 @@ internal sealed class MainMenu(
 
         if (!result.IsSuccess)
         {
-            AnsiConsole.MarkupLine($"[red]  {Markup.Escape(result.ErrorMessage ?? "Credenciales incorrectas.")}[/]");
+            AnsiConsole.WriteLine();
+            ConsoleDashboard.Error(result.ErrorMessage ?? "Credenciales incorrectas.");
             PauseReturn();
             return false;
         }
 
-        AnsiConsole.MarkupLine($"[green]  Bienvenido, {Markup.Escape(result.Username ?? username)}![/]");
+        AnsiConsole.WriteLine();
+        ConsoleDashboard.Success($"Bienvenido, {result.Username ?? username}.");
         PauseReturn();
         return true;
     }
@@ -299,9 +272,9 @@ internal sealed class MainMenu(
     private async Task<bool> ShowRegisterFormAsync(CancellationToken cancellationToken)
     {
         AnsiConsole.Clear();
-        AnsiConsole.Write(new Rule("[green] Crear cuenta nueva [/]").RuleStyle(Style.Parse("grey")));
-        AnsiConsole.MarkupLine("[grey]Complete el formulario para registrarse. Todos los campos marcados son obligatorios.[/]");
-        AnsiConsole.WriteLine();
+        ConsoleDashboard.SubScreenTitle(
+            "Crear cuenta nueva",
+            "Complete el formulario. Los campos obligatorios deben rellenarse.");
 
         var username = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow]Usuario:[/]")
@@ -318,7 +291,8 @@ internal sealed class MainMenu(
 
         if (password != confirmPassword)
         {
-            AnsiConsole.MarkupLine("[red]Las contraseñas no coinciden.[/]");
+            AnsiConsole.WriteLine();
+            ConsoleDashboard.Error("Las contraseñas no coinciden.");
             PauseReturn();
             return false;
         }
@@ -335,7 +309,7 @@ internal sealed class MainMenu(
         var docTypes = await _context.DocumentTypes.AsNoTracking().ToListAsync(cancellationToken);
         if (!docTypes.Any())
         {
-            AnsiConsole.MarkupLine("[red]No hay tipos de documento disponibles.[/]");
+            ConsoleDashboard.Error("No hay tipos de documento disponibles.");
             PauseReturn();
             return false;
         }
@@ -345,7 +319,12 @@ internal sealed class MainMenu(
                 .Title("[yellow]Tipo de documento:[/]")
                 .AddChoices(docTypes.Select(d => $"{d.DocumentTypeId} - {d.Name}")));
 
-        var documentTypeId = int.Parse(docTypeChoice.Split(new[] { " - " }, StringSplitOptions.None)[0]);
+        if (!ConsoleIntPrompt.TryParseFirstSegmentAsInt32(docTypeChoice, out var documentTypeId))
+        {
+            ConsoleDashboard.Error("No se pudo interpretar el tipo de documento. Vuelva a intentar el registro.");
+            PauseReturn();
+            return false;
+        }
 
         var documentNumber = AnsiConsole.Prompt(
             new TextPrompt<string>("[yellow]Número de documento:[/]")
@@ -374,48 +353,16 @@ internal sealed class MainMenu(
 
         if (!result.IsSuccess)
         {
-            AnsiConsole.MarkupLine($"[red]{result.ErrorMessage}[/]");
+            AnsiConsole.WriteLine();
+            ConsoleDashboard.Error(result.ErrorMessage ?? "No se pudo registrar.");
             PauseReturn();
             return false;
         }
 
-        AnsiConsole.MarkupLine($"[green]Cuenta creada exitosamente! Bienvenido, {result.Username}![/]");
+        AnsiConsole.WriteLine();
+        ConsoleDashboard.Success($"Cuenta creada. Bienvenido, {result.Username}.");
         PauseReturn();
         return true;
-    }
-
-    private async Task RunClientSectionAsync(PortalClientSection section, CancellationToken cancellationToken)
-    {
-        while (!cancellationToken.IsCancellationRequested)
-        {
-            AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule($"[green] {Markup.Escape(section.Title)} [/]").RuleStyle(Style.Parse("grey")));
-            AnsiConsole.MarkupLine($"[grey]{Markup.Escape(section.Description)}[/]");
-            AnsiConsole.WriteLine();
-
-            var items = BuildOrderedModuleItems(section.ModuleKeys);
-
-            if (items.Count == 0)
-            {
-                AnsiConsole.MarkupLine("[yellow]No hay módulos disponibles en esta sección.[/]");
-                PauseReturn();
-                return;
-            }
-
-            var selected = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("[yellow]¿Qué desea consultar o gestionar?[/]")
-                    .PageSize(15)
-                    .MoreChoicesText("[grey](Desplace para ver más)[/]")
-                    .AddChoices(items.Select(x => x.Title).Append(PortalAccess.BackToClientAreas)));
-
-            if (selected == PortalAccess.BackToClientAreas)
-                return;
-
-            var item   = items.First(x => x.Title == selected);
-            var module = _modules[item.NormalizedKey];
-            await RunModuleUiSafeAsync(module, section.Title, item.Title, cancellationToken);
-        }
     }
 
     private async Task RunModuleUiSafeAsync(IModuleUI module, string portalContext, string moduleTitle, CancellationToken cancellationToken)
@@ -427,9 +374,9 @@ internal sealed class MainMenu(
     private bool TryVerifyAdminPin(CancellationToken cancellationToken)
     {
         AnsiConsole.Clear();
-        AnsiConsole.Write(new Rule("[green] Administración — Autenticación [/]").RuleStyle(Style.Parse("grey")));
-        AnsiConsole.MarkupLine("[grey]Ingrese el PIN de administrador. Deje vacío y presione Enter para volver.[/]");
-        AnsiConsole.WriteLine();
+        ConsoleDashboard.AdminSubScreenTitle(
+            "Autenticación de administración",
+            "PIN requerido. Deje vacío y Enter para volver al inicio.");
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -446,7 +393,7 @@ internal sealed class MainMenu(
             if (string.Equals(pin, _adminPin, StringComparison.Ordinal))
                 return true;
 
-            AnsiConsole.MarkupLine("[red]PIN incorrecto. Intente de nuevo.[/]");
+            ConsoleDashboard.Error("PIN incorrecto. Intente de nuevo.");
         }
 
         return false;
@@ -461,14 +408,15 @@ internal sealed class MainMenu(
 
     private static void PauseReturn()
     {
-        AnsiConsole.MarkupLine("[grey]Presiona una tecla para continuar...[/]");
+        AnsiConsole.WriteLine();
+        ConsoleDashboard.FooterPressKey();
         Console.ReadKey(intercept: true);
     }
 
     private sealed record PortalMenuItem(string NormalizedKey, string Title);
 }
 
-internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
+public sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
@@ -477,14 +425,16 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
         while (!cancellationToken.IsCancellationRequested)
         {
             AnsiConsole.Clear();
-            AnsiConsole.Write(new Rule("[green] Administración  ›  Reportes [/]").RuleStyle(Style.Parse("grey")));
-            AnsiConsole.MarkupLine("[grey]Resúmenes y estadísticas del sistema en tiempo real.[/]");
-            AnsiConsole.WriteLine();
+            ConsoleDashboard.AdminSubScreenTitle(
+                "Reportes",
+                "Resúmenes y estadísticas (datos en tiempo real desde la base de datos).");
+            ConsoleDashboard.NavigationHint();
 
             var option = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("[yellow]¿Qué reporte desea consultar?[/]")
+                    .Title("[bold yellow]¿Qué reporte desea consultar?[/]")
                     .PageSize(12)
+                    .MoreChoicesText(ConsoleDashboard.SelectionMoreChoicesNav)
                     .AddChoices(
                     [
                         "Reservas por estado",
@@ -530,7 +480,7 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
             if (ok)
             {
                 AnsiConsole.WriteLine();
-                AnsiConsole.MarkupLine("[grey]Presiona una tecla para continuar...[/]");
+                ConsoleDashboard.FooterPressKey();
                 Console.ReadKey(intercept: true);
             }
         }
@@ -581,13 +531,13 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
             .Take(10)
             .ToListAsync(ct);
 
-        var table = new Table().Border(TableBorder.Rounded).Expand();
+        var table = ConsoleDashboard.NewDataTable();
         table.AddColumn("Vuelo");
         table.AddColumn("Fecha");
         table.AddColumn("Reservas");
         foreach (var row in data)
             table.AddRow(row.Vuelo, row.Fecha.ToString("yyyy-MM-dd"), row.Reservas.ToString());
-        AnsiConsole.Write(new Panel(table).Header("[green]Vuelos con más reservas[/]"));
+        ConsoleDashboard.ShowWorkspaceTablePanel("Vuelos con más reservas (top 10)", table);
     }
 
     private static async Task RenderTopCustomersAsync(AppDbContext db, CancellationToken ct)
@@ -633,12 +583,12 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
             .OrderByDescending(x => x.Total)
             .ToListAsync(ct);
 
-        var table = new Table().Border(TableBorder.Rounded).Expand();
+        var table = ConsoleDashboard.NewDataTable();
         table.AddColumn("Estado de pago");
         table.AddColumn("Monto total");
         foreach (var row in data)
             table.AddRow(row.Estado, row.Total.ToString("N2"));
-        AnsiConsole.Write(new Panel(table).Header("[green]Ingresos por estado de pago[/]"));
+        ConsoleDashboard.ShowWorkspaceTablePanel("Ingresos por estado de pago", table);
     }
 
     private static async Task RenderSeatAvailabilityAsync(AppDbContext db, CancellationToken ct)
@@ -656,28 +606,28 @@ internal sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
             .Take(50)
             .ToListAsync(ct);
 
-        var table = new Table().Border(TableBorder.Rounded).Expand();
+        var table = ConsoleDashboard.NewDataTable();
         table.AddColumn("Vuelo programado ID");
         table.AddColumn("Estado asiento");
         table.AddColumn("Cantidad");
         foreach (var row in data)
             table.AddRow(row.VueloProgramado.ToString(), row.EstadoAsiento, row.Cantidad.ToString());
-        AnsiConsole.Write(new Panel(table).Header("[green]Disponibilidad de asientos por vuelo[/]"));
+        ConsoleDashboard.ShowWorkspaceTablePanel("Disponibilidad de asientos por vuelo (hasta 50 filas)", table);
     }
 
     private static void RenderSimpleTable(string title, string leftColumn, string rightColumn, IEnumerable<(string Left, string Right)> rows)
     {
-        var table = new Table().Border(TableBorder.Rounded).Expand();
+        var table = ConsoleDashboard.NewDataTable();
         table.AddColumn(leftColumn);
         table.AddColumn(rightColumn);
         foreach (var row in rows)
             table.AddRow(Markup.Escape(row.Left), Markup.Escape(row.Right));
 
-        AnsiConsole.Write(new Panel(table).Header($"[green]{Markup.Escape(title)}[/]"));
+        ConsoleDashboard.ShowWorkspaceTablePanel(title, table);
     }
 }
 
-internal static class FunctionalNavigation
+public static class FunctionalNavigation
 {
     private static readonly Dictionary<string, string> ModuleTitles = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -710,6 +660,8 @@ internal static class FunctionalNavigation
         ["contacttype"] = "Tipos de contacto",
         ["passengercontact"] = "Contactos de pasajero",
         ["reservation"] = "Reservas",
+        ["waitlist"] = "Lista de espera",
+        ["reprogramminghistory"] = "Historial de reprogramaciones",
         ["reservationdetail"] = "Detalles de reserva",
         ["reservationstatus"] = "Estados de reserva",
         ["reservationstatushistory"] = "Trazabilidad de reservas",
@@ -721,7 +673,7 @@ internal static class FunctionalNavigation
         ["baggagetype"] = "Tipos de equipaje",
         ["checkin"] = "Check-in",
         ["checkinstatus"] = "Estados de check-in",
-        ["boardingpass"] = "Boarding passes",
+        ["boardingpass"] = "Pases de abordar",
         ["payment"] = "Pagos",
         ["paymentstatus"] = "Estados de pago",
         ["paymentmethod"] = "Métodos de pago",
@@ -762,7 +714,7 @@ internal static class FunctionalNavigation
             .ToArray();
 }
 
-internal static class PortalAccess
+public static class PortalAccess
 {
     public const string AdminPortalLabel = "[[1]] Administración";
     public const string ClientPortalLabel = "[[2]] Portal de clientes";
@@ -798,7 +750,7 @@ internal static class PortalAccess
     public static readonly HashSet<string> ClientPortalNormalizedKeys =
     [
         "scheduledflight", "customer", "person", "passenger", "passengercontact",
-        "reservation", "reservationdetail", "reservationstatushistory",
+        "reservation", "reservationdetail", "reservationstatushistory", "waitlist", "reprogramminghistory",
         "ticket", "ticketstatushistory", "ticketbaggage", "checkin", "boardingpass",
         "payment", "refund", "passengerdiscount", "loyaltyaccount", "loyaltytransaction"
     ];
@@ -807,8 +759,8 @@ internal static class PortalAccess
     [
         new PortalClientSection(
             "Mis reservas",
-            "Consulta y seguimiento de tus reservas activas.",
-            ["reservation", "reservationstatushistory", "reservationdetail", "passenger", "passengercontact", "passengerdiscount", "customer", "person"]),
+            "Consulta y seguimiento de tus reservas, lista de espera e historial de reprogramaciones.",
+            ["reservation", "waitlist", "reprogramminghistory", "reservationstatushistory", "reservationdetail", "passenger", "passengercontact", "passengerdiscount", "customer", "person"]),
         new PortalClientSection(
             "Mis tiquetes y check-in",
             "Tiquetes emitidos, equipaje registrado, check-in y pases de abordar.",
@@ -828,6 +780,6 @@ internal static class PortalAccess
     ];
 }
 
-internal sealed record PortalClientSection(string Title, string Description, IReadOnlyList<string> ModuleKeys);
+public sealed record PortalClientSection(string Title, string Description, IReadOnlyList<string> ModuleKeys);
 
-internal sealed record PortalAdminSection(string Title, string Description, IReadOnlyList<string> ModuleKeys);
+public sealed record PortalAdminSection(string Title, string Description, IReadOnlyList<string> ModuleKeys);
