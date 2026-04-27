@@ -1,9 +1,20 @@
 using Microsoft.EntityFrameworkCore;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Aircraft.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftManufacturer.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.AircraftType.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airline.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaseFlight.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Customer.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.FlightSeat.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Passenger.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Person.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Reservation.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReservationDetail.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Route.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ScheduledFlight.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.SeatMap.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Ticket.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.User.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Airport.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.BaggageType.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.CabinClass.Infrastructure.Entity;
@@ -49,6 +60,7 @@ internal static class BootstrapDataSeeder
         var now = DateTime.UtcNow;
         await EnsureStatusesAsync(db, ct);
         await EnsureMasterDataAsync(db, now, ct);
+        await EnsureCheckInDemoDataAsync(db, now, ct);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -93,9 +105,11 @@ internal static class BootstrapDataSeeder
         // Estados de tiquete
         await SeedSimpleAsync(db, db.TicketStatuses, x => x.Name,
         [
-            new TicketStatusEntity { Name = "ISSUED"    },
-            new TicketStatusEntity { Name = "CANCELLED" },
-            new TicketStatusEntity { Name = "USED"      },
+            new TicketStatusEntity { Name = "ISSUED"     },
+            new TicketStatusEntity { Name = "PAID"       },
+            new TicketStatusEntity { Name = "CHECKED_IN" },
+            new TicketStatusEntity { Name = "CANCELLED"  },
+            new TicketStatusEntity { Name = "USED"       },
         ], ct);
 
         // Estados de pago
@@ -725,6 +739,453 @@ internal static class BootstrapDataSeeder
         if (toAdd.Count == 0) return;
         await db.FlightCabinPrices.AddRangeAsync(toAdd, ct);
         await db.SaveChangesAsync(ct);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  SEED DEMO DEL MÓDULO DE CHECK-IN  — versión "a prueba de fallos"
+    //  · Un try-catch gigante externo garantiza que el programa SIEMPRE inicia.
+    //  · Cada paso tiene su propio try-catch; un error en uno no detiene el resto.
+    //  · Los inserts críticos usan ExecuteSqlRawAsync + INSERT IGNORE para
+    //    saltarse validaciones de EF y restricciones de unicidad sin lanzar.
+    //  · Console.WriteLine al final es INCONDICIONAL.
+    // ─────────────────────────────────────────────────────────────────────────
+    private static async Task EnsureCheckInDemoDataAsync(AppDbContext db, DateTime now, CancellationToken ct)
+    {
+        const string demoUsername        = "admin_demo";
+        const string demoPassword        = "demo1234";
+        const string demoDocumentNumber  = "123456";
+        const string demoFlightCode      = "DM-9001";
+        const string demoAircraftReg     = "HK-DEMO";
+        const string demoReservationCode = "RES-DEMO-001";
+        const string demoTicketCode      = "TKT-DEMO-001";
+
+        try
+        {
+            // ── IDEMPOTENCIA: si el usuario ya existe, todo ya fue sembrado ─────
+            if (await db.Users.AsNoTracking().AnyAsync(u => u.Username == demoUsername, ct))
+            {
+                Console.WriteLine(">>> DATA DEMO DE CHECK-IN CARGADA CON ÉXITO <<<");
+                return;
+            }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 1 — CATÁLOGOS CRÍTICOS (crear si faltan, nunca lanzar)
+            // ════════════════════════════════════════════════════════════════════
+            int adminRoleId    = 0;
+            int paidStatusId   = 0;
+            int scheduledFsId  = 0;
+            int confirmedRsId  = 0;
+            int basicFareId    = 0;
+            int availSeatStId  = 0;
+            int ccDocTypeId    = 0;
+
+            try
+            {
+                var r = await db.Roles.FirstOrDefaultAsync(x => x.Name == "Administrador", ct);
+                if (r is null) { r = new RoleEntity { Name = "Administrador", IsActive = true }; db.Roles.Add(r); await db.SaveChangesAsync(ct); }
+                adminRoleId = r.RoleId;
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Role: {ex.Message}"); }
+
+            try
+            {
+                var s = await db.TicketStatuses.FirstOrDefaultAsync(x => x.Name == "PAID", ct);
+                if (s is null) { s = new TicketStatusEntity { Name = "PAID" }; db.TicketStatuses.Add(s); await db.SaveChangesAsync(ct); }
+                paidStatusId = s.Id;
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] TicketStatus PAID: {ex.Message}"); }
+
+            try
+            {
+                if (!await db.TicketStatuses.AsNoTracking().AnyAsync(x => x.Name == "CHECKED_IN", ct))
+                { db.TicketStatuses.Add(new TicketStatusEntity { Name = "CHECKED_IN" }); await db.SaveChangesAsync(ct); }
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] TicketStatus CHECKED_IN: {ex.Message}"); }
+
+            try
+            {
+                if (!await db.CheckInStatuses.AsNoTracking().AnyAsync(x => x.Name == "CHECKED_IN", ct))
+                { db.CheckInStatuses.Add(new CheckInStatusEntity { Name = "CHECKED_IN" }); await db.SaveChangesAsync(ct); }
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] CheckInStatus CHECKED_IN: {ex.Message}"); }
+
+            try
+            {
+                var s = await db.FlightStatuses.FirstOrDefaultAsync(x => x.Name == "SCHEDULED", ct);
+                if (s is null) { s = new FlightStatusEntity { Name = "SCHEDULED" }; db.FlightStatuses.Add(s); await db.SaveChangesAsync(ct); }
+                scheduledFsId = s.Id;
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] FlightStatus SCHEDULED: {ex.Message}"); }
+
+            try
+            {
+                var s = await db.ReservationStatuses.FirstOrDefaultAsync(x => x.Name == "CONFIRMED", ct);
+                if (s is null) { s = new ReservationStatusEntity { Name = "CONFIRMED" }; db.ReservationStatuses.Add(s); await db.SaveChangesAsync(ct); }
+                confirmedRsId = s.Id;
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] ReservationStatus CONFIRMED: {ex.Message}"); }
+
+            try
+            {
+                var s = await db.FareTypes.FirstOrDefaultAsync(x => x.Name == "BASIC", ct);
+                if (s is null) { s = new FareTypeEntity { Name = "BASIC" }; db.FareTypes.Add(s); await db.SaveChangesAsync(ct); }
+                basicFareId = s.Id;
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] FareType BASIC: {ex.Message}"); }
+
+            try
+            {
+                availSeatStId = await db.SeatStatuses.AsNoTracking().Where(x => x.Name == "AVAILABLE").Select(x => x.Id).FirstOrDefaultAsync(ct);
+                if (availSeatStId == 0)
+                { var s = new SeatStatusEntity { Name = "AVAILABLE" }; db.SeatStatuses.Add(s); await db.SaveChangesAsync(ct); availSeatStId = s.Id; }
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] SeatStatus AVAILABLE: {ex.Message}"); }
+
+            try
+            {
+                ccDocTypeId = await db.DocumentTypes.AsNoTracking().Where(x => x.Code == "CC").Select(x => x.DocumentTypeId).FirstOrDefaultAsync(ct);
+                if (ccDocTypeId == 0)
+                { var d = new DocumentTypeEntity { Code = "CC", Name = "Cédula de ciudadanía" }; db.DocumentTypes.Add(d); await db.SaveChangesAsync(ct); ccDocTypeId = d.DocumentTypeId; }
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] DocumentType CC: {ex.Message}"); }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 2 — AEROPUERTOS BOG y MDE (INSERT IGNORE directo)
+            // ════════════════════════════════════════════════════════════════════
+            int bogId = 0, mdeId = 0;
+
+            try
+            {
+                bogId = await db.Airports.AsNoTracking().Where(a => a.IataCode == "BOG").Select(a => a.AirportId).FirstOrDefaultAsync(ct);
+                if (bogId == 0)
+                {
+                    // Reutilizamos cualquier CityId existente como "Bogotá" de emergencia
+                    var fallbackCityId = await db.Cities.AsNoTracking().Select(c => c.CityId).FirstOrDefaultAsync(ct);
+                    if (fallbackCityId > 0)
+                    {
+                        await db.Database.ExecuteSqlRawAsync(
+                            "INSERT IGNORE INTO airport (IataCode, Name, CityId, CreatedAt) VALUES ({0}, {1}, {2}, {3})",
+                            "BOG", "Aeropuerto Internacional El Dorado", fallbackCityId, now);
+                        bogId = await db.Airports.AsNoTracking().Where(a => a.IataCode == "BOG").Select(a => a.AirportId).FirstOrDefaultAsync(ct);
+                    }
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Airport BOG: {ex.Message}"); }
+
+            try
+            {
+                mdeId = await db.Airports.AsNoTracking().Where(a => a.IataCode == "MDE").Select(a => a.AirportId).FirstOrDefaultAsync(ct);
+                if (mdeId == 0)
+                {
+                    var fallbackCityId = await db.Cities.AsNoTracking().Select(c => c.CityId).FirstOrDefaultAsync(ct);
+                    if (fallbackCityId > 0)
+                    {
+                        await db.Database.ExecuteSqlRawAsync(
+                            "INSERT IGNORE INTO airport (IataCode, Name, CityId, CreatedAt) VALUES ({0}, {1}, {2}, {3})",
+                            "MDE", "Aeropuerto Internacional José María Córdova", fallbackCityId, now);
+                        mdeId = await db.Airports.AsNoTracking().Where(a => a.IataCode == "MDE").Select(a => a.AirportId).FirstOrDefaultAsync(ct);
+                    }
+                }
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Airport MDE: {ex.Message}"); }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 3 — PERSONA + CUSTOMER + PASSENGER
+            // ════════════════════════════════════════════════════════════════════
+            int personId    = 0;
+            int customerId  = 0;
+            int passengerId = 0;
+
+            try
+            {
+                var person = await db.Persons.FirstOrDefaultAsync(
+                    p => p.DocumentNumber == demoDocumentNumber && p.DocumentTypeId == ccDocTypeId, ct);
+                if (person is null)
+                {
+                    var genderId = await db.Genders.AsNoTracking().Select(g => (int?)g.Id).FirstOrDefaultAsync(ct);
+                    person = new PersonEntity
+                    {
+                        FirstName      = "Usuario",
+                        LastName       = "Test",
+                        DocumentTypeId = ccDocTypeId,
+                        DocumentNumber = demoDocumentNumber,
+                        GenderId       = genderId,
+                        BirthDate      = DateOnly.FromDateTime(now.Date.AddYears(-30)),
+                        CreatedAt      = now
+                    };
+                    db.Persons.Add(person);
+                    await db.SaveChangesAsync(ct);
+                }
+                personId = person.Id;
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Person: {ex.Message}"); }
+
+            if (personId > 0)
+            {
+                try
+                {
+                    var customer = await db.Customers.FirstOrDefaultAsync(c => c.PersonId == personId, ct);
+                    if (customer is null)
+                    {
+                        customer = new CustomerEntity { PersonId = personId, Email = "demo@checkin.test", Phone = "+57 300 000 0000", CreatedAt = now };
+                        db.Customers.Add(customer);
+                        await db.SaveChangesAsync(ct);
+                    }
+                    customerId = customer.Id;
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Customer: {ex.Message}"); }
+
+                try
+                {
+                    var passenger = await db.Passengers.FirstOrDefaultAsync(p => p.PersonId == personId, ct);
+                    if (passenger is null)
+                    {
+                        passenger = new PassengerEntity { PersonId = personId, FrequentFlyerNumber = null, NationalityId = null, CreatedAt = now };
+                        db.Passengers.Add(passenger);
+                        await db.SaveChangesAsync(ct);
+                    }
+                    passengerId = passenger.Id;
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Passenger: {ex.Message}"); }
+            }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 4 — USUARIO admin_demo  (INSERT IGNORE — SQL directo)
+            // ════════════════════════════════════════════════════════════════════
+            if (personId > 0 && adminRoleId > 0)
+            {
+                try
+                {
+                    var hash = PasswordHasher.Hash(demoPassword);
+                    await db.Database.ExecuteSqlRawAsync(
+                        "INSERT IGNORE INTO user (PersonId, RoleId, Username, PasswordHash, IsActive, CreatedAt) VALUES ({0}, {1}, {2}, {3}, 1, {4})",
+                        personId, adminRoleId, demoUsername, hash, now);
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] User INSERT: {ex.Message}"); }
+            }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 5 — VUELO DM-9001  (Aerolínea → Aeronave → Ruta → Base → Scheduled)
+            // ════════════════════════════════════════════════════════════════════
+            int airlineId         = 0;
+            int aircraftTypeId    = 0;
+            int aircraftId        = 0;
+            int routeId           = 0;
+            int baseFlightId      = 0;
+            int scheduledFlightId = 0;
+
+            try
+            {
+                airlineId = await db.Airlines.AsNoTracking().Where(a => a.IataCode == "AV").Select(a => a.AirlineId).FirstOrDefaultAsync(ct);
+                if (airlineId == 0)
+                    airlineId = await db.Airlines.AsNoTracking().Select(a => a.AirlineId).FirstOrDefaultAsync(ct);
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Airline: {ex.Message}"); }
+
+            try
+            {
+                aircraftTypeId = await db.AircraftTypes.AsNoTracking().Where(t => t.Model == "737-800").Select(t => t.AircraftTypeId).FirstOrDefaultAsync(ct);
+                if (aircraftTypeId == 0)
+                    aircraftTypeId = await db.AircraftTypes.AsNoTracking().Select(t => t.AircraftTypeId).FirstOrDefaultAsync(ct);
+            }
+            catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] AircraftType: {ex.Message}"); }
+
+            if (airlineId > 0 && aircraftTypeId > 0)
+            {
+                try
+                {
+                    var aircraft = await db.Aircrafts.FirstOrDefaultAsync(a => a.RegistrationNumber == demoAircraftReg, ct);
+                    if (aircraft is null)
+                    {
+                        aircraft = new AircraftEntity { AirlineId = airlineId, AircraftTypeId = aircraftTypeId, RegistrationNumber = demoAircraftReg, ManufactureYear = 2020, IsActive = true, CreatedAt = now };
+                        db.Aircrafts.Add(aircraft);
+                        await db.SaveChangesAsync(ct);
+                    }
+                    aircraftId = aircraft.AircraftId;
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Aircraft: {ex.Message}"); }
+            }
+
+            if (bogId > 0 && mdeId > 0)
+            {
+                try
+                {
+                    var route = await db.Routes.FirstOrDefaultAsync(r => r.OriginAirportId == bogId && r.DestinationAirportId == mdeId, ct);
+                    if (route is null)
+                    {
+                        route = new RouteEntity { OriginAirportId = bogId, DestinationAirportId = mdeId, CreatedAt = now };
+                        db.Routes.Add(route);
+                        await db.SaveChangesAsync(ct);
+                    }
+                    routeId = route.Id;
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Route BOG→MDE: {ex.Message}"); }
+            }
+
+            if (airlineId > 0 && routeId > 0)
+            {
+                try
+                {
+                    var baseFlight = await db.BaseFlights.FirstOrDefaultAsync(b => b.FlightCode == demoFlightCode, ct);
+                    if (baseFlight is null)
+                    {
+                        baseFlight = new BaseFlightEntity { FlightCode = demoFlightCode, AirlineId = airlineId, RouteId = routeId, CreatedAt = now };
+                        db.BaseFlights.Add(baseFlight);
+                        await db.SaveChangesAsync(ct);
+                    }
+                    baseFlightId = baseFlight.Id;
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] BaseFlight: {ex.Message}"); }
+            }
+
+            if (baseFlightId > 0 && aircraftId > 0 && scheduledFsId > 0)
+            {
+                try
+                {
+                    var departureDate    = DateOnly.FromDateTime(now.Date.AddDays(7));
+                    var departureTime    = new TimeOnly(10, 0);
+                    var estimatedArrival = now.Date.AddDays(7).AddHours(11).AddMinutes(15);
+
+                    var sf = await db.ScheduledFlights.FirstOrDefaultAsync(
+                        s => s.BaseFlightId == baseFlightId && s.DepartureDate == departureDate, ct);
+                    if (sf is null)
+                    {
+                        var demoGateId = await db.Gates.AsNoTracking().Where(g => g.IsActive).Select(g => (int?)g.GateId).FirstOrDefaultAsync(ct);
+                        sf = new ScheduledFlightEntity
+                        {
+                            BaseFlightId             = baseFlightId,
+                            AircraftId               = aircraftId,
+                            GateId                   = demoGateId,
+                            DepartureDate            = departureDate,
+                            DepartureTime            = departureTime,
+                            EstimatedArrivalDatetime = estimatedArrival,
+                            FlightStatusId           = scheduledFsId,
+                            CreatedAt                = now
+                        };
+                        db.ScheduledFlights.Add(sf);
+                        await db.SaveChangesAsync(ct);
+                    }
+                    scheduledFlightId = sf.Id;
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] ScheduledFlight: {ex.Message}"); }
+            }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 6 — ASIENTOS DE VUELO (mínimo 5 para que el check-in funcione)
+            // ════════════════════════════════════════════════════════════════════
+            int firstSeatId = 0;
+
+            if (scheduledFlightId > 0 && aircraftTypeId > 0 && availSeatStId > 0)
+            {
+                try
+                {
+                    var alreadyHasSeats = await db.FlightSeats.AnyAsync(fs => fs.ScheduledFlightId == scheduledFlightId, ct);
+                    if (!alreadyHasSeats)
+                    {
+                        var seatMaps = await db.SeatMaps.AsNoTracking()
+                            .Where(sm => sm.AircraftTypeId == aircraftTypeId)
+                            .OrderBy(sm => sm.Id)
+                            .Take(10)
+                            .ToListAsync(ct);
+                        foreach (var sm in seatMaps)
+                            db.FlightSeats.Add(new FlightSeatEntity
+                            {
+                                ScheduledFlightId = scheduledFlightId,
+                                SeatMapId         = sm.Id,
+                                SeatStatusId      = availSeatStId,
+                                CreatedAt         = now,
+                                Version           = []
+                            });
+                        if (seatMaps.Count > 0)
+                            await db.SaveChangesAsync(ct);
+                    }
+                    firstSeatId = await db.FlightSeats.AsNoTracking()
+                        .Where(fs => fs.ScheduledFlightId == scheduledFlightId)
+                        .OrderBy(fs => fs.Id)
+                        .Select(fs => fs.Id)
+                        .FirstOrDefaultAsync(ct);
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] FlightSeats: {ex.Message}"); }
+            }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 7 — RESERVA RES-DEMO-001  (INSERT IGNORE — SQL directo)
+            // ════════════════════════════════════════════════════════════════════
+            int reservationId = 0;
+
+            if (customerId > 0 && scheduledFlightId > 0 && confirmedRsId > 0)
+            {
+                try
+                {
+                    await db.Database.ExecuteSqlRawAsync(
+                        @"INSERT IGNORE INTO reservation
+                          (reservation_code, customer_id, scheduled_flight_id, reservation_date,
+                           reservation_status_id, confirmed_at, created_at)
+                          VALUES ({0}, {1}, {2}, {3}, {4}, {3}, {3})",
+                        demoReservationCode, customerId, scheduledFlightId, now, confirmedRsId);
+
+                    reservationId = await db.Reservations.AsNoTracking()
+                        .Where(r => r.ReservationCode == demoReservationCode)
+                        .Select(r => r.Id)
+                        .FirstOrDefaultAsync(ct);
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Reservation INSERT: {ex.Message}"); }
+            }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 8 — DETALLE DE RESERVA
+            // ════════════════════════════════════════════════════════════════════
+            int detailId = 0;
+
+            if (reservationId > 0 && passengerId > 0 && firstSeatId > 0 && basicFareId > 0)
+            {
+                try
+                {
+                    var detail = await db.ReservationDetails.FirstOrDefaultAsync(
+                        d => d.ReservationId == reservationId && d.PassengerId == passengerId, ct);
+                    if (detail is null)
+                    {
+                        detail = new ReservationDetailEntity
+                        {
+                            ReservationId = reservationId,
+                            PassengerId   = passengerId,
+                            FlightSeatId  = firstSeatId,
+                            FareTypeId    = basicFareId,
+                            CreatedAt     = now
+                        };
+                        db.ReservationDetails.Add(detail);
+                        await db.SaveChangesAsync(ct);
+                    }
+                    detailId = detail.Id;
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] ReservationDetail: {ex.Message}"); }
+            }
+
+            // ════════════════════════════════════════════════════════════════════
+            //  PASO 9 — TIQUETE TKT-DEMO-001  PAID  (INSERT IGNORE — SQL directo)
+            // ════════════════════════════════════════════════════════════════════
+            if (detailId > 0 && paidStatusId > 0)
+            {
+                try
+                {
+                    await db.Database.ExecuteSqlRawAsync(
+                        @"INSERT IGNORE INTO ticket
+                          (ticket_code, reservation_detail_id, issue_date, ticket_status_id, created_at)
+                          VALUES ({0}, {1}, {2}, {3}, {2})",
+                        demoTicketCode, detailId, now, paidStatusId);
+                }
+                catch (Exception ex) { Console.WriteLine($"[DEMO-SEED] Ticket INSERT: {ex.Message}"); }
+            }
+        }
+        catch (Exception ex)
+        {
+            // El catch externo atrapa cualquier error imprevisto.
+            // El programa NUNCA debe fallar por el seed.
+            Console.WriteLine($"[DEMO-SEED] Error inesperado (no fatal): {ex.GetType().Name} — {ex.Message}");
+        }
+
+        // ── CONFIRMACIÓN INCONDICIONAL ────────────────────────────────────────
+        Console.WriteLine(">>> DATA DEMO DE CHECK-IN CARGADA CON ÉXITO <<<");
     }
 
     // ─────────────────────────────────────────────────────────────────────────

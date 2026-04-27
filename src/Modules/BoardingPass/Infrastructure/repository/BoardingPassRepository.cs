@@ -16,17 +16,15 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
         _context = context;
     }
 
-    
-
     private static BoardingPassAggregate ToDomain(BoardingPassEntity entity)
         => new(
             new BoardingPassId(entity.Id),
+            entity.BoardingPassCode,
             entity.CheckInId,
             entity.GateId,
             entity.BoardingGroup,
-            entity.FlightSeatId);
-
-    
+            entity.FlightSeatId,
+            entity.IssuedAt);
 
     public async Task<BoardingPassAggregate?> GetByIdAsync(
         BoardingPassId    id,
@@ -44,7 +42,7 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
     {
         var entities = await _context.BoardingPasses
             .AsNoTracking()
-            .OrderBy(e => e.CheckInId)
+            .OrderByDescending(e => e.IssuedAt)
             .ToListAsync(cancellationToken);
 
         return entities.Select(ToDomain);
@@ -54,7 +52,6 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
         int               checkInId,
         CancellationToken cancellationToken = default)
     {
-        
         var entity = await _context.BoardingPasses
             .AsNoTracking()
             .FirstOrDefaultAsync(e => e.CheckInId == checkInId, cancellationToken);
@@ -62,16 +59,36 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
         return entity is null ? null : ToDomain(entity);
     }
 
+    public async Task<BoardingPassAggregate?> GetByCodeAsync(
+        string            normalizedCode,
+        CancellationToken cancellationToken = default)
+    {
+        var entity = await _context.BoardingPasses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.BoardingPassCode == normalizedCode, cancellationToken);
+
+        return entity is null ? null : ToDomain(entity);
+    }
+
+    public async Task<bool> BoardingPassCodeExistsAsync(
+        string            normalizedCode,
+        CancellationToken cancellationToken = default) =>
+        await _context.BoardingPasses
+            .AsNoTracking()
+            .AnyAsync(e => e.BoardingPassCode == normalizedCode, cancellationToken);
+
     public async Task AddAsync(
         BoardingPassAggregate boardingPass,
         CancellationToken     cancellationToken = default)
     {
         var entity = new BoardingPassEntity
         {
-            CheckInId     = boardingPass.CheckInId,
-            GateId        = boardingPass.GateId,
-            BoardingGroup = boardingPass.BoardingGroup,
-            FlightSeatId  = boardingPass.FlightSeatId
+            BoardingPassCode = boardingPass.BoardingPassCode,
+            CheckInId        = boardingPass.CheckInId,
+            GateId           = boardingPass.GateId,
+            BoardingGroup    = boardingPass.BoardingGroup,
+            FlightSeatId     = boardingPass.FlightSeatId,
+            IssuedAt         = boardingPass.IssuedAt
         };
         await _context.BoardingPasses.AddAsync(entity, cancellationToken);
     }
@@ -83,10 +100,8 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
         var entity = await _context.BoardingPasses
             .FirstOrDefaultAsync(e => e.Id == boardingPass.Id.Value, cancellationToken)
             ?? throw new KeyNotFoundException(
-                $"BoardingPassEntity with id {boardingPass.Id.Value} not found.");
+                $"No se encontró el pase de abordar con id {boardingPass.Id.Value}.");
 
-        
-        
         entity.GateId        = boardingPass.GateId;
         entity.BoardingGroup = boardingPass.BoardingGroup;
 
@@ -100,7 +115,7 @@ public sealed class BoardingPassRepository : IBoardingPassRepository
         var entity = await _context.BoardingPasses
             .FirstOrDefaultAsync(e => e.Id == id.Value, cancellationToken)
             ?? throw new KeyNotFoundException(
-                $"BoardingPassEntity with id {id.Value} not found.");
+                $"No se encontró el pase de abordar con id {id.Value}.");
 
         _context.BoardingPasses.Remove(entity);
     }

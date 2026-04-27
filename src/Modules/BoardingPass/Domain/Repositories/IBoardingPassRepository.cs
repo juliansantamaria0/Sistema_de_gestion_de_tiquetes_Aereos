@@ -8,6 +8,8 @@ public interface IBoardingPassRepository
     Task<BoardingPassAggregate?>             GetByIdAsync(BoardingPassId id,                      CancellationToken cancellationToken = default);
     Task<IEnumerable<BoardingPassAggregate>> GetAllAsync(                                          CancellationToken cancellationToken = default);
     Task<BoardingPassAggregate?>             GetByCheckInAsync(int checkInId,                      CancellationToken cancellationToken = default);
+    Task<BoardingPassAggregate?>             GetByCodeAsync(string normalizedCode,                 CancellationToken cancellationToken = default);
+    Task<bool>                               BoardingPassCodeExistsAsync(string normalizedCode,    CancellationToken cancellationToken = default);
     Task                                     AddAsync(BoardingPassAggregate boardingPass,          CancellationToken cancellationToken = default);
     Task                                     UpdateAsync(BoardingPassAggregate boardingPass,       CancellationToken cancellationToken = default);
     Task                                     DeleteAsync(BoardingPassId id,                        CancellationToken cancellationToken = default);

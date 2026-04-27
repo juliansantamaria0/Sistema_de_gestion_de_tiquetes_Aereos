@@ -20,6 +20,7 @@ builder.Services.AddSharedInfrastructure(builder.Configuration);
 // Scoped: consumen IModuleUI, UseCases, DbContext, etc. (no pueden ser Singleton).
 builder.Services.AddScoped<ReportsMenu>();
 builder.Services.AddScoped<Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI.Client.ClientPortalApp>();
+builder.Services.AddScoped<Sistema_de_gestion_de_tiquetes_Aereos.Modules.CheckIn.UI.CheckInWizardUI>();
 builder.Services.AddScoped<MainMenu>();
 
 using var host = builder.Build();
@@ -28,6 +29,7 @@ await using (var scope = host.Services.CreateAsyncScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await BootstrapDataSeeder.SeedAsync(db);
+    // await QASeeder.SeedTestData(scope.ServiceProvider); // Temporarily disabled
 
     var menu = scope.ServiceProvider.GetRequiredService<MainMenu>();
     await menu.RunAsync();

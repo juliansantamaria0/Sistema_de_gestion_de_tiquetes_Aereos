@@ -36,6 +36,10 @@ public sealed class ClientPortalApp
         Waitlist,
         ReproHistory,
 
+        // Check-in y embarque
+        CheckIn,
+        ViewBoardingPass,
+
         // Cuenta/ayuda
         Help,
 
@@ -47,6 +51,7 @@ public sealed class ClientPortalApp
     {
         Reservations,
         Tracking,
+        CheckInArea,
         HelpAndAccount,
         Advanced
     }
@@ -55,8 +60,9 @@ public sealed class ClientPortalApp
     [
         (MainCategory.Reservations,  "1) Reservas (reservar, asiento/tarifa, mis reservas)"),
         (MainCategory.Tracking,      "2) Seguimiento (lista de espera, historial de cambios)"),
-        (MainCategory.HelpAndAccount,"3) Ayuda y cuenta"),
-        (MainCategory.Advanced,      "4) Avanzado (módulos y catálogos)")
+        (MainCategory.CheckInArea,   "3) Check-in y pase de abordar"),
+        (MainCategory.HelpAndAccount,"4) Ayuda y cuenta"),
+        (MainCategory.Advanced,      "5) Avanzado (módulos y catálogos)")
     ];
 
     private static readonly (MainMenuAction Action, string Label)[] ReservationActions =
@@ -70,6 +76,12 @@ public sealed class ClientPortalApp
     [
         (MainMenuAction.Waitlist,     "Lista de espera (por vuelo)"),
         (MainMenuAction.ReproHistory, "Historial de reprogramaciones")
+    ];
+
+    private static readonly (MainMenuAction Action, string Label)[] CheckInActions =
+    [
+        (MainMenuAction.CheckIn,          "Hacer check-in (asistente)"),
+        (MainMenuAction.ViewBoardingPass, "Ver mi pase de abordar")
     ];
 
     private static readonly (MainMenuAction Action, string Label)[] HelpAndAccountActions =
@@ -130,13 +142,15 @@ public sealed class ClientPortalApp
             {
                 switch (action.Value)
                 {
-                    case MainMenuAction.Book:           await RunBookingWizardAsync(ct); break;
-                    case MainMenuAction.AssignSeat:     await RunAssignSeatAndFareFlowAsync(ct); break;
-                    case MainMenuAction.MyReservations: await RunMyReservationsHubAsync(ct); break;
-                    case MainMenuAction.Waitlist:       await RunWaitlistLookupAsync(ct); break;
-                    case MainMenuAction.ReproHistory:   await RunReprogrammingHistoryLookupAsync(ct); break;
-                    case MainMenuAction.Help:            ShowHelp(); break;
-                    case MainMenuAction.Legacy:         await RunLegacyAdvancedAsync(ct); break;
+                    case MainMenuAction.Book:             await RunBookingWizardAsync(ct); break;
+                    case MainMenuAction.AssignSeat:       await RunAssignSeatAndFareFlowAsync(ct); break;
+                    case MainMenuAction.MyReservations:   await RunMyReservationsHubAsync(ct); break;
+                    case MainMenuAction.Waitlist:         await RunWaitlistLookupAsync(ct); break;
+                    case MainMenuAction.ReproHistory:     await RunReprogrammingHistoryLookupAsync(ct); break;
+                    case MainMenuAction.CheckIn:          await RunCheckInWizardAsync(ct); break;
+                    case MainMenuAction.ViewBoardingPass: await RunViewBoardingPassAsync(ct); break;
+                    case MainMenuAction.Help:              ShowHelp(); break;
+                    case MainMenuAction.Legacy:           await RunLegacyAdvancedAsync(ct); break;
                     default: throw new InvalidOperationException();
                 }
             }, cancellationToken);
@@ -154,6 +168,7 @@ public sealed class ClientPortalApp
         {
             MainCategory.Reservations  => ReservationActions,
             MainCategory.Tracking      => TrackingActions,
+            MainCategory.CheckInArea   => CheckInActions,
             MainCategory.HelpAndAccount=> HelpAndAccountActions,
             _                          => AdvancedActions
         };
@@ -162,6 +177,7 @@ public sealed class ClientPortalApp
         {
             MainCategory.Reservations   => "Reservas",
             MainCategory.Tracking       => "Seguimiento",
+            MainCategory.CheckInArea    => "Check-in y pase de abordar",
             MainCategory.HelpAndAccount => "Ayuda y cuenta",
             _                           => "Avanzado"
         };
@@ -172,6 +188,8 @@ public sealed class ClientPortalApp
                 "Paso a paso para reservar y gestionar sus reservas (asiento, confirmación, cancelación, reprogramación).",
             MainCategory.Tracking =>
                 "Consultar lista de espera por vuelo e historial de reprogramaciones.",
+            MainCategory.CheckInArea =>
+                "Realice el check-in del tiquete y obtenga el pase de abordar (puerta, asiento, grupo).",
             MainCategory.HelpAndAccount =>
                 "Guía del sistema y acciones de cuenta.",
             _ =>
@@ -311,6 +329,22 @@ public sealed class ClientPortalApp
 
         var wizard = new Modules.Reservation.UI.ReservationBookingWizardUI(reservationService, passengerService, db);
         await wizard.RunAsync(ct);
+    }
+
+    private async Task RunCheckInWizardAsync(CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var wizard = scope.ServiceProvider
+            .GetRequiredService<Modules.CheckIn.UI.CheckInWizardUI>();
+        await wizard.RunCheckInAsync(ct);
+    }
+
+    private async Task RunViewBoardingPassAsync(CancellationToken ct)
+    {
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var wizard = scope.ServiceProvider
+            .GetRequiredService<Modules.CheckIn.UI.CheckInWizardUI>();
+        await wizard.RunViewBoardingPassAsync(ct);
     }
 
     private async Task RunAssignSeatAndFareFlowAsync(CancellationToken ct)

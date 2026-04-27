@@ -15,6 +15,7 @@ public sealed class BoardingPassService : IBoardingPassService
     private readonly GetBoardingPassByIdUseCase      _getById;
     private readonly UpdateBoardingPassUseCase       _update;
     private readonly GetBoardingPassByCheckInUseCase _getByCheckIn;
+    private readonly GetBoardingPassByCodeUseCase    _getByCode;
     private readonly AppDbContext                    _db;
 
     public BoardingPassService(
@@ -24,6 +25,7 @@ public sealed class BoardingPassService : IBoardingPassService
         GetBoardingPassByIdUseCase      getById,
         UpdateBoardingPassUseCase       update,
         GetBoardingPassByCheckInUseCase getByCheckIn,
+        GetBoardingPassByCodeUseCase    getByCode,
         AppDbContext                    db)
     {
         _create       = create;
@@ -32,10 +34,12 @@ public sealed class BoardingPassService : IBoardingPassService
         _getById      = getById;
         _update       = update;
         _getByCheckIn = getByCheckIn;
+        _getByCode    = getByCode;
         _db           = db;
     }
 
     public async Task<BoardingPassDto> CreateAsync(
+        string            boardingPassCode,
         int               checkInId,
         int?              gateId,
         string?           boardingGroup,
@@ -43,7 +47,7 @@ public sealed class BoardingPassService : IBoardingPassService
         CancellationToken cancellationToken = default)
     {
         var agg = await _create.ExecuteAsync(
-            checkInId, gateId, boardingGroup, flightSeatId, cancellationToken);
+            boardingPassCode, checkInId, gateId, boardingGroup, flightSeatId, cancellationToken);
         return ToDto(agg);
     }
 
@@ -101,8 +105,21 @@ public sealed class BoardingPassService : IBoardingPassService
         return agg is null ? null : ToDto(agg);
     }
 
-    
+    public async Task<BoardingPassDto?> GetByCodeAsync(
+        string            boardingPassCode,
+        CancellationToken cancellationToken = default)
+    {
+        var agg = await _getByCode.ExecuteAsync(boardingPassCode, cancellationToken);
+        return agg is null ? null : ToDto(agg);
+    }
 
     private static BoardingPassDto ToDto(BoardingPassAggregate agg)
-        => new(agg.Id.Value, agg.CheckInId, agg.GateId, agg.BoardingGroup, agg.FlightSeatId);
+        => new(
+            agg.Id.Value,
+            agg.BoardingPassCode,
+            agg.CheckInId,
+            agg.GateId,
+            agg.BoardingGroup,
+            agg.FlightSeatId,
+            agg.IssuedAt);
 }
