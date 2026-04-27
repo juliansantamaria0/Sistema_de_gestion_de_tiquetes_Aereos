@@ -342,7 +342,7 @@ public sealed class MainMenu(
                 }));
 
         var phone = AnsiConsole.Prompt(
-            new TextPrompt<string>("[yellow]Teléfono (opcional):[/]"));
+            new TextPrompt<string>("[yellow]Teléfono:[/]"));
 
         var result = await _authService.RegisterAsync(
             username, password, firstName, lastName,
