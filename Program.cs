@@ -6,6 +6,7 @@ using Spectre.Console;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Context;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Infrastructure;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.UI;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAnalytics.UI;
 
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -305,7 +306,6 @@ public sealed class MainMenu(
             new TextPrompt<string>("[yellow]Apellido:[/]")
                 .Validate(s => !string.IsNullOrWhiteSpace(s), "El apellido es obligatorio."));
 
-        // Obtener tipos de documento disponibles
         var docTypes = await _context.DocumentTypes.AsNoTracking().ToListAsync(cancellationToken);
         if (!docTypes.Any())
         {
@@ -443,6 +443,7 @@ public sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
                         "Tiquetes emitidos por estado",
                         "Ingresos por estado de pago",
                         "Disponibilidad de asientos por vuelo",
+                        "Reportes de fidelización (millas)",
                         "« Volver"
                     ]));
 
@@ -473,6 +474,10 @@ public sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
                         break;
                     case "Disponibilidad de asientos por vuelo":
                         await RenderSeatAvailabilityAsync(db, ct);
+                        break;
+                    case "Reportes de fidelización (millas)":
+                        var analyticsUi = scope.ServiceProvider.GetRequiredService<LoyaltyAnalyticsConsoleUI>();
+                        await analyticsUi.RunAsync(ct);
                         break;
                 }
             }, cancellationToken);
@@ -545,7 +550,6 @@ public sealed class ReportsMenu(IServiceScopeFactory scopeFactory)
         var data = await db.Reservations
             .AsNoTracking()
             .GroupBy(r => r.CustomerId)
-            
             .Select(g => new { Cliente = g.Key, Reservas = g.Count() })
             .OrderByDescending(x => x.Reservas)
             .Take(10)
@@ -697,6 +701,7 @@ public static class FunctionalNavigation
         ["loyaltytier"] = "Niveles de lealtad",
         ["loyaltyaccount"] = "Cuentas de lealtad",
         ["loyaltytransaction"] = "Movimientos de lealtad",
+        ["loyaltyanalytics"] = " Reportes de Fidelización (Millas)",
         ["role"] = "Roles",
         ["permission"] = "Permisos",
         ["rolepermission"] = "Permisos por rol",
@@ -716,10 +721,10 @@ public static class FunctionalNavigation
 
 public static class PortalAccess
 {
-    public const string AdminPortalLabel = "[[1]] Administración";
+    public const string AdminPortalLabel  = "[[1]] Administración";
     public const string ClientPortalLabel = "[[2]] Portal de clientes";
-    public const string BackToAccessMenu = "« Volver";
-    public const string BackToAdminRoot = "« Volver";
+    public const string BackToAccessMenu  = "« Volver";
+    public const string BackToAdminRoot   = "« Volver";
     public const string BackToClientAreas = "« Volver";
     public const string ReportsEntryLabel = "Reportes";
 
@@ -744,7 +749,11 @@ public static class PortalAccess
         new PortalAdminSection(
             "Catálogos de estados",
             "Estados de vuelo, reserva, tiquete, pago, check-in, reembolso y asiento.",
-            FunctionalNavigation.GetModuleKeysWithTitlePrefix("Estados de "))
+            FunctionalNavigation.GetModuleKeysWithTitlePrefix("Estados de ")),
+        new PortalAdminSection(
+            "📊 Fidelización – Reportes",
+            "Analítica avanzada del programa de millas: acumulación, redención y viajeros frecuentes.",
+            ["loyaltyanalytics"]),
     ];
 
     public static readonly HashSet<string> ClientPortalNormalizedKeys =
@@ -776,7 +785,7 @@ public static class PortalAccess
         new PortalClientSection(
             "Programa de lealtad",
             "Cuentas y movimientos de tus millas acumuladas.",
-            ["loyaltyaccount", "loyaltytransaction"])
+            ["loyaltyaccount", "loyaltytransaction"]),
     ];
 }
 

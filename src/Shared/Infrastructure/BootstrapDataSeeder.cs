@@ -23,6 +23,8 @@ using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Gender.Infrastructure.Entity
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.JobPosition.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyProgram.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTier.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyAccount.Infrastructure.Entity;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.LoyaltyTransaction.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Nationality.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentMethod.Infrastructure.Entity;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.PaymentStatus.Infrastructure.Entity;
@@ -663,6 +665,104 @@ internal static class BootstrapDataSeeder
                     ]);
 
                 await db.LoyaltyTiers.AddRangeAsync(tierRows, ct);
+                await db.SaveChangesAsync(ct);
+            }
+        }
+
+        // ── CUENTAS Y TRANSACCIONES DE MILLAS ───────────────────────────────
+        if (!await db.LoyaltyAccounts.AnyAsync(ct))
+        {
+            var passengers = await db.Passengers.AsNoTracking().ToListAsync(ct);
+            var programs   = await db.LoyaltyPrograms.AsNoTracking().ToListAsync(ct);
+
+            if (passengers.Count > 0 && programs.Count > 0)
+            {
+                var memberTiers = await db.LoyaltyTiers.AsNoTracking()
+                    .Where(t => t.Name == "Member")
+                    .ToListAsync(ct);
+
+                var tierByProgram = memberTiers
+                    .GroupBy(t => t.LoyaltyProgramId)
+                    .ToDictionary(g => g.Key, g => g.First().Id);
+
+                var accountRows = new List<LoyaltyAccountEntity>();
+                for (int i = 0; i < passengers.Count; i++)
+                {
+                    var prog = programs[i % programs.Count];
+                    if (!tierByProgram.TryGetValue(prog.Id, out var tierId)) continue;
+
+                    accountRows.Add(new LoyaltyAccountEntity
+                    {
+                        PassengerId      = passengers[i].Id,
+                        LoyaltyProgramId = prog.Id,
+                        LoyaltyTierId    = tierId,
+                        TotalMiles       = 0,
+                        AvailableMiles   = 0,
+                        JoinedAt         = DateTime.UtcNow
+                    });
+                }
+
+                await db.LoyaltyAccounts.AddRangeAsync(accountRows, ct);
+                await db.SaveChangesAsync(ct);
+
+                var savedAccounts = await db.LoyaltyAccounts.AsNoTracking().ToListAsync(ct);
+
+                var milesData = new[]
+                {
+                    (earn: 12_000,  redeem:  2_000),
+                    (earn: 45_000,  redeem: 10_000),
+                    (earn: 78_000,  redeem: 25_000),
+                    (earn: 110_000, redeem: 40_000),
+                    (earn:  8_500,  redeem:      0),
+                    (earn: 30_000,  redeem:  5_000),
+                    (earn: 55_000,  redeem: 15_000),
+                    (earn: 95_000,  redeem: 30_000),
+                    (earn:  3_200,  redeem:      0),
+                    (earn: 22_000,  redeem:  8_000),
+                };
+
+                var txRows = new List<LoyaltyTransactionEntity>();
+
+                for (int i = 0; i < savedAccounts.Count; i++)
+                {
+                    var acc  = savedAccounts[i];
+                    var data = milesData[i % milesData.Length];
+
+                    txRows.Add(new LoyaltyTransactionEntity
+                    {
+                        LoyaltyAccountId = acc.Id,
+                        TicketId         = null,
+                        TransactionType  = "EARN",
+                        Miles            = data.earn,
+                        TransactionDate  = DateTime.UtcNow.AddDays(-(30 - i))
+                    });
+
+                    if (data.redeem > 0)
+                        txRows.Add(new LoyaltyTransactionEntity
+                        {
+                            LoyaltyAccountId = acc.Id,
+                            TicketId         = null,
+                            TransactionType  = "REDEEM",
+                            Miles            = data.redeem,
+                            TransactionDate  = DateTime.UtcNow.AddDays(-(15 - i))
+                        });
+
+                    var tracked = await db.LoyaltyAccounts.FirstAsync(a => a.Id == acc.Id, ct);
+                    tracked.TotalMiles     = data.earn;
+                    tracked.AvailableMiles = data.earn - data.redeem;
+
+                    var newTierId = await db.LoyaltyTiers.AsNoTracking()
+                        .Where(t => t.LoyaltyProgramId == acc.LoyaltyProgramId
+                                 && t.MinMiles <= tracked.TotalMiles)
+                        .OrderByDescending(t => t.MinMiles)
+                        .Select(t => t.Id)
+                        .FirstOrDefaultAsync(ct);
+
+                    if (newTierId != 0)
+                        tracked.LoyaltyTierId = newTierId;
+                }
+
+                await db.LoyaltyTransactions.AddRangeAsync(txRows, ct);
                 await db.SaveChangesAsync(ct);
             }
         }
