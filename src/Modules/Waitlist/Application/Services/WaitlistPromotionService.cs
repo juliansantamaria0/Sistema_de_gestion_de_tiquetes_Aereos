@@ -1,4 +1,5 @@
 using MySqlConnector;
+using Sistema_de_gestion_de_tiquetes_Aereos.Modules.ReprogrammingHistory.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Modules.Waitlist.Domain.Repositories;
 using Sistema_de_gestion_de_tiquetes_Aereos.Shared.Constants;
 
@@ -7,8 +8,15 @@ namespace Sistema_de_gestion_de_tiquetes_Aereos.Modules.Waitlist.Application.Ser
 public sealed class WaitlistPromotionService : IWaitlistPromotionService
 {
     private readonly IWaitlistRepository _waitlist;
+    private readonly IReprogrammingHistoryRepository _history;
 
-    public WaitlistPromotionService(IWaitlistRepository waitlist) => _waitlist = waitlist;
+    public WaitlistPromotionService(
+        IWaitlistRepository waitlist,
+        IReprogrammingHistoryRepository history)
+    {
+        _waitlist = waitlist;
+        _history = history;
+    }
 
     public async Task PromotePendingReservationsForFlightAsync(
         MySqlConnection connection,
@@ -41,6 +49,13 @@ public sealed class WaitlistPromotionService : IWaitlistPromotionService
                 next.Value.FareTypeId,
                 ct);
 
+            var nowUtc = DateTime.UtcNow;
+            var vueloAnteriorId = await GetReservationScheduledFlightIdForUpdateAsync(
+                connection,
+                transaction,
+                next.Value.ReservationId,
+                ct);
+
             var confirmedId = await GetReservationStatusIdAsync(connection, transaction, "CONFIRMED", ct);
             await UpdateReservationFlightAndStatusAsync(
                 connection,
@@ -48,11 +63,21 @@ public sealed class WaitlistPromotionService : IWaitlistPromotionService
                 next.Value.ReservationId,
                 scheduledFlightId,
                 confirmedId,
-                DateTime.UtcNow,
+                nowUtc,
                 ct);
 
             await _waitlist.MarkPromotedAsync(
-                connection, transaction, next.Value.ListaEsperaId, DateTime.UtcNow, ct);
+                connection, transaction, next.Value.ListaEsperaId, nowUtc, ct);
+
+            await _history.InsertAsync(
+                connection,
+                transaction,
+                reservationId: next.Value.ReservationId,
+                vueloAnteriorId: vueloAnteriorId,
+                nuevoVueloId: scheduledFlightId,
+                fechaCambioUtc: nowUtc,
+                motivo: "Promoción automática desde lista de espera",
+                ct: ct);
 
             var code = await GetReservationCodeAsync(connection, transaction, next.Value.ReservationId, ct);
             onPromoted?.Invoke(code);
@@ -243,5 +268,28 @@ public sealed class WaitlistPromotionService : IWaitlistPromotionService
         cmd.Parameters.AddWithValue("@id", reservationId);
         var o = await cmd.ExecuteScalarAsync(ct);
         return Convert.ToString(o) ?? reservationId.ToString();
+    }
+
+    private static async Task<int> GetReservationScheduledFlightIdForUpdateAsync(
+        MySqlConnection connection,
+        MySqlTransaction transaction,
+        int reservationId,
+        CancellationToken ct)
+    {
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+                          SELECT scheduled_flight_id
+                          FROM reservation
+                          WHERE reservation_id = @id
+                          LIMIT 1
+                          FOR UPDATE;
+                          """;
+        cmd.Parameters.AddWithValue("@id", reservationId);
+        var o = await cmd.ExecuteScalarAsync(ct);
+        var id = o is null ? 0 : Convert.ToInt32(o);
+        if (id <= 0)
+            throw new InvalidOperationException("No se pudo leer el vuelo actual de la reserva para registrar historial.");
+        return id;
     }
 }
