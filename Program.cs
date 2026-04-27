@@ -751,7 +751,7 @@ public static class PortalAccess
             "Estados de vuelo, reserva, tiquete, pago, check-in, reembolso y asiento.",
             FunctionalNavigation.GetModuleKeysWithTitlePrefix("Estados de ")),
         new PortalAdminSection(
-            "📊 Fidelización – Reportes",
+            "Fidelización – Reportes",
             "Analítica avanzada del programa de millas: acumulación, redención y viajeros frecuentes.",
             ["loyaltyanalytics"]),
     ];

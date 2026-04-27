@@ -493,3 +493,4 @@ El sistema ejecuta el seeder automáticamente al iniciar, poblando los datos bas
 | LINQ | Consultas y procesamiento de datos |
 | Spectre.Console | Interfaz de consola con tablas y menús |
 | appsettings.json | Configuración de la aplicación |
+-----------------------------------------------------
